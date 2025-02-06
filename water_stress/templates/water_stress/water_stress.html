@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Water Stress
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Water Stress Analysis</h1>
+
+        <div class="row">
+            <div class="col-md-12">
+                <form action="{% url 'water_stress:upload_water_stress_facility_csv' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                      <!-- First Card: Dynamic Fields -->
+                      <div class="col-md-6">
+                        <div class="card mb-3">
+                          <div class="card-header">
+                            <strong>Select the fields to be generated</strong>
+                          </div>
+                          <div class="card-body">
+                            <div class="form-group">
+                              <label class="control-label">Select Data Fields to Include</label>
+                              {% for field in available_fields %}
+                                <div class="form-check">
+                                  <input type="checkbox" class="form-check-input" name="fields" value="{{ field }}" id="{{ field }}" >
+                                  <label class="form-check-label" for="{{ field }}">{{ field }}</label>
+                                </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                  
+                      <!-- Second Card: File Upload -->
+                      <div class="col-md-6">
+                        <div class="card mb-3">
+                          <div class="card-header">
+                            <strong>Upload Files for Water Stress Analysis</strong>
+                          </div>
+                          <div class="card-body">
+                            <div class="form-group">
+                              <label class="control-label">Upload Facility Location CSV</label>
+                              <input type="file" name="facility_csv" id="facilityCsv" accept=".csv" class="form-control">
+                            </div>
+                          </div>
+                          <div class="card-footer text-center">
+                            <button type="submit" class="btn btn-primary">
+                              Generate Table and Create Plot
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+            </div>
+        </div>
+
+        <!-- Bootstrap Tabs -->
+        <ul class="nav nav-tabs mt-4" id="waterStressTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="table-tab" data-bs-toggle="tab" href="#table-content" role="tab" aria-controls="table-content" aria-selected="true">
+                    Facility Locations Table
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="plot-tab" data-bs-toggle="tab" href="#plot-content" role="tab" aria-controls="plot-content" aria-selected="false">
+                    Water Stress Plot
+                </a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content mt-3" id="waterStressTabsContent">
+            <!-- Facility Locations Table Tab -->
+            <div class="tab-pane fade show active" id="table-content" role="tabpanel" aria-labelledby="table-tab">
+                <h2>Updated Facility Locations Table</h2>
+                <table id="data-table" class="display nowrap table table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            {% for column in columns %}
+                                <th>{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                            <tr>
+                                {% for value in row.values %}
+                                    <td>{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Water Stress Plot Tab -->
+            <div class="tab-pane fade text-center" id="plot-content" role="tabpanel" aria-labelledby="plot-tab">
+                <h2>Water Stress Plot</h2>
+                <img src="{% url 'water_stress:water_stress_image' %}" alt="Water Stress Plot" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+
+    <!-- Include DataTables CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+    
+    <!-- Bootstrap Tabs JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#data-table').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        className: 'btn btn-secondary'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'Download CSV',
+                        className: 'btn btn-primary'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Download Excel',
+                        className: 'btn btn-success'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'Download PDF',
+                        className: 'btn btn-danger'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        className: 'btn btn-info'
+                    }
+                ]
+            });
+            
+            $('.form-check-input').on('change', function() {
+                console.log('Checkbox value:', $(this).val(), 'Checked:', $(this).is(':checked'));
+            });
+        });
+
+
+    </script>
+{% endblock %}

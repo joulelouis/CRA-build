@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+            Django App
+        {% endblock %} 
+    </title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav>
+        <h1>Climate Risk Assessment</h1>
+        
+        
+        <a href="/">Dashboard</a> |
+        <a href="/feature_1">Feature 1</a> |
+        <a href="/feature_2">Feature 2</a> |
+        {% comment %} <a href="{% url 'posts:list' %}">Feature 3</a> {% endcomment %}
+        
+    </nav>
+
+ 
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+</body>
+
+<script src="{% static 'js/main.js' %} %}"></script>
+</html>
