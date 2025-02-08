@@ -63,22 +63,22 @@ def generate_water_stress_plot(shapefile_path, dbf_path, shx_path, csv_path, fac
         facility_locs = pd.read_csv(facility_csv_path)
 
         #Check if required columns exist
-        if 'Long' not in facility_locs.columns or 'Lat' not in facility_locs.columns:
-            raise ValueError("Error! Missing 'Long' or 'Lat' columns in facility CSV.")
+        if 'Longitude' not in facility_locs.columns or 'Latitude' not in facility_locs.columns:
+            raise ValueError("Error! Missing 'Longitude' or 'Latitude' columns in facility CSV.")
 
         print("Step 8: Cleaning facility location data")
         # Convert Longitude & Latitude to numeric
-        facility_locs['Long'] = pd.to_numeric(facility_locs['Long'], errors='coerce')
-        facility_locs['Lat'] = pd.to_numeric(facility_locs['Lat'], errors='coerce')
+        facility_locs['Longitude'] = pd.to_numeric(facility_locs['Longitude'], errors='coerce')
+        facility_locs['Latitude'] = pd.to_numeric(facility_locs['Latitude'], errors='coerce')
 
         #Drop invalid rows
-        facility_locs = facility_locs.dropna(subset=['Long', 'Lat'])
+        facility_locs = facility_locs.dropna(subset=['Longitude', 'Latitude'])
 
         if facility_locs.empty:
             raise ValueError("Facility locations CSV is empty after cleaning!")
 
         print("Step 9: Converting facility locations to GeoDataFrame")
-        geometry = [Point(xy) for xy in zip(facility_locs['Long'], facility_locs['Lat'])]
+        geometry = [Point(xy) for xy in zip(facility_locs['Longitude'], facility_locs['Latitude'])]
         facility_gdf = gpd.GeoDataFrame(facility_locs, geometry=geometry, crs="EPSG:4326")
 
         if facility_gdf.empty:
