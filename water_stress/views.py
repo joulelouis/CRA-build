@@ -95,7 +95,7 @@ def water_stress(request):
     )
 
     # Load updated CSV with facility locations
-    updated_csv_path = os.path.join(UPLOAD_DIR, 'sample_locs.csv')
+    updated_csv_path = os.path.join(UPLOAD_DIR, 'sample_locs_ws.csv')
     if os.path.exists(updated_csv_path):
         df = pd.read_csv(updated_csv_path)
         data = df.to_dict(orient="records")
