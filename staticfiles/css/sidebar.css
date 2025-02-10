@@ -1,0 +1,41 @@
+/* Custom Sidebar Styles */
+.sidebar {
+    width: 240px; /* Or desired width */
+    background-color: #1E1E22 !important; /* Ensuring this important declaration to override any other */
+    border-right: 1px solid #dee2e6; /* Bootstrap-like border styling */
+    padding: 0;
+    position: fixed; /* To keep it stationary */
+    top: 0;
+    bottom: 0;
+    overflow-y: auto; /* Enables scrolling */
+}
+
+.sidebar .offcanvas-header {
+    padding: 1rem; /* Spacing around content */
+    border-bottom: 1px solid #dee2e6; /* Separator */
+}
+
+.sidebar .nav-link {
+    padding: .75rem 1rem; /* Bootstrap-like padding for nav items */
+    color: #fff; /* Light text color for contrast */
+    font-size: 0.875rem;
+}
+
+.sidebar .nav-link.active {
+    color: #2470dc; /* Highlight color for active items */
+    background-color: #343a40; /* Slightly lighter bg for active link */
+}
+
+.sidebar .nav-link svg { /* Styling for SVG icons */
+    fill: currentColor; /* Ensures the icon color matches the text color */
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 767px) {
+    .sidebar {
+        position: static; /* Sidebar becomes part of the flow on smaller screens */
+        width: 100%;
+    }
+}
