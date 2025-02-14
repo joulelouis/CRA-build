@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Water Stress Map
+{% endblock %}
+
+{% block content %}
+
+<div id="map" style="width: 100%; height: 500px;"></div>
+
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
+
+    
+
+
+    const map = new mapboxgl.Map({
+        container: 'map', // container ID
+        center: [121.7740, 12.8797], // Default center position [lng, lat]
+        zoom: 4.5, // Default zoom
+        style: 'mapbox://styles/mapbox/streets-v12' // Default map style
+    });
+
+
+    const marker = new mapboxgl.Marker({
+            color: "red",
+        }).setLngLat([120.9849205, 14.59057479]) // Set position dynamically based on row data
+        .setPopup(new mapboxgl.Popup().setHTML("<h4>SM Manila Shakeys Branch</h4>")) // add popup
+        .addTo(map);
+
+    const marker2 = new mapboxgl.Marker({
+            color: "red",
+        })
+        .setLngLat([121.042187, 14.49557534]) // Set position dynamically based on row data
+        .setPopup(new mapboxgl.Popup().setHTML("<h4>Commissary in Paranque</h4>")) // add popup
+        .addTo(map);
+
+    const marker3 = new mapboxgl.Marker({
+        color: "#FFC067",
+    })
+    .setLngLat([125.1456158, 6.065404576]) // Set position dynamically based on row data
+    .setPopup(new mapboxgl.Popup().setHTML("<h4>Coconut Processing Plant in Gen San</h4>")) // add popup
+    .addTo(map);
+
+    const marker4 = new mapboxgl.Marker({
+        color: "#FFC067",
+    })
+    .setLngLat([125.150691, 6.064051003]) // Set position dynamically based on row data
+    .setPopup(new mapboxgl.Popup().setHTML("<h4>Tuna Processing Plant in Gen San</h4>")) // add popup
+    .addTo(map);
+        
+</script>
+
+{% endblock %}

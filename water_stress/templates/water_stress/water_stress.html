@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css" rel="stylesheet">
     <div class="container mt-4">
         <h1>Water Stress Analysis</h1>
 
@@ -69,6 +70,15 @@
                     Water Stress Plot
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link" id="map-tab" data-bs-toggle="tab" href="#map-content" role="tab" aria-controls="map-content" aria-selected="false">
+                    Water Stress Map
+                </a>
+            </li>
+
+            
+
         </ul>
 
         <!-- Tab Content -->
@@ -101,7 +111,14 @@
                 <h2>Water Stress Plot</h2>
                 <img src="{% url 'water_stress:water_stress_image' %}" alt="Water Stress Plot" class="img-fluid rounded shadow">
             </div>
-        </div>
+
+            <!-- Water Stress Plot Tab -->
+            <div class="tab-pane fade text-center" id="map-content" role="tabpanel" aria-labelledby="map-tab">
+              <h2>Water Stress Map</h2>
+              {% include 'water_stress/water_stress_mapbox.html' %}
+          </div>
+
+            
     </div>
 
     <!-- Include DataTables CSS & JS -->
@@ -153,6 +170,16 @@
             
             $('.form-check-input').on('change', function() {
                 console.log('Checkbox value:', $(this).val(), 'Checked:', $(this).is(':checked'));
+            });
+
+            // Log row values when a table row is clicked
+            $('#data-table tbody').on('click', 'tr', function () {
+                var rowData = [];
+                // Loop through each cell in the row
+                $(this).find('td').each(function() {
+                    rowData.push($(this).text()); // Push cell text into array
+                });
+                console.log(rowData); // Log the values of the clicked row
             });
         });
 

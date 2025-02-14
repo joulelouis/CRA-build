@@ -4,9 +4,16 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .utils.water_stress import generate_water_stress_plot  # Ensure you import the function
+from django.views.generic.edit import CreateView
+from .models import Address
 
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, 'water_stress/static/input_files')
 
+class AddressView(CreateView):
+    model = Address
+    fields = ['address']
+    template_name = 'water_stress/water_stress_mapbox.html'
+    # success_url = 'water_stress/water_stress_mapbox.html'
 
 def upload_water_stress_facility_csv(request):
     # List of available fields for the water stress analysis
