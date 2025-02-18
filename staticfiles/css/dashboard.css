@@ -1,3 +1,8 @@
+body {
+  background-color: #F7F7F7 !important;
+}
+
+
 .bi {
   display: inline-block;
   width: 1rem;
@@ -140,3 +145,4 @@
 .navbar .form-control {
   padding: .75rem 1rem;
 }
+
