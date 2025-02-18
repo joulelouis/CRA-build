@@ -1,14 +1,7 @@
 {% load static %}
-<div class="sidebar border border-right p-0 ">
-    <div class="offcanvas-md offcanvas-end " tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
-        
-        <!-- Sidebar Header -->
-        <div class="offcanvas-header">
-            <h1 class="offcanvas-title sidebar-title" id="sidebarMenuLabel"><strong>Company Name</strong></h1>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
-        </div>
-
-        <div class="offcanvas-body d-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+<div class="sidebar p-0 d-none d-md-block"> <!-- Removed border classes -->
+    <div class="sidebar-content" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+        <div class="sidebar-body d-flex flex-column p-0 pt-lg-3 overflow-y-auto">
             
             <!-- Logo Section (Aligned Left) -->
             <div class="sidebar-logo text-start">
