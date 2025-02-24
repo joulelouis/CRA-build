@@ -8,7 +8,8 @@ from pyproj import CRS
 from rasterstats import zonal_stats
 from django.conf import settings
 
-def generate_flood_exposure_analysis(facility_csv_path, raster_path):
+
+def generate_flood_exposure_analysis(facility_csv_path, raster_path, dynamic_fields=None):
     try:
         # Set square buffer around point location in the absence of facility extent
         buffer = 0.0045  # degree, ~250 meters radius, ~500 m x 500 m
@@ -16,11 +17,6 @@ def generate_flood_exposure_analysis(facility_csv_path, raster_path):
         # Set geospatial map projection
         proj1 = 4326
 
-        # Set folder paths and input files
-        folder = Path(r"D:\Documents\NOAH\Flood")
-        out_folder = r"D:\Documents\NOAH\Flood\Trial\Exposure"
-        # facility_csv_path = "sample_locs.csv"
-        # raster_path = "Abra_Flood_100year.tif"
 
         # Open facility location and georeference
         df_fac = pd.read_csv(facility_csv_path)
@@ -51,9 +47,17 @@ def generate_flood_exposure_analysis(facility_csv_path, raster_path):
         uploads_dir = os.path.join(settings.BASE_DIR, 'flood_exposure_analysis', 'static', 'input_files')
         os.makedirs(uploads_dir, exist_ok=True)
 
+
+
+        #set dynamic fields if not provided
+        if dynamic_fields is None:
+            dynamic_fields = ['75th Percentile', 'Exposure']
+        
+        print(f"dynamic fields are: {dynamic_fields}")
+
         # Save to CSV
         output_csv_path = os.path.join(uploads_dir, 'output_with_exposure.csv')
-        geo_df[['Site', 'Long', 'Lat', '75th Percentile', 'Exposure']].to_csv(output_csv_path, index=False)
+        geo_df[['Site', 'Long', 'Lat'] + dynamic_fields].to_csv(output_csv_path, index=False)
         print("CSV file saved successfully.")
 
     except Exception as e:

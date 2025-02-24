@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import upload_water_stress_facility_csv, water_stress, water_stress_image, AddressView
 
-app_name = "water_stress"  # Add app name
+app_name = "water_stress" 
 
 urlpatterns = [
     path('', upload_water_stress_facility_csv, name='upload_water_stress_facility_csv'),
