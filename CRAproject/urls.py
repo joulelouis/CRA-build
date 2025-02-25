@@ -30,6 +30,7 @@ urlpatterns = [
     path('delta_method/', views.delta_method),
     path('water-stress/', include('water_stress.urls')),
     path('flood-exposure-analysis/', include('flood_exposure_analysis.urls')),
+    path('climate-hazards-analysis/', include('climate_hazards_analysis.urls')),
 ]
 
 # Serve media files during development
