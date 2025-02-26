@@ -8,7 +8,7 @@ from rasterstats import zonal_stats
 from pyproj import CRS
 
 def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_risk_csv_path,
-                               facility_csv_path, raster_path,
+                               facility_csv_path, raster_path, selected_fields=None,
                                water_dynamic_fields=None, water_plot_fields=None):
     """
     Integrates water stress analysis and flood exposure analysis.
@@ -175,8 +175,24 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         # ---------- GENERATE COMBINED OUTPUT TABLE ----------
         print("Step 9: Generating combined output table")
 
+        print(f"water dynamic fields: {water_dynamic_fields}")
+        print(f"selected climate hazards1: {selected_fields}")
         
-        required_columns = ['Site', 'Lat', 'Long', 'bws_06_lab', 'Exposure']
+        #rename the names of the climate hazards to their specific fields in the table
+        selected_fields_mapping = {
+            'Flood Exposure Analysis': 'Exposure',
+            'Water Stress Analysis': 'bws_06_lab',
+            
+        }
+
+        selected_fields =[selected_fields_mapping.get(field, field) for field in selected_fields]
+        print(f"selected climate hazards2: {selected_fields}")
+        required_columns = ['Site', 'Lat', 'Long']
+
+        required_columns.extend(selected_fields)
+
+        print(f"Required Columns: {required_columns}")
+        print(f"flood_gdf columns: {flood_gdf.columns}")
         
 
         # Verify each required column exists in the GeoDataFrame.

@@ -33,7 +33,7 @@
                             <div class="form-group">
                             <label class="control-label">Select Fields to include in analysis.</label>
                             <div class="checkbox-grid">
-                                {% for field in available_fields %}
+                                {% for field in climate_hazards_fields %}
                                 <div class="form-check checkbox-container">
                                     <!-- Custom Checkbox -->
                                     <input type="checkbox" class="form-check-input custom-checkbox" name="fields" value="{{ field }}" id="{{ field }}" onclick="toggleCheckbox(this)">

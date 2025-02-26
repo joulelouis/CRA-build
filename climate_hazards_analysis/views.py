@@ -8,8 +8,8 @@ from climate_hazards_analysis.utils.climate_hazards_analysis import generate_cli
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
 
 def upload_facility_csv(request):
-    # List of available fields for the flood exposure analysis
-    available_fields = [
+    # List of climate hazards fields 
+    climate_hazards_fields = [
         'Heat Exposure Analysis',
         'Soil Level Risk Exposure Analysis',
         'Flood Exposure Analysis',
@@ -34,24 +34,24 @@ def upload_facility_csv(request):
 
         print("Uploaded facility CSV file path:", file_path)
 
-        # Retrieve the list of selected dynamic fields from the checkboxes
+        # Retrieve the list of selected climate hazards from the checkboxes
         selected_fields = request.POST.getlist('fields')
         request.session['selected_dynamic_fields'] = selected_fields
 
-        print("Selected dynamic fields:", selected_fields)
+        print("Selected climate hazards:", selected_fields)
 
         return redirect('climate_hazards_analysis:climate_hazards_analysis')
     
     # For GET requests, render the upload form with the dynamic checkboxes.
     context = {
-        'available_fields': available_fields,
+        'climate_hazards_fields': climate_hazards_fields,
     }
     return render(request, 'upload.html', context)
 
 
 def climate_hazards_analysis(request):
 
-    available_fields = [
+    climate_hazards_fields = [
         'Heat Exposure Analysis',
         'Soil Level Risk Exposure Analysis',
         'Flood Exposure Analysis',
@@ -59,6 +59,10 @@ def climate_hazards_analysis(request):
         'Tropical Cyclones',
         'Plot Hazard Maps',
     ]
+
+
+
+
     # Define the required file paths using the local UPLOAD_DIR variable
     shapefile_base = os.path.join(UPLOAD_DIR, 'hybas_lake_au_lev06_v1c')
     shapefile_path = f"{shapefile_base}.shp"
@@ -76,10 +80,14 @@ def climate_hazards_analysis(request):
             'error': 'No facility file uploaded or file not found.'
         })
     
+    # Retrieve the list of climate hazards selected by the user
+    selected_fields = request.session.get('selected_dynamic_fields', None)
+    print("Climate Hazards selected:", selected_fields)
+    
     # Call the combined analysis function
     result = generate_climate_hazards_analysis(
         shapefile_path, dbf_path, shx_path,
-        water_risk_csv_path, facility_csv_path, raster_path
+        water_risk_csv_path, facility_csv_path, raster_path, selected_fields
     )
     
     if result is None:
@@ -110,7 +118,7 @@ def climate_hazards_analysis(request):
         'data': data,
         'columns': columns,
         'plot_path': plot_path,
-        'available_fields': available_fields
+        'climate_hazards_fields': climate_hazards_fields
     }
     
     return render(request, 'climate_hazards_analysis.html', context)
