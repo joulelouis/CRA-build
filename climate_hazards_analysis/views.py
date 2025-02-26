@@ -118,9 +118,10 @@ def climate_hazards_analysis(request):
         'data': data,
         'columns': columns,
         'plot_path': plot_path,
-        'climate_hazards_fields': climate_hazards_fields
+        'climate_hazards_fields': climate_hazards_fields,
+        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []),
     }
-    
+
     return render(request, 'climate_hazards_analysis.html', context)
 
 def water_stress_mapbox_ajax(request):
