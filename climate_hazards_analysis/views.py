@@ -119,7 +119,7 @@ def climate_hazards_analysis(request):
         'columns': columns,
         'plot_path': plot_path,
         'climate_hazards_fields': climate_hazards_fields,
-        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []),
+        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []), #context to be passed in the tab list condition
     }
 
     return render(request, 'climate_hazards_analysis.html', context)

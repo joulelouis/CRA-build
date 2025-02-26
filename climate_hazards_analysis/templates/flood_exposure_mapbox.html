@@ -27,28 +27,44 @@
     const floodExposureMarker = new mapboxgl.Marker({
             color: "#FFC067",
         }).setLngLat([120.9849205, 14.59057479]) // Set position dynamically based on row data
-        .setPopup(new mapboxgl.Popup().setHTML("<h4>SM Manila Shakeys Branch</h4>")) // add popup
+        .setPopup(new mapboxgl.Popup().setHTML("<h4>SM Manila Shakeys Branch</h4>" +
+  "<a>" +
+    "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
+    "Low Exposure" +
+  "</a>")) // add popup
         .addTo(floodExposureMap);
 
     const floodExposureMarker2 = new mapboxgl.Marker({
             color: "#FFC067",
         })
         .setLngLat([121.042187, 14.49557534]) // Set position dynamically based on row data
-        .setPopup(new mapboxgl.Popup().setHTML("<h4>Commissary in Paranque</h4>")) // add popup
+        .setPopup(new mapboxgl.Popup().setHTML("<h4>Commissary in Paranque</h4>" +
+  "<a>" +
+    "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
+    "Low Exposure" +
+  "</a>")) // add popup
         .addTo(floodExposureMap);
 
     const floodExposureMarker3 = new mapboxgl.Marker({
         color: "#FFC067",
     })
     .setLngLat([125.1456158, 6.065404576]) // Set position dynamically based on row data
-    .setPopup(new mapboxgl.Popup().setHTML("<h4>Coconut Processing Plant in Gen San</h4>")) // add popup
+    .setPopup(new mapboxgl.Popup().setHTML("<h4>Coconut Processing Plant in Gen San</h4>" +
+    "<a>" +
+      "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
+      "Low Exposure" +
+    "</a>")) // add popup
     .addTo(floodExposureMap);
 
     const floodExposureMarker4 = new mapboxgl.Marker({
         color: "#FFC067",
     })
     .setLngLat([125.150691, 6.064051003]) // Set position dynamically based on row data
-    .setPopup(new mapboxgl.Popup().setHTML("<h4>Tuna Processing Plant in Gen San</h4>")) // add popup
+    .setPopup(new mapboxgl.Popup().setHTML("<h4>Tuna Processing Plant in Gen San</h4>" +
+    "<a>" +
+      "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
+      "Low Exposure" +
+    "</a>")) // add popup
     .addTo(floodExposureMap);
         
 </script>
