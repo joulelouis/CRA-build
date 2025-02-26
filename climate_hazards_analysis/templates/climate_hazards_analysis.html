@@ -20,7 +20,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <form action="{% url 'flood_exposure_analysis:upload_facility_csv' %}" method="POST" enctype="multipart/form-data">
+                <form action="{% url 'climate_hazards_analysis:upload_facility_csv' %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="row d-flex align-items-stretch">
                     <!-- First Card: Dynamic Fields -->
@@ -78,15 +78,17 @@
                             </div>
                             </div>
                         </div>
-                        <!-- Moved Card Footer Inside the Card -->
-                        <div class="card-footer text-center card-footer-no-border">
+                         <!-- Moved Card Footer Inside the Card -->
+                         <div class="card-footer text-center card-footer-no-border">
                             <div class="footer-button-wrapper d-flex justify-content-center gap-2">
-                              <button type="submit" class="btn btn-warning preview-button flex-fill" >
-                                <strong>Preview CSV upload</strong>
-                              </button>
-                              <button type="submit" class="btn btn-warning upload-button flex-fill" >
-                                <strong>Generate Table</strong>
-                              </button>
+                                <!-- Preview Button now triggers modal -->
+                                <button type="button" class="btn btn-warning preview-button flex-fill" 
+                                        data-bs-toggle="modal" data-bs-target="#csvPreviewModal" onclick="previewCSV()">
+                                    <strong>Preview CSV upload</strong>
+                                </button>
+                                <button type="submit" class="btn btn-warning upload-button flex-fill">
+                                    <strong>Generate Table</strong>
+                                </button>
                             </div>
                         </div>
                         </div>
@@ -112,8 +114,13 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link custom-tab-link" id="map-tab" data-bs-toggle="tab" href="#map-content" role="tab" aria-controls="map-content" aria-selected="false">
+              <a class="nav-link custom-tab-link" id="map-tab" data-bs-toggle="tab" href="#flood-map" role="tab" aria-controls="map-content" aria-selected="false">
                 Flood Exposure Map
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link custom-tab-link" id="map-tab" data-bs-toggle="tab" href="#water-map" role="tab" aria-controls="map-content" aria-selected="false">
+                Water Stress Map
               </a>
             </li>
           </ul>
@@ -146,15 +153,51 @@
             </div>
   
             <!-- Water Stress Map Tab -->
-            <div class="tab-pane fade text-center" id="map-content" role="tabpanel" aria-labelledby="map-tab">
+            <div class="tab-pane fade text-center" id="flood-map" role="tabpanel" aria-labelledby="map-tab">
               <h2>Flood Exposure Map</h2>
               {% include 'flood_exposure_analysis/flood_exposure_mapbox.html' %}
+            </div>
+
+            <!-- Water Stress Map Tab -->
+            <div class="tab-pane fade text-center" id="water-map" role="tabpanel" aria-labelledby="map-tab">
+              <h2>Water Stress Map</h2>
+              {% include 'water_stress/water_stress_mapbox.html' %}
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+<!-- Modal for CSV Preview -->
+<div class="modal fade" id="csvPreviewModal" tabindex="-1" aria-labelledby="csvPreviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="csvPreviewModalLabel">CSV Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Datatable for CSV Preview -->
+        <div class="table-responsive">
+          <table id="preview-data-table" class="table custom-table">
+            <thead>
+              <tr id="preview-table-header">
+                <!-- Headers will be inserted dynamically -->
+              </tr>
+            </thead>
+            <tbody id="preview-table-body">
+              <!-- CSV rows will be inserted dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
   
   {% if error %}
     <div class="alert alert-danger mt-3">{{ error }}</div>
@@ -233,5 +276,41 @@
                 fileNameDisplay.textContent = "No file chosen";
             }
         }
+
+        // Function to read the CSV file and populate the preview table in the modal
+        function previewCSV() {
+          var input = document.getElementById("facilityCsv");
+          if (input.files.length > 0) {
+              var file = input.files[0];
+              var reader = new FileReader();
+              reader.onload = function(e) {
+                  var csvData = e.target.result;
+                  var lines = csvData.split("\n");
+                  var headerHtml = "";
+                  var bodyHtml = "";
+                  if (lines.length > 0) {
+                      // Assume the first line contains headers
+                      var headers = lines[0].split(",");
+                      headerHtml += headers.map(function(header) {
+                          return "<th>" + header.trim() + "</th>";
+                      }).join("");
+                  }
+                  // Process each row after the header
+                  for (var i = 1; i < lines.length; i++) {
+                      if (lines[i].trim() === "") continue;
+                      var cells = lines[i].split(",");
+                      var rowHtml = cells.map(function(cell) {
+                          return "<td>" + cell.trim() + "</td>";
+                      }).join("");
+                      bodyHtml += "<tr>" + rowHtml + "</tr>";
+                  }
+                  document.getElementById("preview-table-header").innerHTML = headerHtml;
+                  document.getElementById("preview-table-body").innerHTML = bodyHtml;
+                  // Optionally, you can initialize a DataTable here:
+                  // $('#preview-data-table').DataTable();
+              };
+              reader.readAsText(file);
+          }
+      }
     </script>
 {% endblock %}

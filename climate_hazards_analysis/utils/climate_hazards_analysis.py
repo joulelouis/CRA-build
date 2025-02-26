@@ -174,19 +174,23 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         
         # ---------- GENERATE COMBINED OUTPUT TABLE ----------
         print("Step 9: Generating combined output table")
-        # We require fields: Site, Lat, Long, bws_06_lab, Exposure
+
+        
         required_columns = ['Site', 'Lat', 'Long', 'bws_06_lab', 'Exposure']
+        
+
+        # Verify each required column exists in the GeoDataFrame.
         for col in required_columns:
             if col not in flood_gdf.columns:
                 raise ValueError(f"Expected column '{col}' not found in combined data.")
-        
+
         combined_df = flood_gdf[required_columns]
         combined_uploads_dir = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
         os.makedirs(combined_uploads_dir, exist_ok=True)
         combined_csv_path = os.path.join(combined_uploads_dir, 'combined_output.csv')
         combined_df.to_csv(combined_csv_path, index=False)
         print(f"Combined output CSV saved at {combined_csv_path}")
-        
+
         return {
             'plot_path': plot_path,
             'combined_csv_path': combined_csv_path
