@@ -1,5 +1,5 @@
-Site,Lat,Long,bws_06_lab
-Coconut Processing Plant in Gen San,6.065404576,125.1456158,Low (<10%)
-Tuna Processing Plant in Gen San ,6.064051003,125.150691,Low (<10%)
-Commissary in Paranque,14.49557534,121.042187,High (40-80%)
-SM Manila Shakeys Branch,14.59057479,120.9849205,High (40-80%)
+Site,Lat,Long,Exposure,bws_06_lab
+Coconut Processing Plant in Gen San,6.065404576,125.1456158,Low,Low (<10%)
+Tuna Processing Plant in Gen San ,6.064051003,125.150691,Low,Low (<10%)
+Commissary in Paranque,14.49557534,121.042187,Low,High (40-80%)
+SM Manila Shakeys Branch,14.59057479,120.9849205,Low,High (40-80%)

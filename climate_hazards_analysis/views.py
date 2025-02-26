@@ -122,3 +122,9 @@ def climate_hazards_analysis(request):
     }
     
     return render(request, 'climate_hazards_analysis.html', context)
+
+def water_stress_mapbox_ajax(request):
+    return render(request, 'water_stress_mapbox.html')
+
+def flood_exposure_mapbox_ajax(request):
+    return render(request, 'flood_exposure_mapbox.html')

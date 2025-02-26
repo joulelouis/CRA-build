@@ -113,16 +113,19 @@
                 Facility Locations Table
               </a>
             </li>
+
             <li class="nav-item">
-              <a class="nav-link custom-tab-link" id="map-tab" data-bs-toggle="tab" href="#flood-map" role="tab" aria-controls="map-content" aria-selected="false">
-                Flood Exposure Map
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link custom-tab-link" id="map-tab" data-bs-toggle="tab" href="#water-map" role="tab" aria-controls="map-content" aria-selected="false">
+              <a class="nav-link custom-tab-link" id="water-stress-map-tab" data-bs-toggle="tab" href="#water-map" role="tab" aria-controls="map-content" aria-selected="false">
                 Water Stress Map
               </a>
             </li>
+
+            <li class="nav-item">
+              <a class="nav-link custom-tab-link" id="flood-exposure-map-tab" data-bs-toggle="tab" href="#flood-map" role="tab" aria-controls="map-content" aria-selected="false">
+                Flood Exposure Map
+              </a>
+            </li>
+            
           </ul>
   
           <!-- Tab Content -->
@@ -151,18 +154,20 @@
                 </table>
               </div>
             </div>
-  
-            <!-- Water Stress Map Tab -->
-            <div class="tab-pane fade text-center" id="flood-map" role="tabpanel" aria-labelledby="map-tab">
-              <h2>Flood Exposure Map</h2>
-              {% include 'flood_exposure_analysis/flood_exposure_mapbox.html' %}
-            </div>
 
             <!-- Water Stress Map Tab -->
-            <div class="tab-pane fade text-center" id="water-map" role="tabpanel" aria-labelledby="map-tab">
+            <div class="tab-pane fade text-center" id="water-map" role="tabpanel" aria-labelledby="water-stress-map-tab">
               <h2>Water Stress Map</h2>
-              {% include 'water_stress/water_stress_mapbox.html' %}
+              <div id="water-map-content"></div>
             </div>
+
+            <!-- Flood Exposure Map Tab -->
+            <div class="tab-pane fade text-center" id="flood-map" role="tabpanel" aria-labelledby="flood-exposure-map-tab">
+              <h2>Flood Exposure Map</h2>
+              <div id="flood-map-content"></div>
+            </div>
+
+            
           </div>
         </div>
       </div>
@@ -248,6 +253,18 @@
                   $('.dt-buttons').appendTo('.table-controls');
                 }
               });
+
+              $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var target = $(e.target).attr("href");
+                if (target === "#water-map" && $("#water-map-content").is(':empty')) {
+                  $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_ajax' %}");
+                }
+                if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
+                  $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_ajax' %}");
+                }
+              });
+
+              
         });
 
         function toggleCheckbox(checkbox) {
@@ -306,8 +323,7 @@
                   }
                   document.getElementById("preview-table-header").innerHTML = headerHtml;
                   document.getElementById("preview-table-body").innerHTML = bodyHtml;
-                  // Optionally, you can initialize a DataTable here:
-                  // $('#preview-data-table').DataTable();
+                
               };
               reader.readAsText(file);
           }

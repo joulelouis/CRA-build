@@ -2,22 +2,21 @@
 
 {% block content %}
 
-<div id="water-stress-map" style="width: 100%; height: 500px;"></div>
+<div id="flood-exposure-map" style="width: 100%; height: 500px;"></div>
 
 
 <script>
     mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
 
     
-
-    window.waterStressMap = new mapboxgl.Map({ 
-        container: 'water-stress-map',
+    window.floodExposureMap = new mapboxgl.Map({ 
+        container: 'flood-exposure-map',
         center: [121.7740, 12.8797],
         zoom: 4.5,
         style: 'mapbox://styles/mapbox/streets-v12'
     });
 
-    {% comment %} const waterStressMap  = new mapboxgl.Map({
+    {% comment %} const floodExposureMap = new mapboxgl.Map({
         container: 'map', // container ID
         center: [121.7740, 12.8797], // Default center position [lng, lat]
         zoom: 4.5, // Default zoom
@@ -25,32 +24,32 @@
     }); {% endcomment %}
 
 
-    const waterStressMarker = new mapboxgl.Marker({
-            color: "red",
+    const floodExposureMarker = new mapboxgl.Marker({
+            color: "#FFC067",
         }).setLngLat([120.9849205, 14.59057479]) // Set position dynamically based on row data
         .setPopup(new mapboxgl.Popup().setHTML("<h4>SM Manila Shakeys Branch</h4>")) // add popup
-        .addTo(waterStressMap);
+        .addTo(floodExposureMap);
 
-    const waterStressMarker2 = new mapboxgl.Marker({
-            color: "red",
+    const floodExposureMarker2 = new mapboxgl.Marker({
+            color: "#FFC067",
         })
         .setLngLat([121.042187, 14.49557534]) // Set position dynamically based on row data
         .setPopup(new mapboxgl.Popup().setHTML("<h4>Commissary in Paranque</h4>")) // add popup
-        .addTo(waterStressMap);
+        .addTo(floodExposureMap);
 
-    const waterStressMarker3 = new mapboxgl.Marker({
+    const floodExposureMarker3 = new mapboxgl.Marker({
         color: "#FFC067",
     })
     .setLngLat([125.1456158, 6.065404576]) // Set position dynamically based on row data
     .setPopup(new mapboxgl.Popup().setHTML("<h4>Coconut Processing Plant in Gen San</h4>")) // add popup
-    .addTo(waterStressMap);
+    .addTo(floodExposureMap);
 
-    const waterStressMarker4 = new mapboxgl.Marker({
+    const floodExposureMarker4 = new mapboxgl.Marker({
         color: "#FFC067",
     })
     .setLngLat([125.150691, 6.064051003]) // Set position dynamically based on row data
     .setPopup(new mapboxgl.Popup().setHTML("<h4>Tuna Processing Plant in Gen San</h4>")) // add popup
-    .addTo(waterStressMap);
+    .addTo(floodExposureMap);
         
 </script>
 
