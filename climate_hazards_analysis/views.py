@@ -11,11 +11,11 @@ def upload_facility_csv(request):
     # List of climate hazards fields 
     climate_hazards_fields = [
         'Heat Exposure Analysis',
-        'Soil Level Risk Exposure Analysis',
+        'Sea Level Rise Exposure Analysis',
         'Flood Exposure Analysis',
         'Water Stress Analysis',
         'Tropical Cyclones',
-        'Plot Hazard Maps',
+        
     ]
 
     if request.method == 'POST' and request.FILES.get('facility_csv'):
@@ -53,11 +53,11 @@ def climate_hazards_analysis(request):
 
     climate_hazards_fields = [
         'Heat Exposure Analysis',
-        'Soil Level Risk Exposure Analysis',
+        'Sea Level Rise Exposure Analysis',
         'Flood Exposure Analysis',
         'Water Stress Analysis',
         'Tropical Cyclones',
-        'Plot Hazard Maps',
+        
     ]
 
 
