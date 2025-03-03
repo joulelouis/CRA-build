@@ -17,55 +17,73 @@
         style: 'mapbox://styles/mapbox/streets-v12'
     });
 
-    {% comment %} const waterStressMap  = new mapboxgl.Map({
-        container: 'map', // container ID
-        center: [121.7740, 12.8797], // Default center position [lng, lat]
-        zoom: 4.5, // Default zoom
-        style: 'mapbox://styles/mapbox/streets-v12' // Default map style
-    }); {% endcomment %}
+    // Create a base red circle element
+    const baseRedCircle = document.createElement('div');
+    baseRedCircle.style.width = '20px';
+    baseRedCircle.style.height = '20px';
+    baseRedCircle.style.borderRadius = '50%';
+    baseRedCircle.style.border = '2px solid white';
+    baseRedCircle.style.backgroundColor = 'red';
 
+    // Create a base yellow circle element
+    const baseYellowCircle = document.createElement('div');
+    baseYellowCircle.style.width = '20px';
+    baseYellowCircle.style.height = '20px';
+    baseYellowCircle.style.borderRadius = '50%';
+    baseYellowCircle.style.border = '2px solid white';
+    baseYellowCircle.style.backgroundColor = '#FFC067';
 
-    const waterStressMarker = new mapboxgl.Marker({
-            color: "red",
-        }).setLngLat([120.9849205, 14.59057479]) // Set position dynamically based on row data
-        .setPopup(new mapboxgl.Popup().setHTML("<h4>SM Manila Shakeys Branch</h4>" +
-        "<a>" +
-          "<span style='display:inline-block; width:10px; height:10px; background-color: red; margin-right:5px;'></span>" +
-          "High Exposure" +
-        "</a>")) // add popup
-        .addTo(waterStressMap);
+    // Create markers using clones of the base elements
+    const waterStressMarker = new mapboxgl.Marker({ 
+      element: baseRedCircle.cloneNode(true) 
+    })
+    .setLngLat([120.9849205, 14.59057479])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>SM Manila Shakeys Branch</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: red; margin-right:5px;'></span>" +
+        "High Exposure" +
+      "</a>"
+    ))
+    .addTo(waterStressMap);
 
     const waterStressMarker2 = new mapboxgl.Marker({
-            color: "red",
-        })
-        .setLngLat([121.042187, 14.49557534]) // Set position dynamically based on row data
-        .setPopup(new mapboxgl.Popup().setHTML("<h4>Commissary in Paranque</h4>" +
-        "<a>" +
-          "<span style='display:inline-block; width:10px; height:10px; background-color: red; margin-right:5px;'></span>" +
-          "High Exposure" +
-        "</a>")) // add popup
-        .addTo(waterStressMap);
+      element: baseRedCircle.cloneNode(true)
+    })
+    .setLngLat([121.042187, 14.49557534])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Commissary in Paranque</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: red; margin-right:5px;'></span>" +
+        "High Exposure" +
+      "</a>"
+    ))
+    .addTo(waterStressMap);
 
     const waterStressMarker3 = new mapboxgl.Marker({
-        color: "#FFC067",
+      element: baseYellowCircle.cloneNode(true)
     })
-    .setLngLat([125.1456158, 6.065404576]) // Set position dynamically based on row data
-    .setPopup(new mapboxgl.Popup().setHTML("<h4>Coconut Processing Plant in Gen San</h4>" +
-    "<a>" +
-      "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
-      "Low Exposure" +
-    "</a>")) // add popup
+    .setLngLat([125.1456158, 6.065404576])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Coconut Processing Plant in Gen San</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
+        "Low Exposure" +
+      "</a>"
+    ))
     .addTo(waterStressMap);
 
     const waterStressMarker4 = new mapboxgl.Marker({
-        color: "#FFC067",
+      element: baseYellowCircle.cloneNode(true)
     })
-    .setLngLat([125.150691, 6.064051003]) // Set position dynamically based on row data
-    .setPopup(new mapboxgl.Popup().setHTML("<h4>Tuna Processing Plant in Gen San</h4>" +
-    "<a>" +
-      "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
-      "Low Exposure" +
-    "</a>")) // add popup
+    .setLngLat([125.150691, 6.064051003])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Tuna Processing Plant in Gen San</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
+        "Low Exposure" +
+      "</a>"
+    ))
     .addTo(waterStressMap);
         
 </script>

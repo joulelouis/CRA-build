@@ -16,6 +16,13 @@
         style: 'mapbox://styles/mapbox/streets-v12'
     });
 
+    // Create a base yellow circle element
+    const baseYellowCircle = document.createElement('div');
+    baseYellowCircle.style.width = '20px';
+    baseYellowCircle.style.height = '20px';
+    baseYellowCircle.style.borderRadius = '50%';
+    baseYellowCircle.style.border = '2px solid white';
+    baseYellowCircle.style.backgroundColor = '#FFC067';
     {% comment %} const floodExposureMap = new mapboxgl.Map({
         container: 'map', // container ID
         center: [121.7740, 12.8797], // Default center position [lng, lat]
@@ -25,7 +32,7 @@
 
 
     const floodExposureMarker = new mapboxgl.Marker({
-            color: "#FFC067",
+      element: baseYellowCircle.cloneNode(true)
         }).setLngLat([120.9849205, 14.59057479]) // Set position dynamically based on row data
         .setPopup(new mapboxgl.Popup().setHTML("<h4>SM Manila Shakeys Branch</h4>" +
   "<a>" +
@@ -35,7 +42,7 @@
         .addTo(floodExposureMap);
 
     const floodExposureMarker2 = new mapboxgl.Marker({
-            color: "#FFC067",
+      element: baseYellowCircle.cloneNode(true)
         })
         .setLngLat([121.042187, 14.49557534]) // Set position dynamically based on row data
         .setPopup(new mapboxgl.Popup().setHTML("<h4>Commissary in Paranque</h4>" +
@@ -46,7 +53,7 @@
         .addTo(floodExposureMap);
 
     const floodExposureMarker3 = new mapboxgl.Marker({
-        color: "#FFC067",
+      element: baseYellowCircle.cloneNode(true)
     })
     .setLngLat([125.1456158, 6.065404576]) // Set position dynamically based on row data
     .setPopup(new mapboxgl.Popup().setHTML("<h4>Coconut Processing Plant in Gen San</h4>" +
@@ -57,7 +64,7 @@
     .addTo(floodExposureMap);
 
     const floodExposureMarker4 = new mapboxgl.Marker({
-        color: "#FFC067",
+      element: baseYellowCircle.cloneNode(true)
     })
     .setLngLat([125.150691, 6.064051003]) // Set position dynamically based on row data
     .setPopup(new mapboxgl.Popup().setHTML("<h4>Tuna Processing Plant in Gen San</h4>" +

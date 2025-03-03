@@ -43,64 +43,51 @@ def slr_upload_facility_csv(request):
     return render(request, 'sea_level_rise_analysis/upload.html', context)
 
 def sea_level_rise_analysis(request):
+    import os
+    import pandas as pd
 
-    # List of sea level rise fields 
-    sea_level_rise_fields = []
-
-    # Define the required file paths using the local UPLOAD_DIR variable
-    # shapefile_base = os.path.join(UPLOAD_DIR, 'hybas_lake_au_lev06_v1c')
-    # shapefile_path = f"{shapefile_base}.shp"
-    # dbf_path = f"{shapefile_base}.dbf"
-    # shx_path = f"{shapefile_base}.shx"
-    
-    # water_risk_csv_path = os.path.join(UPLOAD_DIR, 'Aqueduct40_baseline_monthly_y2023m07d05.csv')
-    # Use the same session key as in the upload view
+    # Retrieve the uploaded facility CSV file path from the session.
     facility_csv_path = request.session.get('sea_level_rise_analysis_csv_path')
-    # raster_path = os.path.join(UPLOAD_DIR, 'Abra_Flood_100year.tif')
-    
-    # Check if facility CSV exists
     if not facility_csv_path or not os.path.exists(facility_csv_path):
         return render(request, 'sea_level_rise_analysis/upload.html', {
             'error': 'No facility file uploaded or file not found.'
         })
-    
-    # Retrieve the list of climate hazards selected by the user
+
+    # Retrieve any selected fields from the session.
     selected_fields = request.session.get('selected_dynamic_fields', None)
     print("Climate Hazards selected:", selected_fields)
-    
-    # Call the combined analysis function
+
+    # Call the analysis function.
     result = generate_sea_level_rise_analysis(facility_csv_path)
-    
-    if result is None:
+
+    # Check for errors in the result.
+    if result is None or "error" in result:
         return render(request, 'climate_hazards_analysis/error.html', {
             'error': 'Combined analysis failed. Please check logs for details.'
         })
+
+    # Get the list of generated CSV and PNG file paths.
+    combined_csv_paths = result.get('combined_csv_paths', [])
+    png_paths = result.get('png_paths', [])
     
-    # Load the combined CSV into a DataFrame
-    combined_csv_path = result.get('combined_csv_path')
-    # plot_path = result.get('plot_path')
-    
-    if os.path.exists(combined_csv_path):
-        df = pd.read_csv(combined_csv_path)
-        # Rename columns according to your requirements
-        df.rename(columns={
-            'Site': 'Facility',
-            'Lat': 'Latitude',
-            'Long': 'Longitude',
-            'bws_06_lab': 'Water Stress Exposure',
-            'Exposure': 'Flood Exposure'
-        }, inplace=True)
-        data = df.to_dict(orient="records")
-        columns = df.columns.tolist()
+    # If multiple CSVs were generated, pick the first one for display.
+    if combined_csv_paths:
+        combined_csv_path = combined_csv_paths[0]
+        if os.path.exists(combined_csv_path):
+            df = pd.read_csv(combined_csv_path)
+            data = df.to_dict(orient="records")
+            columns = df.columns.tolist()
+        else:
+            data, columns = [], []
     else:
         data, columns = [], []
-    
+
     context = {
         'data': data,
         'columns': columns,
-        # 'plot_path': plot_path,
-        'sea_level_rise_fields': sea_level_rise_fields,
-        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []), #context to be passed in the tab list condition
+        'png_paths': png_paths,  # You can use this in your template to display or link to the PNGs.
+        'sea_level_rise_fields': [],  # Update as needed.
+        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []),
     }
 
     return render(request, 'sea_level_rise_analysis/sea_level_rise_analysis.html', context)
