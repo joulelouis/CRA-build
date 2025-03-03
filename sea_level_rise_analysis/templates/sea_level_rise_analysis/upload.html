@@ -11,7 +11,7 @@
     <div class="col-6 d-flex flex-column">
       <!-- Rounded Icon Container with Margin -->
       <div class="icon-container">
-        <i class="fa-solid fa-gauge-high icon-style"></i>
+        <i class="fa-solid fa-city icon-style"></i>
       </div>
       
       <!-- Heading below the icon with Margin -->
@@ -21,7 +21,7 @@
   
   <div class="row">
     <div class="col-md-12">
-      <form action="{% url 'sea_level_rise_analysis:upload_facility_csv' %}" method="POST" enctype="multipart/form-data">
+      <form action="{% url 'sea_level_rise_analysis:slr_upload_facility_csv' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row d-flex align-items-stretch">
           <!-- First Card: Dynamic Fields -->
