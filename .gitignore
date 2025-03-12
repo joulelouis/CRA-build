@@ -1,4 +1,4 @@
 .venv/
 CRAproject/.env
 
-sea_level_rise_analysis/static
+sea_level_rise_analysis/static/input_files
