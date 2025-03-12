@@ -18,24 +18,24 @@
     });
 
     // Create a base red circle element
-    const baseRedCircle = document.createElement('div');
-    baseRedCircle.style.width = '20px';
-    baseRedCircle.style.height = '20px';
-    baseRedCircle.style.borderRadius = '50%';
-    baseRedCircle.style.border = '2px solid white';
-    baseRedCircle.style.backgroundColor = 'red';
+    const waterStressBaseRedCircle = document.createElement('div');
+    waterStressBaseRedCircle.style.width = '20px';
+    waterStressBaseRedCircle.style.height = '20px';
+    waterStressBaseRedCircle.style.borderRadius = '50%';
+    waterStressBaseRedCircle.style.border = '2px solid white';
+    waterStressBaseRedCircle.style.backgroundColor = 'red';
 
     // Create a base yellow circle element
-    const baseYellowCircle = document.createElement('div');
-    baseYellowCircle.style.width = '20px';
-    baseYellowCircle.style.height = '20px';
-    baseYellowCircle.style.borderRadius = '50%';
-    baseYellowCircle.style.border = '2px solid white';
-    baseYellowCircle.style.backgroundColor = '#FFC067';
+    const waterStressBaseYellowCircle = document.createElement('div');
+    waterStressBaseYellowCircle.style.width = '20px';
+    waterStressBaseYellowCircle.style.height = '20px';
+    waterStressBaseYellowCircle.style.borderRadius = '50%';
+    waterStressBaseYellowCircle.style.border = '2px solid white';
+    waterStressBaseYellowCircle.style.backgroundColor = '#FFC067';
 
     // Create markers using clones of the base elements
     const waterStressMarker = new mapboxgl.Marker({ 
-      element: baseRedCircle.cloneNode(true) 
+      element: waterStressBaseRedCircle.cloneNode(true) 
     })
     .setLngLat([120.9849205, 14.59057479])
     .setPopup(new mapboxgl.Popup().setHTML(
@@ -48,7 +48,7 @@
     .addTo(waterStressMap);
 
     const waterStressMarker2 = new mapboxgl.Marker({
-      element: baseRedCircle.cloneNode(true)
+      element: waterStressBaseRedCircle.cloneNode(true)
     })
     .setLngLat([121.042187, 14.49557534])
     .setPopup(new mapboxgl.Popup().setHTML(
@@ -61,7 +61,7 @@
     .addTo(waterStressMap);
 
     const waterStressMarker3 = new mapboxgl.Marker({
-      element: baseYellowCircle.cloneNode(true)
+      element: waterStressBaseYellowCircle.cloneNode(true)
     })
     .setLngLat([125.1456158, 6.065404576])
     .setPopup(new mapboxgl.Popup().setHTML(
@@ -74,7 +74,7 @@
     .addTo(waterStressMap);
 
     const waterStressMarker4 = new mapboxgl.Marker({
-      element: baseYellowCircle.cloneNode(true)
+      element: waterStressBaseYellowCircle.cloneNode(true)
     })
     .setLngLat([125.150691, 6.064051003])
     .setPopup(new mapboxgl.Popup().setHTML(
