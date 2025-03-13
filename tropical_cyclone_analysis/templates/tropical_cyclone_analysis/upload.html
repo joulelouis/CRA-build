@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Upload Facility CSV
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-6 d-flex flex-column">
+      <!-- Rounded Icon Container with Margin -->
+      <div class="icon-container">
+        <i class="fa-solid fa-city icon-style"></i>
+      </div>
+      
+      <!-- Heading below the icon with Margin -->
+      <h1 class="page-heading">Tropical Cyclone Analysis</h1>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-12">
+      <form action="{% url 'tropical_cyclone_analysis:tc_upload_facility_csv' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row d-flex align-items-stretch">
+          <!-- First Card: Dynamic Fields -->
+          {% comment %} <div class="col-md-6">
+            <div class="card h-100 mb-3 custom-card">
+              <div class="card-header no-border">
+                <strong>Select Data Fields</strong>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="control-label">Select Fields to include in analysis.</label>
+                  <div class="checkbox-grid">
+                    {% for field in available_fields %}
+                      <div class="form-check checkbox-container">
+                        <!-- Custom Checkbox -->
+                        <input type="checkbox" class="form-check-input custom-checkbox" name="fields" value="{{ field }}" id="{{ field }}" onclick="toggleCheckbox(this)">
+                        <label class="form-check-label custom-checkbox-label" for="{{ field }}">
+                          {{ field }}
+                        </label>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> {% endcomment %}
+          
+          <!-- Second Card: File Upload -->
+          <div class="col-md-6">
+            <div class="card h-100 mb-3 custom-card">
+              <div class="card-header no-border upload-card-header">
+                <strong>Upload Files</strong>
+              </div>
+              <div class="card-body upload-card-body">
+                <!-- Label Container -->
+                <div class="upload-label-container">
+                  <label class="control-label">
+                    Please upload the facility location CSV.
+                  </label>
+                </div>
+
+                <div class="file-input-wrapper">
+                  <!-- File Input Container -->
+                  <div class="file-upload-box" onclick="document.getElementById('facilityCsv').click()">
+                    <!-- Upload Icon -->
+                    <i class="fas fa-upload upload-icon"></i>
+                    
+                    <!-- Choose File Text -->
+                    <label for="facilityCsv" class="upload-label">
+                      Choose File
+                    </label>
+                    
+                    <!-- File Name Display -->
+                    <p id="file-name" class="file-name-display">No file chosen</p>
+                  </div>
+                </div>
+              </div>
+              <!-- Moved Card Footer Inside the Card -->
+              <div class="card-footer text-center card-footer-no-border">
+                <div class="footer-button-wrapper">
+                  <button type="submit" class="btn btn-warning upload-button">
+                    <strong>Generate table &amp; plot</strong>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Hidden File Input (using Bootstrap’s d-none class) -->
+            <input type="file" name="facility_csv" id="facilityCsv" accept=".csv" class="d-none" onchange="updateFileName()">
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+  {% endif %}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  function toggleCheckbox(checkbox) {
+      let container = checkbox.closest('.checkbox-container');
+
+      if (checkbox.checked) {
+          container.style.backgroundColor = '#FFF8C7'; // Change background to light yellow
+          container.style.border = '2px solid #F1D500'; // Add yellow border
+          checkbox.style.backgroundColor = '#000'; // Change checkbox to black
+          checkbox.style.borderColor = '#000'; // Keep border black
+      } else {
+          container.style.backgroundColor = '#F8F9FA'; // Revert background to gray
+          container.style.border = '2px solid transparent'; // Remove border
+          checkbox.style.backgroundColor = '#F7F7F7'; // Reset checkbox background to gray
+          checkbox.style.borderColor = '#000'; // Keep border black
+      }
+  }
+
+  function updateFileName() {
+      var input = document.getElementById("facilityCsv");
+      var fileNameDisplay = document.getElementById("file-name");
+
+      if (input.files.length > 0) {
+          fileNameDisplay.textContent = input.files[0].name;
+      } else {
+          fileNameDisplay.textContent = "No file chosen";
+      }
+  }
+</script>
+    
+{% endblock %}

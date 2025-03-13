@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'flood_exposure_analysis',
     'climate_hazards_analysis',
     'sea_level_rise_analysis',
-    
+    'tropical_cyclone_analysis',
 ]
 
 MIDDLEWARE = [
@@ -144,6 +144,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'flood_exposure_analysis', 'static'),
     os.path.join(BASE_DIR, 'climate_hazards_analysis', 'static'),
     os.path.join(BASE_DIR, 'sea_level_rise_analysis', 'static'),
+    os.path.join(BASE_DIR, 'tropical_cyclone_analysis', 'static'),
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

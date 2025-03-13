@@ -32,6 +32,7 @@ urlpatterns = [
     path('flood-exposure-analysis/', include('flood_exposure_analysis.urls')),
     path('climate-hazards-analysis/', include('climate_hazards_analysis.urls')),
     path('sea-level-rise-analysis/', include('sea_level_rise_analysis.urls')),
+    path('tropical-cyclone-analysis/', include('tropical_cyclone_analysis.urls')),
 ]
 
 # Serve media files during development
