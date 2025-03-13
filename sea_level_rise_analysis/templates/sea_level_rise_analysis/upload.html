@@ -82,8 +82,12 @@
               <!-- Moved Card Footer Inside the Card -->
               <div class="card-footer text-center card-footer-no-border">
                 <div class="footer-button-wrapper">
+                  <!-- Preview Button now triggers modal -->
+                  {% comment %} <button type="button" class="btn btn-warning preview-button flex-fill" data-bs-toggle="modal" data-bs-target="#csvPreviewModal" onclick="previewCSV()">
+                      <strong>Preview CSV upload</strong>
+                  </button> {% endcomment %}
                   <button type="submit" class="btn btn-warning upload-button">
-                    <strong>Generate table &amp; plot</strong>
+                    <strong>Generate Exposure Data</strong>
                   </button>
                 </div>
               </div>
@@ -129,6 +133,45 @@
           fileNameDisplay.textContent = "No file chosen";
       }
   }
+
+// Function to read the CSV file and populate the preview table in the modal
+function previewCSV() {
+  var input = document.getElementById("facilityCsv");
+  if (input.files.length > 0) {
+      var file = input.files[0];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+          var csvData = e.target.result;
+          var lines = csvData.split("\n");
+          var headerHtml = "";
+          var bodyHtml = "";
+          if (lines.length > 0) {
+              // Assume the first line contains headers
+              var headers = lines[0].split(",");
+              headerHtml += headers.map(function(header) {
+                  return "<th>" + header.trim() + "</th>";
+              }).join("");
+          }
+          // Process each row after the header
+          for (var i = 1; i < lines.length; i++) {
+              if (lines[i].trim() === "") continue;
+              var cells = lines[i].split(",");
+              var rowHtml = cells.map(function(cell) {
+                  return "<td>" + cell.trim() + "</td>";
+              }).join("");
+              bodyHtml += "<tr>" + rowHtml + "</tr>";
+          }
+          document.getElementById("preview-table-header").innerHTML = headerHtml;
+          document.getElementById("preview-table-body").innerHTML = bodyHtml;
+        
+      };
+      reader.readAsText(file);
+  }
+}
+
+
+
+
 </script>
     
 {% endblock %}

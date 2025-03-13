@@ -131,7 +131,8 @@ def generate_sea_level_rise_analysis(facility_csv_path):
         ))
 
         # Define buffer sizes to iterate through.
-        buffer_list = [0.00045, 0.0009, 0.00225, 0.0045, 0.009, 0.0225]
+        # buffer_list = [0.00045, 0.0009, 0.00225, 0.0045, 0.009, 0.0225]
+        buffer_list = [0.00045]
 
         for buffer in buffer_list:
             buffer_in_km = round(buffer * 2 * 111, 1)  # convert to km

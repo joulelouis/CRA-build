@@ -1,10 +1,21 @@
 import os
-from django.conf import settings
+import pandas as pd
 from django.shortcuts import render, redirect
+from django.conf import settings
 from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
 
 # Use a local UPLOAD_DIR variable defined in this views.py file
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, 'tropical_cyclone_analysis', 'static', 'input_files')
+
+def process_data(data):
+    """
+    Replace NaN values in a list of dictionaries with empty strings.
+    """
+    for row in data:
+        for key, value in row.items():
+            if pd.isna(value):
+                row[key] = ""
+    return data
 
 def tc_upload_facility_csv(request):
     # List of sea level rise fields 
@@ -41,9 +52,6 @@ def tc_upload_facility_csv(request):
     return render(request, 'tropical_cyclone_analysis/upload.html', context)
 
 def tropical_cyclone_analysis(request):
-    import os
-    import pandas as pd
-
     # Retrieve the uploaded facility CSV file path from the session.
     facility_csv_path = request.session.get('tropical_cyclone_analysis_csv_path')
     if not facility_csv_path or not os.path.exists(facility_csv_path):
@@ -74,6 +82,8 @@ def tropical_cyclone_analysis(request):
         if os.path.exists(combined_csv_path):
             df = pd.read_csv(combined_csv_path)
             data = df.to_dict(orient="records")
+            # Process the data to replace NaN values with empty strings.
+            data = process_data(data)
             columns = df.columns.tolist()
         else:
             data, columns = [], []
