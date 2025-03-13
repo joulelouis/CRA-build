@@ -2,16 +2,22 @@ import pandas as pd
 from shapely.wkt import loads
 from shapely.geometry import Point
 from scipy.spatial import distance
+import os
+from django.conf import settings
 
 
 def generate_tropical_cyclone_analysis(facilty_csv_path):
+
+    # Lists to track generated files
+    output_csv_files = []
+
     # Load known points CSV
-    known_csv = "climada_output_01.csv"  # Change to actual file path
+    known_csv = os.path.join(settings.BASE_DIR, 'tropical_cyclone_analysis', 'static',  'input_files', 'climada_output_01.csv')   # Change to actual file path
     df_known = pd.read_csv(known_csv)
 
     # Load target points CSV
-    target_csv = "sample_locs.csv"  # Change to actual file path
-    df_target = pd.read_csv(target_csv)
+    # target_csv = "sample_locs.csv"  # Change to actual file path
+    df_target = pd.read_csv(facilty_csv_path)
 
     # Ensure required columns exist
     if "Lat" not in df_target.columns or "Long" not in df_target.columns:
@@ -21,8 +27,9 @@ def generate_tropical_cyclone_analysis(facilty_csv_path):
     df_target["geometry"] = df_target.apply(lambda row: Point(row["Long"], row["Lat"]), axis=1)
 
     # Save and reload target file (optional, avoids potential formatting issues)
-    df_target.to_csv("smc_assets_coords.csv", index=False)
-    df_target = pd.read_csv("smc_assets_coords.csv")
+    output_asset_coordinates = os.path.join(settings.BASE_DIR, 'tropical_cyclone_analysis', 'static', 'input_files', 'smc_assets_coords.csv')
+    df_target.to_csv(output_asset_coordinates, index=False)
+    df_target = pd.read_csv(output_asset_coordinates)
 
     # Parse WKT geometry in known points
     df_known["geometry"] = df_known["geometry"].apply(lambda x: loads(x).coords[0])  # Convert WKT to (x, y)
@@ -60,7 +67,16 @@ def generate_tropical_cyclone_analysis(facilty_csv_path):
     # print(df_result.columns)
     # sys.exit()
 
+    output_csv = os.path.join(settings.BASE_DIR, 'tropical_cyclone_analysis', 'static', 'input_files', 'exposure_results_01.csv')
+
     # Save results to CSV
-    df_result.to_csv("exposure_results_01.csv", index=False)
+    df_result.to_csv(output_csv, index=False)
 
     print("Matching complete! Results saved.")
+
+    output_csv_files.append(output_csv)
+
+    # Return a dictionary with all output file paths.
+    return {
+        "combined_csv_paths": output_csv_files,
+    }

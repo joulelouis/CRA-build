@@ -39,3 +39,53 @@ def tc_upload_facility_csv(request):
         'tropical_cyclone_fields': tropical_cyclone_fields,
     }
     return render(request, 'tropical_cyclone_analysis/upload.html', context)
+
+def tropical_cyclone_analysis(request):
+    import os
+    import pandas as pd
+
+    # Retrieve the uploaded facility CSV file path from the session.
+    facility_csv_path = request.session.get('tropical_cyclone_analysis_csv_path')
+    if not facility_csv_path or not os.path.exists(facility_csv_path):
+        return render(request, 'tropical_cyclone_analysis/upload.html', {
+            'error': 'No facility file uploaded or file not found.'
+        })
+
+    # Retrieve any selected fields from the session.
+    selected_fields = request.session.get('selected_dynamic_fields', None)
+    print("Climate Hazards selected:", selected_fields)
+
+    # Call the analysis function.
+    result = generate_tropical_cyclone_analysis(facility_csv_path)
+
+    # Check for errors in the result.
+    if result is None or "error" in result:
+        return render(request, 'climate_hazards_analysis/error.html', {
+            'error': 'Combined analysis failed. Please check logs for details.'
+        })
+
+    # Get the list of generated CSV and PNG file paths.
+    combined_csv_paths = result.get('combined_csv_paths', [])
+    png_paths = result.get('png_paths', [])
+    
+    # If multiple CSVs were generated, pick the first one for display.
+    if combined_csv_paths:
+        combined_csv_path = combined_csv_paths[0]
+        if os.path.exists(combined_csv_path):
+            df = pd.read_csv(combined_csv_path)
+            data = df.to_dict(orient="records")
+            columns = df.columns.tolist()
+        else:
+            data, columns = [], []
+    else:
+        data, columns = [], []
+
+    context = {
+        'data': data,
+        'columns': columns,
+        'png_paths': png_paths,  # You can use this in your template to display or link to the PNGs.
+        'tropical_cyclone_fields': [],  # Update as needed.
+        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []),
+    }
+
+    return render(request, 'tropical_cyclone_analysis/tropical_cyclone_analysis.html', context)
