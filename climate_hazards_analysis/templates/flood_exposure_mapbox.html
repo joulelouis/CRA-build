@@ -2,9 +2,18 @@
 
 {% block content %}
 
+<!-- Checkbox for toggling river layers -->
+<div style="text-align: center; margin-bottom: 10px;">
+  <label>
+    <input type="checkbox" id="toggle-rivers" checked> Show Rivers
+  </label>
+</div>
+
 <div id="flood-exposure-map" style="width: 100%; height: 500px;"></div>
 
 <script src="../../static/javascript/rivers-gensan.min.js"></script>
+<script src="../../static/javascript/rivers-parañaque.min.js"></script>
+<script src="../../static/javascript/rivers-manila.min.js"></script>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
 
@@ -16,63 +25,171 @@
         style: 'mapbox://styles/mapbox/dark-v10'
     })
     .addControl(new mapboxgl.NavigationControl())
-            .addControl(new mapboxgl.GeolocateControl())
-            .addControl(new mapboxgl.ScaleControl())
-            .addControl(new mapboxgl.FullscreenControl());
+    .addControl(new mapboxgl.GeolocateControl())
+    .addControl(new mapboxgl.ScaleControl())
+    .addControl(new mapboxgl.FullscreenControl());
 
-            floodExposureMap.on("load", () => {
-              floodExposureMap.addSource("rivers", {
-                  type: "geojson",
-                  data: RiversGensan,
-              });
-              floodExposureMap.addLayer({
-                  id: "rivers",
-                  type: "line",
-                  source: "rivers",
-                  layout: {
-                      "line-join": "round",
-                      "line-cap": "round",
-                  },
-                  paint: {
-                      "line-color": "#3388ff",
-                      "line-width": 4,
-                  },
-              });
+    floodExposureMap.on("load", () => {
+      // Add the RiversGensan source and layer.
+      floodExposureMap.addSource("rivers-gensan", {
+          type: "geojson",
+          data: RiversGensan,
+      });
+      floodExposureMap.addLayer({
+          id: "rivers-gensan",
+          type: "line",
+          source: "rivers-gensan",
+          layout: {
+              "line-join": "round",
+              "line-cap": "round",
+          },
+          paint: {
+              "line-color": "#3388ff",
+              "line-width": 3,
+          },
+      });
   
-              // Add pop-up
-              floodExposureMap.on("click", "rivers", (e) => {
-                  const properties = e.features[0].properties;
+      // Add the RiversParañaque source and layer.
+      floodExposureMap.addSource("rivers-paranaque", {
+          type: "geojson",
+          data: RiversParañaque,
+      });
+      floodExposureMap.addLayer({
+          id: "rivers-paranaque",
+          type: "line",
+          source: "rivers-paranaque",
+          layout: {
+              "line-join": "round",
+              "line-cap": "round",
+          },
+          paint: {
+              "line-color": "#3388ff",  
+              "line-width": 3,
+          },
+      });
+
+      // Add the RiversManila source and layer.
+      floodExposureMap.addSource("rivers-manila", {
+          type: "geojson",
+          data: RiversManila,
+      });
+      floodExposureMap.addLayer({
+          id: "rivers-manila",
+          type: "line",
+          source: "rivers-manila",
+          layout: {
+              "line-join": "round",
+              "line-cap": "round",
+          },
+          paint: {
+              "line-color": "#3388ff",  
+              "line-width": 3,
+          },
+      });
   
-                  var description = "";
-                  if (properties.name) {
-                      description += "<h3>" + properties.name + "</h3>";
-                  }
-                  description += "<pre>";
-                  for (const [key, value] of Object.entries(properties)) {
-                      if (["@id", "waterway"].includes(key)) {
-                          continue;
-                      }
-                      description += `${key}: ${value}\n`;
-                  }
-                  description +=
-                      '</pre><p>Data: <a href="https://www.openstreetmap.org/' +
-                      properties["@id"] +
-                      '" target="_blank">OpenStreetMap</a> / <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank">ODbL</a></p>';
+      // Optionally add pop-ups and cursor events for RiversGensan...
+      floodExposureMap.on("click", "rivers-gensan", (e) => {
+          const properties = e.features[0].properties;
+          let description = "";
+          if (properties.name) {
+              description += "<h3>" + properties.name + "</h3>";
+          }
+          description += "<pre>";
+          for (const [key, value] of Object.entries(properties)) {
+              if (["@id", "waterway"].includes(key)) {
+                  continue;
+              }
+              description += `${key}: ${value}\n`;
+          }
+          description += '</pre><p>Data: <a href="https://www.openstreetmap.org/' +
+              properties["@id"] +
+              '" target="_blank">OpenStreetMap</a> / <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank">ODbL</a></p>';
   
-                  new mapboxgl.Popup()
-                      .setLngLat(e.lngLat)
-                      .setHTML(description)
-                      .addTo(floodExposureMap);
-              });
+          new mapboxgl.Popup()
+              .setLngLat(e.lngLat)
+              .setHTML(description)
+              .addTo(floodExposureMap);
+      });
   
-              // Cursor when the mouse is over the layer.
-              floodExposureMap.on("mouseenter", "rivers", () => {
-                floodExposureMap.getCanvas().style.cursor = "pointer";
-              });
-              floodExposureMap.on("mouseleave", "rivers", () => {
-                floodExposureMap.getCanvas().style.cursor = "";
-              });
-          });     
+      floodExposureMap.on("mouseenter", "rivers-gensan", () => {
+          floodExposureMap.getCanvas().style.cursor = "pointer";
+      });
+      floodExposureMap.on("mouseleave", "rivers-gensan", () => {
+          floodExposureMap.getCanvas().style.cursor = "";
+      });
+  
+      // Optionally add pop-ups and cursor events for RiversParañaque.
+      floodExposureMap.on("click", "rivers-paranaque", (e) => {
+          const properties = e.features[0].properties;
+          let description = "";
+          if (properties.name) {
+              description += "<h3>" + properties.name + "</h3>";
+          }
+          description += "<pre>";
+          for (const [key, value] of Object.entries(properties)) {
+              if (["@id", "waterway"].includes(key)) {
+                  continue;
+              }
+              description += `${key}: ${value}\n`;
+          }
+          description += '</pre><p>Data: <a href="https://www.openstreetmap.org/' +
+              properties["@id"] +
+              '" target="_blank">OpenStreetMap</a> / <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank">ODbL</a></p>';
+  
+          new mapboxgl.Popup()
+              .setLngLat(e.lngLat)
+              .setHTML(description)
+              .addTo(floodExposureMap);
+      });
+
+      floodExposureMap.on("mouseenter", "rivers-paranaque", () => {
+          floodExposureMap.getCanvas().style.cursor = "pointer";
+      });
+      floodExposureMap.on("mouseleave", "rivers-paranaque", () => {
+          floodExposureMap.getCanvas().style.cursor = "";
+      });
+
+      // Optionally add pop-ups and cursor events for RiversManila.
+      floodExposureMap.on("click", "rivers-manila", (e) => {
+          const properties = e.features[0].properties;
+          let description = "";
+          if (properties.name) {
+              description += "<h3>" + properties.name + "</h3>";
+          }
+          description += "<pre>";
+          for (const [key, value] of Object.entries(properties)) {
+              if (["@id", "waterway"].includes(key)) {
+                  continue;
+              }
+              description += `${key}: ${value}\n`;
+          }
+          description += '</pre><p>Data: <a href="https://www.openstreetmap.org/' +
+              properties["@id"] +
+              '" target="_blank">OpenStreetMap</a> / <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank">ODbL</a></p>';
+
+          new mapboxgl.Popup()
+              .setLngLat(e.lngLat)
+              .setHTML(description)
+              .addTo(floodExposureMap);
+      });
+
+      floodExposureMap.on("mouseenter", "rivers-manila", () => {
+          floodExposureMap.getCanvas().style.cursor = "pointer";
+      });
+      floodExposureMap.on("mouseleave", "rivers-manila", () => {
+          floodExposureMap.getCanvas().style.cursor = "";
+      });
+
+      // Add checkbox event listener to toggle river layers visibility.
+      document.getElementById("toggle-rivers").addEventListener("change", function() {
+        var visibility = this.checked ? "visible" : "none";
+        floodExposureMap.setLayoutProperty("rivers-gensan", "visibility", visibility);
+        floodExposureMap.setLayoutProperty("rivers-paranaque", "visibility", visibility);
+        floodExposureMap.setLayoutProperty("rivers-manila", "visibility", visibility);
+      });
+  
+      
+  });     
 
 
 
