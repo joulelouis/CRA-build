@@ -4,7 +4,7 @@
 
 <div id="flood-exposure-map" style="width: 100%; height: 500px;"></div>
 
-
+<script src="../../static/javascript/rivers-gensan.min.js"></script>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
 
@@ -14,7 +14,67 @@
         center: [121.7740, 12.8797],
         zoom: 4.5,
         style: 'mapbox://styles/mapbox/dark-v10'
-    });
+    })
+    .addControl(new mapboxgl.NavigationControl())
+            .addControl(new mapboxgl.GeolocateControl())
+            .addControl(new mapboxgl.ScaleControl())
+            .addControl(new mapboxgl.FullscreenControl());
+
+            floodExposureMap.on("load", () => {
+              floodExposureMap.addSource("rivers", {
+                  type: "geojson",
+                  data: RiversGensan,
+              });
+              floodExposureMap.addLayer({
+                  id: "rivers",
+                  type: "line",
+                  source: "rivers",
+                  layout: {
+                      "line-join": "round",
+                      "line-cap": "round",
+                  },
+                  paint: {
+                      "line-color": "#3388ff",
+                      "line-width": 4,
+                  },
+              });
+  
+              // Add pop-up
+              floodExposureMap.on("click", "rivers", (e) => {
+                  const properties = e.features[0].properties;
+  
+                  var description = "";
+                  if (properties.name) {
+                      description += "<h3>" + properties.name + "</h3>";
+                  }
+                  description += "<pre>";
+                  for (const [key, value] of Object.entries(properties)) {
+                      if (["@id", "waterway"].includes(key)) {
+                          continue;
+                      }
+                      description += `${key}: ${value}\n`;
+                  }
+                  description +=
+                      '</pre><p>Data: <a href="https://www.openstreetmap.org/' +
+                      properties["@id"] +
+                      '" target="_blank">OpenStreetMap</a> / <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank">ODbL</a></p>';
+  
+                  new mapboxgl.Popup()
+                      .setLngLat(e.lngLat)
+                      .setHTML(description)
+                      .addTo(floodExposureMap);
+              });
+  
+              // Cursor when the mouse is over the layer.
+              floodExposureMap.on("mouseenter", "rivers", () => {
+                floodExposureMap.getCanvas().style.cursor = "pointer";
+              });
+              floodExposureMap.on("mouseleave", "rivers", () => {
+                floodExposureMap.getCanvas().style.cursor = "";
+              });
+          });     
+
+
 
     // Create a base yellow circle element
     const floodExposureBaseYellowCircle = document.createElement('div');
