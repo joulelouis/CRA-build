@@ -14,7 +14,7 @@ def process_data(data):
     for row in data:
         for key, value in row.items():
             if pd.isna(value):
-                row[key] = ""
+                row[key] = "N/A"
     return data
 
 def tc_upload_facility_csv(request):

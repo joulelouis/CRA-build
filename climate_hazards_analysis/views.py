@@ -10,10 +10,10 @@ UPLOAD_DIR = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static
 def upload_facility_csv(request):
     # List of climate hazards fields 
     climate_hazards_fields = [
-        'Heat Exposure Analysis',
-        'Sea Level Rise Exposure Analysis',
-        'Flood Exposure Analysis',
-        'Water Stress Analysis',
+        'Heat',
+        'Sea Level Rise',
+        'Flood',
+        'Water Stress',
         'Tropical Cyclones',
         
     ]
@@ -52,10 +52,10 @@ def upload_facility_csv(request):
 def climate_hazards_analysis(request):
 
     climate_hazards_fields = [
-        'Heat Exposure Analysis',
-        'Sea Level Rise Exposure Analysis',
-        'Flood Exposure Analysis',
-        'Water Stress Analysis',
+        'Heat Exposure',
+        'Sea Level Rise',
+        'Flood',
+        'Water Stress',
         'Tropical Cyclones',
         
     ]

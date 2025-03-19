@@ -15,7 +15,7 @@
         </div>
         
         <!-- Heading below the icon with Margin -->
-        <h1 class="page-heading">Climate Hazards Analysis</h1>
+        <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
       </div>
     </div>
 
@@ -28,11 +28,11 @@
                     <div class="col-md-6">
                         <div class="card h-100 mb-3 custom-card">
                         <div class="card-header no-border">
-                            <strong>Select Data Fields</strong>
+                            <strong>Select Climate/Weather Hazards</strong>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                            <label class="control-label">Select hazards to include in analysis.</label>
+                            {% comment %} <label class="control-label">Select hazards to include in analysis.</label> {% endcomment %}
                             <div class="checkbox-grid">
                                 {% for field in climate_hazards_fields %}
                                 <div class="form-check checkbox-container">
@@ -53,14 +53,14 @@
                     <div class="col-md-6">
                         <div class="card h-100 mb-3 custom-card">
                             <div class="card-header no-border upload-card-header">
-                                <strong>Upload Files</strong>
+                                <strong>Upload Facility Location Excel Sheet</strong>
                             </div>
                         <div class="card-body upload-card-body">
                             <!-- Label Container -->
                             <div class="upload-label-container">
-                                <label class="control-label">
+                                {% comment %} <label class="control-label">
                                     Please upload the facility location CSV.
-                                </label>
+                                </label> {% endcomment %}
                             </div>
 
                             <div class="file-input-wrapper">

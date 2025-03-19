@@ -15,7 +15,7 @@
         </div>
         
         <!-- Heading below the icon with Margin -->
-        <h1 class="page-heading">Climate Hazards Analysis</h1>
+        <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
       </div>
     </div>
 
@@ -231,24 +231,11 @@
             $('#data-table').DataTable({
                 dom: 'Bfrtip',
                 buttons: [
-                  {
-                    extend: 'copyHtml5',
-                    text: '<i class="fas fa-copy"></i> Copy',  // Add icon
-                    className: 'btn btn-outline-secondary'
-                  },
-                  {
-                    extend: 'csvHtml5',
-                    text: '<i class="fas fa-file-csv"></i> Save to CSV',
-                    className: 'btn btn-outline-secondary'
-                  },
+                  
+                
                   {
                     extend: 'excelHtml5',
                     text: '<i class="fas fa-file-excel"></i> Save to Excel',
-                    className: 'btn btn-outline-secondary'
-                  },
-                  {
-                    extend: 'print',
-                    text: '<i class="fas fa-print"></i> Print',
                     className: 'btn btn-outline-secondary'
                   }
                 ],
