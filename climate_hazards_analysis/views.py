@@ -7,6 +7,16 @@ from climate_hazards_analysis.utils.climate_hazards_analysis import generate_cli
 # Use a local UPLOAD_DIR variable defined in this views.py file
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
 
+def process_data(data):
+    """
+    Replace NaN values in a list of dictionaries with "N/A".
+    """
+    for row in data:
+        for key, value in row.items():
+            if pd.isna(value):
+                row[key] = "N/A"
+    return data
+
 def upload_facility_csv(request):
     # List of climate hazards fields 
     climate_hazards_fields = [
@@ -15,7 +25,6 @@ def upload_facility_csv(request):
         'Flood',
         'Water Stress',
         'Tropical Cyclones',
-        
     ]
 
     if request.method == 'POST' and request.FILES.get('facility_csv'):
@@ -57,11 +66,7 @@ def climate_hazards_analysis(request):
         'Flood',
         'Water Stress',
         'Tropical Cyclones',
-        
     ]
-
-
-
 
     # Define the required file paths using the local UPLOAD_DIR variable
     shapefile_base = os.path.join(UPLOAD_DIR, 'hybas_lake_au_lev06_v1c')
@@ -110,6 +115,8 @@ def climate_hazards_analysis(request):
             'Exposure': 'Flood Exposure'
         }, inplace=True)
         data = df.to_dict(orient="records")
+        # Process data to replace any NaN values with "N/A"
+        data = process_data(data)
         columns = df.columns.tolist()
     else:
         data, columns = [], []
@@ -119,7 +126,7 @@ def climate_hazards_analysis(request):
         'columns': columns,
         'plot_path': plot_path,
         'climate_hazards_fields': climate_hazards_fields,
-        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []), #context to be passed in the tab list condition
+        'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []),
     }
 
     return render(request, 'climate_hazards_analysis.html', context)
