@@ -28,11 +28,11 @@
                     <div class="col-md-6">
                         <div class="card h-100 mb-3 custom-card">
                         <div class="card-header no-border">
-                            <strong>Select Data Fields</strong>
+                            <strong>Select Climate/Weather Hazards</strong>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                            <label class="control-label">Select Fields to include in analysis.</label>
+                            {% comment %} <label class="control-label">Select Fields to include in analysis.</label> {% endcomment %}
                             <div class="checkbox-grid">
                                 {% for field in climate_hazards_fields %}
                                 <div class="form-check checkbox-container">
@@ -53,14 +53,14 @@
                     <div class="col-md-6">
                         <div class="card h-100 mb-3 custom-card">
                         <div class="card-header no-border upload-card-header">
-                            <strong>Upload Files</strong>
+                            <strong>Upload Facility Location Excel Sheet</strong>
                         </div>
                         <div class="card-body upload-card-body">
                             <!-- Label Container -->
                             <div class="upload-label-container">
-                            <label class="control-label">
+                            {% comment %} <label class="control-label">
                                 Please upload the facility location CSV.
-                            </label>
+                            </label> {% endcomment %}
                             </div>
 
                             <div class="file-input-wrapper">
@@ -117,13 +117,13 @@
 
             
             
-            <li class="nav-item {% if 'Flood Exposure Analysis' not in selected_dynamic_fields %}d-none{% endif %}">
+            <li class="nav-item {% if 'Flood' not in selected_dynamic_fields %}d-none{% endif %}">
               <a class="nav-link custom-tab-link" id="flood-exposure-map-tab" data-bs-toggle="tab" href="#flood-map" role="tab" aria-controls="map-content" aria-selected="false">
                 Flood Exposure Map
               </a>
             </li>
 
-            <li class="nav-item {% if 'Water Stress Analysis' not in selected_dynamic_fields %}d-none{% endif %}">
+            <li class="nav-item {% if 'Water Stress' not in selected_dynamic_fields %}d-none{% endif %}">
               <a class="nav-link custom-tab-link" id="water-stress-map-tab" data-bs-toggle="tab" href="#water-map" role="tab" aria-controls="map-content" aria-selected="false">
                 Water Stress Map
               </a>

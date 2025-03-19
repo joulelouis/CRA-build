@@ -180,8 +180,8 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         
         #rename the names of the climate hazards to their specific fields in the table
         selected_fields_mapping = {
-            'Flood Exposure Analysis': 'Exposure',
-            'Water Stress Analysis': 'bws_06_lab',
+            'Flood': 'Exposure',
+            'Water Stress': 'bws_06_lab',
             
         }
 
