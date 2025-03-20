@@ -61,7 +61,7 @@ def upload_facility_csv(request):
 def climate_hazards_analysis(request):
 
     climate_hazards_fields = [
-        'Heat Exposure',
+        'Heat',
         'Sea Level Rise',
         'Flood',
         'Water Stress',
@@ -111,6 +111,9 @@ def climate_hazards_analysis(request):
             'Site': 'Facility',
             'Lat': 'Latitude',
             'Long': 'Longitude',
+            'n>30degC_2125': 'Days over 30 degrees Celsius',
+            'n>33degC_2125': 'Days over 33 degrees Celsius',
+            'n>35degC_2125': 'Days over 35 degrees Celsius',
             'bws_06_lab': 'Water Stress Exposure',
             'Exposure': 'Flood Exposure',
             'SRTM elevation': 'Elevation (meter above sea level)',
