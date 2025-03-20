@@ -112,7 +112,16 @@ def climate_hazards_analysis(request):
             'Lat': 'Latitude',
             'Long': 'Longitude',
             'bws_06_lab': 'Water Stress Exposure',
-            'Exposure': 'Flood Exposure'
+            'Exposure': 'Flood Exposure',
+            'SRTM elevation': 'Elevation (meter above sea level)',
+            '2030 Sea Level Rise Cl 0.5': '2030 Sea Level Rise (in meters)',
+            '2040 Sea Level Rise Cl 0.5': '2040 Sea Level Rise (in meters)',
+            '2050 Sea Level Rise Cl 0.5': '2050 Sea Level Rise (in meters)',
+            '2060 Sea Level Rise Cl 0.5': '2060 Sea Level Rise (in meters)',
+            '1-min MSW 10 yr RP': '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
+            '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
+            '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
+            '1-min MSW 100 yr RP': '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)',
         }, inplace=True)
         data = df.to_dict(orient="records")
         # Process data to replace any NaN values with "N/A"

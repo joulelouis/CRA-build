@@ -69,6 +69,16 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         facility_locs = facility_locs.dropna(subset=['Long', 'Lat'])
         if facility_locs.empty:
             raise ValueError("Facility CSV is empty after cleaning!")
+        # Ensure a consistent facility identifier column.
+        if 'Facility' not in facility_locs.columns:
+            if 'Site' in facility_locs.columns:
+                facility_locs.rename(columns={'Site': 'Facility'}, inplace=True)
+            elif 'Facilty Name' in facility_locs.columns:
+                facility_locs.rename(columns={'Facilty Name': 'Facility'}, inplace=True)
+            else:
+                # If none of these exist, then generate a default identifier.
+                facility_locs['Facility'] = facility_locs.apply(lambda row: f"Facility_{row.name}", axis=1)
+        
         geometry = [Point(xy) for xy in zip(facility_locs['Long'], facility_locs['Lat'])]
         facility_gdf = gpd.GeoDataFrame(facility_locs, geometry=geometry, crs="EPSG:4326")
         buffer_size = 0.0009  # ~100m square buffer
@@ -114,10 +124,9 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         # ---------- FLOOD EXPOSURE ANALYSIS ----------
         print("Step 8: Performing flood exposure analysis")
         df_fac = pd.read_csv(updated_facility_csv)
-        # Ensure we have a facility identifier; if missing, rename the first column to 'Site'
-        for col in ['Long', 'Lat', 'Site']:
-            if col not in df_fac.columns:
-                df_fac.rename(columns={df_fac.columns[0]: 'Site'}, inplace=True)
+        # Ensure that the facility identifier is "Facility"
+        if 'Facility' not in df_fac.columns:
+            df_fac['Facility'] = df_fac.apply(lambda row: f"Facility_{row.name}", axis=1)
         flood_buffer = 0.0045  # ~250m radius
         crs_flood = CRS("epsg:32651")
         geometry = [Point(xy).buffer(flood_buffer, cap_style=3) for xy in zip(df_fac['Long'], df_fac['Lat'])]
@@ -137,12 +146,18 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         
         # ---------- GENERATE COMBINED OUTPUT (Water Stress + Flood Exposure) ----------
         print("Step 9: Generating combined output table for water stress and flood exposure")
-        selected_fields_mapping = {
-            'Flood': 'Exposure',
-            'Water Stress': 'bws_06_lab',
+        # Only include Flood and Water Stress in the base combined output.
+        base_mapping = {
+            'Flood': ['Exposure'],
+            'Water Stress': ['bws_06_lab']
         }
-        selected_fields = [selected_fields_mapping.get(field, field) for field in (selected_fields or list(selected_fields_mapping.keys()))]
-        required_columns = ['Site', 'Lat', 'Long'] + selected_fields
+        # Get the subset of the user selection for the base hazards.
+        base_selected = [hazard for hazard in (selected_fields or []) if hazard in base_mapping]
+        # Build required columns for the base combined table.
+        required_columns = ['Facility', 'Lat', 'Long']
+        for hazard in base_selected:
+            required_columns.extend(base_mapping[hazard])
+        
         for col in required_columns:
             if col not in flood_gdf.columns:
                 raise ValueError(f"Expected column '{col}' not found in combined data.")
@@ -153,67 +168,51 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         combined_df.to_csv(combined_csv_path, index=False)
         print(f"Combined output CSV (water stress and flood exposure) saved at {combined_csv_path}")
         
-        # ---------- INTEGRATE SEA LEVEL RISE ANALYSIS ----------
-        print("Step 10: Integrating sea level rise analysis")
-        slr_result = generate_sea_level_rise_analysis(facility_csv_path)
-        if "error" in slr_result:
-            raise Exception("Error in sea level rise analysis: " + slr_result["error"])
-        slr_csv_path = slr_result["combined_csv_paths"][0]
-        df_slr = pd.read_csv(slr_csv_path)
-        # Expecting columns such as "Facility", "Lat", "Lon", "SRTM elevation", "2030 Sea Level Rise CI 0.5", etc.
-        median_years = [2030, 2040, 2050, 2060]
-        median_columns = {}
-        for year in median_years:
-            orig_col = f"{year} Sea Level Rise CI 0.5"
-            new_col = f"{year} Sea Level Rise Cl 0.5"
-            if orig_col in df_slr.columns:
-                median_columns[orig_col] = new_col
-            else:
-                print(f"Warning: Expected column {orig_col} not found in SLR results.")
-        if "Lon" in df_slr.columns:
-            df_slr.rename(columns={"Lon": "Long"}, inplace=True)
-        slr_subset = df_slr[["Facility", "Lat", "Long", "SRTM elevation"] + list(median_columns.keys())].copy()
-        slr_subset.rename(columns=median_columns, inplace=True)
-        # For merging, rename "Facility" to "Site"
-        slr_subset.rename(columns={"Facility": "Site"}, inplace=True)
-        final_df = combined_df.merge(slr_subset, on=["Site", "Lat", "Long"], how="left")
-        # Rename "Site" to "Facility" for the final output.
-        final_df.rename(columns={"Site": "Facility"}, inplace=True)
+        # ---------- INTEGRATE SEA LEVEL RISE ANALYSIS (if selected) ----------
+        if 'Sea Level Rise' in (selected_fields or []):
+            print("Step 10: Integrating sea level rise analysis")
+            slr_result = generate_sea_level_rise_analysis(facility_csv_path)
+            if "error" in slr_result:
+                raise Exception("Error in sea level rise analysis: " + slr_result["error"])
+            slr_csv_path = slr_result["combined_csv_paths"][0]
+            df_slr = pd.read_csv(slr_csv_path)
+            median_years = [2030, 2040, 2050, 2060]
+            median_columns = {}
+            for year in median_years:
+                orig_col = f"{year} Sea Level Rise CI 0.5"
+                new_col = f"{year} Sea Level Rise Cl 0.5"
+                if orig_col in df_slr.columns:
+                    median_columns[orig_col] = new_col
+                else:
+                    print(f"Warning: Expected column {orig_col} not found in SLR results.")
+            if "Lon" in df_slr.columns:
+                df_slr.rename(columns={"Lon": "Long"}, inplace=True)
+            slr_subset = df_slr[["Facility", "Lat", "Long", "SRTM elevation"] + list(median_columns.keys())].copy()
+            slr_subset.rename(columns=median_columns, inplace=True)
+            # Merge using "Facility" as key
+            combined_df = combined_df.merge(slr_subset, on=["Facility", "Lat", "Long"], how="left")
         
-        # ---------- INTEGRATE TROPICAL CYCLONE ANALYSIS ----------
-        print("Step 11: Integrating tropical cyclone analysis")
-        tc_result = generate_tropical_cyclone_analysis(facility_csv_path)
-        if "error" in tc_result:
-            raise Exception("Error in tropical cyclone analysis: " + tc_result["error"])
-        tc_csv_path = tc_result["combined_csv_paths"][0]
-        df_tc = pd.read_csv(tc_csv_path)
-        # Rename columns for consistency.
-        df_tc.rename(columns={"Facility Name": "Facility", "Latitude": "Lat", "Longitude": "Long"}, inplace=True)
-        # Merge tropical cyclone results with final_df.
-        final_df = final_df.merge(df_tc, on=["Facility", "Lat", "Long"], how="left")
+        # ---------- INTEGRATE TROPICAL CYCLONE ANALYSIS (if selected) ----------
+        if 'Tropical Cyclones' in (selected_fields or []):
+            print("Step 11: Integrating tropical cyclone analysis")
+            tc_result = generate_tropical_cyclone_analysis(facility_csv_path)
+            if "error" in tc_result:
+                raise Exception("Error in tropical cyclone analysis: " + tc_result["error"])
+            tc_csv_path = tc_result["combined_csv_paths"][0]
+            df_tc = pd.read_csv(tc_csv_path)
+            df_tc.rename(columns={"Facility Name": "Facility", "Latitude": "Lat", "Longitude": "Long"}, inplace=True)
+            combined_df = combined_df.merge(df_tc, on=["Facility", "Lat", "Long"], how="left")
         
         # ---------- FINAL OUTPUT ----------
-        # Subset the final DataFrame so that it has only the required fields in the correct order.
-        final_columns = [
-            "Facility", 
-            "Lat", 
-            "Long", 
-            "Exposure", 
-            "bws_06_lab", 
-            "SRTM elevation", 
-            "2030 Sea Level Rise Cl 0.5", 
-            "2040 Sea Level Rise Cl 0.5", 
-            "2050 Sea Level Rise Cl 0.5", 
-            "2060 Sea Level Rise Cl 0.5", 
-            "1-min MSW 10 yr RP", 
-            "1-min MSW 20 yr RP", 
-            "1-min MSW 50 yr RP", 
-            "1-min MSW 100 yr RP"
+        final_order = [
+            "Facility", "Lat", "Long",
+            "Exposure", "bws_06_lab",
+            "SRTM elevation", "2030 Sea Level Rise Cl 0.5", "2040 Sea Level Rise Cl 0.5",
+            "2050 Sea Level Rise Cl 0.5", "2060 Sea Level Rise Cl 0.5",
+            "1-min MSW 10 yr RP", "1-min MSW 20 yr RP", "1-min MSW 50 yr RP", "1-min MSW 100 yr RP"
         ]
-        missing = [col for col in final_columns if col not in final_df.columns]
-        if missing:
-            raise ValueError(f"Final output is missing required columns: {missing}")
-        final_df = final_df[final_columns]
+        final_columns = [col for col in final_order if col in combined_df.columns]
+        final_df = combined_df[final_columns]
         
         final_csv_path = os.path.join(combined_uploads_dir, 'final_combined_output.csv')
         final_df.to_csv(final_csv_path, index=False)
@@ -226,4 +225,4 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         
     except Exception as e:
         print(f"Error in generate_climate_hazards_analysis: {e}")
-        return None
+        return {"error": str(e)}
