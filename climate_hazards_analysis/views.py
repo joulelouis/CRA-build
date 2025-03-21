@@ -158,7 +158,7 @@ def flood_exposure_mapbox_ajax(request):
     return render(request, 'flood_exposure_mapbox.html')
 
 
-def generate_building_report_pdf(buffer):
+def generate_building_report_pdf(buffer, selected_fields):
     """
     Generate a PDF report using ReportLab and write it into the provided buffer.
     """
@@ -244,29 +244,45 @@ def generate_building_report_pdf(buffer):
 
     overview_data = [
         [Paragraph("Climate Hazard", wrap_style),
-        Paragraph("Portfolio Exposure Rating", wrap_style),
-        Paragraph("Explanation and Recommendation", wrap_style)],
-        
-        [Paragraph("Heat", wrap_style),
-        Paragraph("Days over 30 degrees Celsius: <strong>No. of Days</strong>, <br/>Days over 33 degrees Celsius: <strong>No. of Days</strong>, <br/>Days over 35 degrees Celsius: <strong>No. of Days</strong>", wrap_style),
-        Paragraph("Lorem Ipsum Dolor with a very long explanation for the Heat Exposure Analysis", wrap_style)],
-        
-        [Paragraph("Flood", wrap_style),
-        Paragraph("Low, Medium, or High", wrap_style),
-        Paragraph("Lorem Ipsum Dolor with a very long explanation for the Flood Exposure Analysis", wrap_style)],
-        
-        [Paragraph("Water Stress", wrap_style),
-        Paragraph("Low, Medium, or High", wrap_style),
-        Paragraph("Lorem Ipsum Dolor with a very long explanation for the Water Stress Exposure Analysis ", wrap_style)],
-        
-        [Paragraph("Sea Level Rise", wrap_style),
-        Paragraph("Elevation (meter above sea level): <strong>value in meters</strong>, <br/>2030 Sea Level Rise (in meters): <strong>value in meters</strong>, <br/>2040 Sea Level Rise (in meters): <strong>value in meters</strong>, <br/>2050 Sea Level Rise (in meters): <strong>value in meters</strong>, <br/>2060 Sea Level Rise (in meters): <strong>value in meters</strong>", wrap_style),
-        Paragraph("Lorem Ipsum Dolor with a very long explanation for the Sea Level Rise Exposure Analysis", wrap_style)],
-        
-        [Paragraph("Tropical Cyclone", wrap_style),
-        Paragraph("1-min Maximum Sustain Windspeed 10 year Return Period (in km/h): <strong>value in km/h</strong>, <br/>1-min Maximum Sustain Windspeed 20 year Return Period (in km/h): <strong>value in km/h</strong>, <br/>1-min Maximum Sustain Windspeed 50 year Return Period (in km/h): <strong>value in km/h</strong>, <br/>1-min Maximum Sustain Windspeed 100 year Return Period (in km/h): <strong>value in km/h</strong>,", wrap_style),
-        Paragraph("Lorem Ipsum Dolor with a very long explanation for the Tropical Cyclone Exposure Analysis", wrap_style)]
+         Paragraph("Portfolio Exposure Rating", wrap_style),
+         Paragraph("Explanation and Recommendation", wrap_style)]
     ]
+
+    # For each hazard, check if it is in selected_fields before appending its row.
+    if "Heat" in selected_fields:
+        overview_data.append([
+            Paragraph("Heat", wrap_style),
+            Paragraph("Days over 30°C: <strong>No. of Days</strong>, <br/>Days over 33°C: <strong>No. of Days</strong>, <br/>Days over 35°C: <strong>No. of Days</strong>", wrap_style),
+            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Heat Exposure Analysis", wrap_style)
+        ])
+
+    if "Flood" in selected_fields:
+        overview_data.append([
+            Paragraph("Flood", wrap_style),
+            Paragraph("Low, Medium, or High", wrap_style),
+            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Flood Exposure Analysis", wrap_style)
+        ])
+
+    if "Water Stress" in selected_fields:
+        overview_data.append([
+            Paragraph("Water Stress", wrap_style),
+            Paragraph("Low, Medium, or High", wrap_style),
+            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Water Stress Exposure Analysis", wrap_style)
+        ])
+
+    if "Sea Level Rise" in selected_fields:
+        overview_data.append([
+            Paragraph("Sea Level Rise", wrap_style),
+            Paragraph("Elevation (m above sea level): <strong>value</strong>, <br/>2030 Sea Level Rise (m): <strong>value</strong>, <br/>2040 Sea Level Rise (m): <strong>value</strong>, <br/>2050 Sea Level Rise (m): <strong>value</strong>, <br/>2060 Sea Level Rise (m): <strong>value</strong>", wrap_style),
+            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Sea Level Rise Exposure Analysis", wrap_style)
+        ])
+
+    if "Tropical Cyclones" in selected_fields:
+        overview_data.append([
+            Paragraph("Tropical Cyclone", wrap_style),
+            Paragraph("1-min Maximum Sustain Windspeed 10 yr RP: <strong>value</strong>, <br/>1-min Maximum Sustain Windspeed 20 yr RP: <strong>value</strong>, <br/>1-min Maximum Sustain Windspeed 50 yr RP: <strong>value</strong>, <br/>1-min Maximum Sustain Windspeed 100 yr RP: <strong>value</strong>", wrap_style),
+            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Tropical Cyclone Exposure Analysis", wrap_style)
+        ])
 
     # Create your overview table with your data and styling
     available_width = doc.width
@@ -306,10 +322,11 @@ def generate_report(request):
     """
     Django view that generates the PDF report and returns it as an HTTP response.
     """
+    selected_fields = request.session.get('selected_dynamic_fields', [])
     buffer = BytesIO()
-    generate_building_report_pdf(buffer)
+    generate_building_report_pdf(buffer, selected_fields)  # Pass the selected_fields here
     pdf = buffer.getvalue()
     buffer.close()
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="Building_Resilience_Index_Report.pdf"'
+    response['Content-Disposition'] = 'attachment; filename="Physical_Climate_Risk_Report.pdf"'
     return response
