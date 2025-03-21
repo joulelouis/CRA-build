@@ -157,6 +157,9 @@ def water_stress_mapbox_ajax(request):
 def flood_exposure_mapbox_ajax(request):
     return render(request, 'flood_exposure_mapbox.html')
 
+def heat_exposure_mapbox_ajax(request):
+    return render(request, 'heat_exposure_mapbox.html')
+
 
 def generate_building_report_pdf(buffer, selected_fields):
     """

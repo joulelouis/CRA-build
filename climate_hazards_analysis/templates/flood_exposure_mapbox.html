@@ -3,11 +3,11 @@
 {% block content %}
 
 <!-- Checkbox for toggling river layers -->
-<div style="text-align: center; margin-bottom: 10px;">
+{% comment %} <div style="text-align: center; margin-bottom: 10px;">
   <label>
     <input type="checkbox" id="toggle-rivers" checked> Show Rivers
   </label>
-</div>
+</div> {% endcomment %}
 
 <div id="flood-exposure-map" style="width: 100%; height: 500px;"></div>
 
@@ -30,7 +30,7 @@
     .addControl(new mapboxgl.ScaleControl())
     .addControl(new mapboxgl.FullscreenControl());
 
-    floodExposureMap.on("load", () => {
+    {% comment %} floodExposureMap.on("load", () => {
       // Add the RiversGensan source and layer.
       floodExposureMap.addSource("rivers-gensan", {
           type: "geojson",
@@ -190,7 +190,7 @@
       });
   
       
-  });     
+  });      {% endcomment %}
 
 
 

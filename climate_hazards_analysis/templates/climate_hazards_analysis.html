@@ -115,7 +115,12 @@
               </a>
             </li>
 
-            
+            <li class="nav-item {% if 'Heat' not in selected_dynamic_fields %}d-none{% endif %}">
+              <a class="nav-link custom-tab-link" id="heat-exposure-map-tab" data-bs-toggle="tab" href="#heat-map" role="tab" aria-controls="map-content" aria-selected="false">
+                Heat Exposure Map
+              </a>
+            </li>
+
             
             <li class="nav-item {% if 'Flood' not in selected_dynamic_fields %}d-none{% endif %}">
               <a class="nav-link custom-tab-link" id="flood-exposure-map-tab" data-bs-toggle="tab" href="#flood-map" role="tab" aria-controls="map-content" aria-selected="false">
@@ -160,6 +165,12 @@
               <div class="text-end mt-3">
                 <a href="{% url 'climate_hazards_analysis:generate_report' %}" class="btn btn-warning"><strong>Generate Report</strong></a>
               </div>
+            </div>
+
+            <!-- Water Stress Map Tab -->
+            <div class="tab-pane fade text-center" id="heat-map" role="tabpanel" aria-labelledby="heat-exposure-map-tab">
+              <h2>Heat Exposure Map</h2>
+              <div id="heat-map-content"></div>
             </div>
 
             <!-- Water Stress Map Tab -->
@@ -256,6 +267,9 @@
                 }
                 if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
                   $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_ajax' %}");
+                }
+                if (target === "#heat-map" && $("#heat-map-content").is(':empty')) {
+                  $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_ajax' %}");
                 }
               });
 

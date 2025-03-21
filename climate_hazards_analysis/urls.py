@@ -4,6 +4,7 @@ from .views import (
     climate_hazards_analysis,
     water_stress_mapbox_ajax,
     flood_exposure_mapbox_ajax,
+    heat_exposure_mapbox_ajax,
     generate_report,  # newly added
 )
 
@@ -14,5 +15,6 @@ urlpatterns = [
     path('output-with-exposure/', climate_hazards_analysis, name='climate_hazards_analysis'),
     path('water-stress-mapbox/', water_stress_mapbox_ajax, name='water_stress_mapbox_ajax'),
     path('flood-exposure-mapbox/', flood_exposure_mapbox_ajax, name='flood_exposure_mapbox_ajax'),
+    path('heat-exposure-mapbox/', heat_exposure_mapbox_ajax, name='heat_exposure_mapbox_ajax'),
     path('generate-report/', generate_report, name='generate_report'),
 ]

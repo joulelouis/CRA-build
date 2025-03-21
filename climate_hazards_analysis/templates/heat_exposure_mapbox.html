@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div id="water-stress-map" style="width: 100%; height: 500px;"></div>
+<div id="heat-exposure-map" style="width: 100%; height: 500px;"></div>
 
 
 <script>
@@ -10,8 +10,8 @@
 
     
 
-    window.waterStressMap = new mapboxgl.Map({ 
-        container: 'water-stress-map',
+    window.heatExposureMap = new mapboxgl.Map({ 
+        container: 'heat-exposure-map',
         center: [121.7740, 12.8797],
         zoom: 4.5,
         style: 'mapbox://styles/mapbox/dark-v10'
@@ -22,24 +22,24 @@
     .addControl(new mapboxgl.FullscreenControl());
 
     // Create a base red circle element
-    const waterStressBaseRedCircle = document.createElement('div');
-    waterStressBaseRedCircle.style.width = '20px';
-    waterStressBaseRedCircle.style.height = '20px';
-    waterStressBaseRedCircle.style.borderRadius = '50%';
-    waterStressBaseRedCircle.style.border = '2px solid white';
-    waterStressBaseRedCircle.style.backgroundColor = 'red';
+    const heatExposureBaseRedCircle = document.createElement('div');
+    heatExposureBaseRedCircle.style.width = '20px';
+    heatExposureBaseRedCircle.style.height = '20px';
+    heatExposureBaseRedCircle.style.borderRadius = '50%';
+    heatExposureBaseRedCircle.style.border = '2px solid white';
+    heatExposureBaseRedCircle.style.backgroundColor = 'red';
 
     // Create a base yellow circle element
-    const waterStressBaseYellowCircle = document.createElement('div');
-    waterStressBaseYellowCircle.style.width = '20px';
-    waterStressBaseYellowCircle.style.height = '20px';
-    waterStressBaseYellowCircle.style.borderRadius = '50%';
-    waterStressBaseYellowCircle.style.border = '2px solid white';
-    waterStressBaseYellowCircle.style.backgroundColor = '#FFC067';
+    const heatExposureBaseYellowCircle = document.createElement('div');
+    heatExposureBaseYellowCircle.style.width = '20px';
+    heatExposureBaseYellowCircle.style.height = '20px';
+    heatExposureBaseYellowCircle.style.borderRadius = '50%';
+    heatExposureBaseYellowCircle.style.border = '2px solid white';
+    heatExposureBaseYellowCircle.style.backgroundColor = '#FFC067';
 
     // Create markers using clones of the base elements
-    const waterStressMarker = new mapboxgl.Marker({ 
-      element: waterStressBaseRedCircle.cloneNode(true) 
+    const heatExposureMarker = new mapboxgl.Marker({ 
+      element: heatExposureBaseRedCircle.cloneNode(true) 
     })
     .setLngLat([120.9849205, 14.59057479])
     .setPopup(new mapboxgl.Popup().setHTML(
@@ -49,10 +49,10 @@
         "High Exposure" +
       "</a>"
     ))
-    .addTo(waterStressMap);
+    .addTo(heatExposureMap);
 
-    const waterStressMarker2 = new mapboxgl.Marker({
-      element: waterStressBaseRedCircle.cloneNode(true)
+    const heatExposureMarker2 = new mapboxgl.Marker({
+      element: heatExposureBaseRedCircle.cloneNode(true)
     })
     .setLngLat([121.042187, 14.49557534])
     .setPopup(new mapboxgl.Popup().setHTML(
@@ -62,10 +62,10 @@
         "High Exposure" +
       "</a>"
     ))
-    .addTo(waterStressMap);
+    .addTo(heatExposureMap);
 
-    const waterStressMarker3 = new mapboxgl.Marker({
-      element: waterStressBaseYellowCircle.cloneNode(true)
+    const heatExposureMarker3 = new mapboxgl.Marker({
+      element: heatExposureBaseYellowCircle.cloneNode(true)
     })
     .setLngLat([125.1456158, 6.065404576])
     .setPopup(new mapboxgl.Popup().setHTML(
@@ -75,10 +75,10 @@
         "Low Exposure" +
       "</a>"
     ))
-    .addTo(waterStressMap);
+    .addTo(heatExposureMap);
 
-    const waterStressMarker4 = new mapboxgl.Marker({
-      element: waterStressBaseYellowCircle.cloneNode(true)
+    const heatExposureMarker4 = new mapboxgl.Marker({
+      element: heatExposureBaseYellowCircle.cloneNode(true)
     })
     .setLngLat([125.150691, 6.064051003])
     .setPopup(new mapboxgl.Popup().setHTML(
@@ -88,7 +88,7 @@
         "Low Exposure" +
       "</a>"
     ))
-    .addTo(waterStressMap);
+    .addTo(heatExposureMap);
         
 </script>
 
