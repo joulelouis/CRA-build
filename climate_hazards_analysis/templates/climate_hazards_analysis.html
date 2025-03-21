@@ -121,6 +121,12 @@
               </a>
             </li>
 
+            <li class="nav-item {% if 'Sea Level Rise' not in selected_dynamic_fields %}d-none{% endif %}">
+              <a class="nav-link custom-tab-link" id="sea-level-rise-map-tab" data-bs-toggle="tab" href="#sea-map" role="tab" aria-controls="map-content" aria-selected="false">
+                Sea Level Rise Exposure Map
+              </a>
+            </li>
+
             
             <li class="nav-item {% if 'Flood' not in selected_dynamic_fields %}d-none{% endif %}">
               <a class="nav-link custom-tab-link" id="flood-exposure-map-tab" data-bs-toggle="tab" href="#flood-map" role="tab" aria-controls="map-content" aria-selected="false">
@@ -130,7 +136,7 @@
 
             <li class="nav-item {% if 'Water Stress' not in selected_dynamic_fields %}d-none{% endif %}">
               <a class="nav-link custom-tab-link" id="water-stress-map-tab" data-bs-toggle="tab" href="#water-map" role="tab" aria-controls="map-content" aria-selected="false">
-                Water Stress Map
+                Water Stress Exposure Map
               </a>
             </li>
             
@@ -167,10 +173,16 @@
               </div>
             </div>
 
-            <!-- Water Stress Map Tab -->
+            <!--  Heat Exposure Map Tab -->
             <div class="tab-pane fade text-center" id="heat-map" role="tabpanel" aria-labelledby="heat-exposure-map-tab">
               <h2>Heat Exposure Map</h2>
               <div id="heat-map-content"></div>
+            </div>
+
+            <!--  Sea Level Rise Exposure Map Tab -->
+            <div class="tab-pane fade text-center" id="sea-map" role="tabpanel" aria-labelledby="sea-level-rise-map-tab">
+              <h2>Sea Level Rise Exposure Map</h2>
+              <div id="sea-map-content"></div>
             </div>
 
             <!-- Water Stress Map Tab -->
@@ -270,6 +282,9 @@
                 }
                 if (target === "#heat-map" && $("#heat-map-content").is(':empty')) {
                   $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_ajax' %}");
+                }
+                if (target === "#sea-map" && $("#sea-map-content").is(':empty')) {
+                  $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_ajax' %}");
                 }
               });
 

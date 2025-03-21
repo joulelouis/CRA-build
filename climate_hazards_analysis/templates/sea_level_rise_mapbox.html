@@ -1,0 +1,152 @@
+
+
+{% block content %}
+
+<div id="sea-level-rise-map" style="width: 100%; height: 500px;"></div>
+
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
+
+    
+
+    window.seaLevelRiseMap = new mapboxgl.Map({ 
+        container: 'sea-level-rise-map',
+        center: [121.7740, 12.8797],
+        zoom: 4.5,
+        style: 'mapbox://styles/mapbox/dark-v10'
+    })
+    .addControl(new mapboxgl.NavigationControl())
+    .addControl(new mapboxgl.GeolocateControl())
+    .addControl(new mapboxgl.ScaleControl())
+    .addControl(new mapboxgl.FullscreenControl());
+
+    // Create a base blue circle element
+    const seaLevelRiseBaseBlueCircle = document.createElement('div');
+    seaLevelRiseBaseBlueCircle.style.width = '20px';
+    seaLevelRiseBaseBlueCircle.style.height = '20px';
+    seaLevelRiseBaseBlueCircle.style.borderRadius = '50%';
+    seaLevelRiseBaseBlueCircle.style.border = '2px solid white';
+    seaLevelRiseBaseBlueCircle.style.backgroundColor = 'blue';
+
+    // Create markers using clones of the base elements
+    const seaLevelRiseMarker = new mapboxgl.Marker({ 
+      element: seaLevelRiseBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([120.9849205, 14.59057479])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>SM Manila Shakeys Branch</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Elevation (meter above sea level): <strong>8.0</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2030 Sea Level Rise (in meters): <strong>0.238</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2040 Sea Level Rise (in meters): <strong>0.355</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2050 Sea Level Rise (in meters): <strong>0.485</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2060 Sea Level Rise (in meters): <strong>0.616</strong>" +
+      "</a>"
+    ))
+    .addTo(seaLevelRiseMap);
+
+    const seaLevelRiseMarker2 = new mapboxgl.Marker({
+        element: seaLevelRiseBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([121.042187, 14.49557534])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Commissary in Paranque</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Elevation (meter above sea level): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2030 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2040 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2050 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2060 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>"
+    ))
+    .addTo(seaLevelRiseMap);
+
+    const seaLevelRiseMarker3 = new mapboxgl.Marker({
+        element: seaLevelRiseBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([125.1456158, 6.065404576])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Coconut Processing Plant in Gen San</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Elevation (meter above sea level): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2030 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2040 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2050 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2060 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>"
+
+    ))
+    .addTo(seaLevelRiseMap);
+
+    const seaLevelRiseMarker4 = new mapboxgl.Marker({
+        element: seaLevelRiseBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([125.150691, 6.064051003])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Tuna Processing Plant in Gen San</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Elevation (meter above sea level): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2030 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2040 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2050 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "2060 Sea Level Rise (in meters): <strong>N/A</strong>" +
+      "</a>"
+    ))
+    .addTo(seaLevelRiseMap);
+        
+</script>
+
+{% endblock %}
