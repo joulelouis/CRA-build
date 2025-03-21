@@ -1,0 +1,136 @@
+
+
+{% block content %}
+
+<div id="tropical-cyclone-map" style="width: 100%; height: 500px;"></div>
+
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
+
+    
+
+    window.tropicalCycloneMap = new mapboxgl.Map({ 
+        container: 'tropical-cyclone-map',
+        center: [121.7740, 12.8797],
+        zoom: 4.5,
+        style: 'mapbox://styles/mapbox/dark-v10'
+    })
+    .addControl(new mapboxgl.NavigationControl())
+    .addControl(new mapboxgl.GeolocateControl())
+    .addControl(new mapboxgl.ScaleControl())
+    .addControl(new mapboxgl.FullscreenControl());
+
+    // Create a base blue circle element
+    const tropicalCycloneBaseBlueCircle = document.createElement('div');
+    tropicalCycloneBaseBlueCircle.style.width = '20px';
+    tropicalCycloneBaseBlueCircle.style.height = '20px';
+    tropicalCycloneBaseBlueCircle.style.borderRadius = '50%';
+    tropicalCycloneBaseBlueCircle.style.border = '2px solid white';
+    tropicalCycloneBaseBlueCircle.style.backgroundColor = 'blue';
+
+    // Create markers using clones of the base elements
+    const tropicalCycloneMarker = new mapboxgl.Marker({ 
+      element: tropicalCycloneBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([120.9849205, 14.59057479])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>SM Manila Shakeys Branch</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>131.89235114922778</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>145.20776880615597</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>161.5589530635856</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>172.15586016015752</strong>" +
+      "</a>" 
+    ))
+    .addTo(tropicalCycloneMap);
+
+    const tropicalCycloneMarker2 = new mapboxgl.Marker({
+        element: tropicalCycloneBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([121.042187, 14.49557534])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Commissary in Paranque</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>132.0953460483329</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>145.54266685376973</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>158.43255514212237</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>171.38462864152282</strong>" +
+      "</a>" 
+    ))
+    .addTo(tropicalCycloneMap);
+
+    const tropicalCycloneMarker3 = new mapboxgl.Marker({
+        element: tropicalCycloneBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([125.1456158, 6.065404576])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Coconut Processing Plant in Gen San</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" 
+
+    ))
+    .addTo(tropicalCycloneMap);
+
+    const tropicalCycloneMarker4 = new mapboxgl.Marker({
+        element: tropicalCycloneBaseBlueCircle.cloneNode(true) 
+    })
+    .setLngLat([125.150691, 6.064051003])
+    .setPopup(new mapboxgl.Popup().setHTML(
+      "<h4>Tuna Processing Plant in Gen San</h4>" +
+      "<a>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>N/A</strong>" +
+      "</a>" 
+    ))
+    .addTo(tropicalCycloneMap);
+        
+</script>
+
+{% endblock %}

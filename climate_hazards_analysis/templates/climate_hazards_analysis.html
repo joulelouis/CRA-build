@@ -6,6 +6,17 @@
 
 {% block content %}
 
+<style>
+  /* Ensure the nav tabs container does not wrap */
+  .custom-tabs-nav {
+    flex-wrap: nowrap !important;
+    overflow-x: auto; /* allows horizontal scrolling if needed */
+  }
+  .custom-tabs-nav .nav-item {
+    flex: 0 0 auto; /* prevents the items from shrinking */
+  }
+</style>
+
 <div class="container mt-4">
     <div class="row">
       <div class="col-6 d-flex flex-column">
@@ -139,6 +150,12 @@
                 Water Stress Exposure Map
               </a>
             </li>
+
+            <li class="nav-item {% if 'Tropical Cyclones' not in selected_dynamic_fields %}d-none{% endif %}">
+              <a class="nav-link custom-tab-link" id="tropical-cyclone-map-tab" data-bs-toggle="tab" href="#cyclone-map" role="tab" aria-controls="map-content" aria-selected="false">
+                Tropical Cyclone Exposure Map
+              </a>
+            </li>
             
           </ul>
   
@@ -185,17 +202,25 @@
               <div id="sea-map-content"></div>
             </div>
 
-            <!-- Water Stress Map Tab -->
-            <div class="tab-pane fade text-center" id="water-map" role="tabpanel" aria-labelledby="water-stress-map-tab">
-              <h2>Water Stress Map</h2>
-              <div id="water-map-content"></div>
-            </div>
-
             <!-- Flood Exposure Map Tab -->
             <div class="tab-pane fade text-center" id="flood-map" role="tabpanel" aria-labelledby="flood-exposure-map-tab">
               <h2>Flood Exposure Map</h2>
               <div id="flood-map-content"></div>
             </div>
+
+            <!-- Water Stress Map Tab -->
+            <div class="tab-pane fade text-center" id="water-map" role="tabpanel" aria-labelledby="water-stress-map-tab">
+              <h2>Water Stress Exposure Map</h2>
+              <div id="water-map-content"></div>
+            </div>
+            
+            <!-- Water Stress Map Tab -->
+            <div class="tab-pane fade text-center" id="cyclone-map" role="tabpanel" aria-labelledby="tropical-cyclone-map-tab">
+              <h2>Tropical Cyclone Exposure Map</h2>
+              <div id="cyclone-map-content"></div>
+            </div>
+
+            
 
             
           </div>
@@ -285,6 +310,9 @@
                 }
                 if (target === "#sea-map" && $("#sea-map-content").is(':empty')) {
                   $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_ajax' %}");
+                }
+                if (target === "#cyclone-map" && $("#cyclone-map-content").is(':empty')) {
+                  $("#cyclone-map-content").load("{% url 'climate_hazards_analysis:tropical_cyclone_mapbox_ajax' %}");
                 }
               });
 
