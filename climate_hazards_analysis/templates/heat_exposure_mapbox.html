@@ -21,71 +21,96 @@
     .addControl(new mapboxgl.ScaleControl())
     .addControl(new mapboxgl.FullscreenControl());
 
-    // Create a base red circle element
-    const heatExposureBaseRedCircle = document.createElement('div');
-    heatExposureBaseRedCircle.style.width = '20px';
-    heatExposureBaseRedCircle.style.height = '20px';
-    heatExposureBaseRedCircle.style.borderRadius = '50%';
-    heatExposureBaseRedCircle.style.border = '2px solid white';
-    heatExposureBaseRedCircle.style.backgroundColor = 'red';
-
-    // Create a base yellow circle element
-    const heatExposureBaseYellowCircle = document.createElement('div');
-    heatExposureBaseYellowCircle.style.width = '20px';
-    heatExposureBaseYellowCircle.style.height = '20px';
-    heatExposureBaseYellowCircle.style.borderRadius = '50%';
-    heatExposureBaseYellowCircle.style.border = '2px solid white';
-    heatExposureBaseYellowCircle.style.backgroundColor = '#FFC067';
+    // Create a base blue circle element
+    const heatExposureBaseBlueCircle = document.createElement('div');
+    heatExposureBaseBlueCircle.style.width = '20px';
+    heatExposureBaseBlueCircle.style.height = '20px';
+    heatExposureBaseBlueCircle.style.borderRadius = '50%';
+    heatExposureBaseBlueCircle.style.border = '2px solid white';
+    heatExposureBaseBlueCircle.style.backgroundColor = 'blue';
 
     // Create markers using clones of the base elements
     const heatExposureMarker = new mapboxgl.Marker({ 
-      element: heatExposureBaseRedCircle.cloneNode(true) 
+      element: heatExposureBaseBlueCircle.cloneNode(true) 
     })
     .setLngLat([120.9849205, 14.59057479])
     .setPopup(new mapboxgl.Popup().setHTML(
       "<h4>SM Manila Shakeys Branch</h4>" +
       "<a>" +
-        "<span style='display:inline-block; width:10px; height:10px; background-color: red; margin-right:5px;'></span>" +
-        "High Exposure" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>356</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>87</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>13</strong>" +
       "</a>"
     ))
     .addTo(heatExposureMap);
 
     const heatExposureMarker2 = new mapboxgl.Marker({
-      element: heatExposureBaseRedCircle.cloneNode(true)
+        element: heatExposureBaseBlueCircle.cloneNode(true) 
     })
     .setLngLat([121.042187, 14.49557534])
     .setPopup(new mapboxgl.Popup().setHTML(
       "<h4>Commissary in Paranque</h4>" +
       "<a>" +
-        "<span style='display:inline-block; width:10px; height:10px; background-color: red; margin-right:5px;'></span>" +
-        "High Exposure" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>343</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>75</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>6</strong>" +
       "</a>"
     ))
     .addTo(heatExposureMap);
 
     const heatExposureMarker3 = new mapboxgl.Marker({
-      element: heatExposureBaseYellowCircle.cloneNode(true)
+        element: heatExposureBaseBlueCircle.cloneNode(true) 
     })
     .setLngLat([125.1456158, 6.065404576])
     .setPopup(new mapboxgl.Popup().setHTML(
       "<h4>Coconut Processing Plant in Gen San</h4>" +
       "<a>" +
-        "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
-        "Low Exposure" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>366</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>219</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>24</strong>" +
       "</a>"
+
     ))
     .addTo(heatExposureMap);
 
     const heatExposureMarker4 = new mapboxgl.Marker({
-      element: heatExposureBaseYellowCircle.cloneNode(true)
+        element: heatExposureBaseBlueCircle.cloneNode(true) 
     })
     .setLngLat([125.150691, 6.064051003])
     .setPopup(new mapboxgl.Popup().setHTML(
       "<h4>Tuna Processing Plant in Gen San</h4>" +
       "<a>" +
-        "<span style='display:inline-block; width:10px; height:10px; background-color:#FFC067; margin-right:5px;'></span>" +
-        "Low Exposure" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>336</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>221</strong>" +
+      "</a>" + "<br/>" +
+      "<a>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>25</strong>" +
       "</a>"
     ))
     .addTo(heatExposureMap);
