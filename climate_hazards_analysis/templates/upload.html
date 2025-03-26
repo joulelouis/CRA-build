@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Climate Hazards Analysis
@@ -9,9 +10,12 @@
     <div class="row">
       <div class="col-6 d-flex flex-column">
         <!-- Rounded Icon Container with Margin -->
+        
         <div class="icon-container">
             
-            <i class="fa-solid fa-earth-asia icon-style"></i>
+            {% comment %} <i class="fa-solid fa-earth-asia icon-style"></i> {% endcomment %}
+            
+            <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
         </div>
         
         <!-- Heading below the icon with Margin -->
