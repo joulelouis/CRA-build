@@ -24,7 +24,7 @@ def process_data(data):
     """
     for row in data:
         for key, value in row.items():
-            print(f"key: {key}")
+            # print(f"key: {key}")
             if pd.isna(value):
                 if key == 'Elevation (meter above sea level)' or key =='2030 Sea Level Rise (in meters)' or key =='2040 Sea Level Rise (in meters)' or key =='2050 Sea Level Rise (in meters)' or key =='2060 Sea Level Rise (in meters)':
                     row[key] = "Little to no effect"

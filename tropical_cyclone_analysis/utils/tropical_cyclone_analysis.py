@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 from shapely.wkt import loads
 from shapely.geometry import Point
 from scipy.spatial import distance
@@ -62,14 +63,35 @@ def generate_tropical_cyclone_analysis(facilty_csv_path):
 
     print("After renaming:", df_result.columns)
 
-    df_result
+    # Define a helper function that rounds up if not NaN, otherwise returns a fallback string
+    def round_up_and_convert(x):
+        if pd.isna(x):
+            return "N/A"
+        return str(int(math.ceil(x)))
 
-    # print(df_result.columns)
-    # sys.exit()
+    # List the columns you want to round up
+    columns_to_round = [
+        "1-min MSW 10 yr RP", 
+        "1-min MSW 20 yr RP", 
+        "1-min MSW 50 yr RP", 
+        "1-min MSW 100 yr RP", 
+        "1-min MSW 200 yr RP", 
+        "1-min MSW 500 yr RP"
+    ]
 
-    output_csv = os.path.join(settings.BASE_DIR, 'tropical_cyclone_analysis', 'static', 'input_files', 'exposure_results_01.csv')
+    # Apply the helper function to each column
+    for col in columns_to_round:
+        # Ensure the column is converted to float, then apply the function
+        df_result[col] = df_result[col].astype(float).apply(round_up_and_convert)
 
     # Save results to CSV
+    output_csv = os.path.join(
+        settings.BASE_DIR, 
+        'tropical_cyclone_analysis', 
+        'static', 
+        'input_files', 
+        'exposure_results_01.csv'
+    )
     df_result.to_csv(output_csv, index=False)
 
     print("Matching complete! Results saved.")
