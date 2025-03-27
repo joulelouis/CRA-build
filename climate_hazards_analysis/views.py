@@ -17,12 +17,21 @@ UPLOAD_DIR = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static
 
 def process_data(data):
     """
-    Replace NaN values in a list of dictionaries with "N/A".
+    Replace NaN values in a list of dictionaries with custom strings.
+    For 'Sea Level Rise', use "Little to no effect".
+    For 'Tropical Cyclones', use "Data not available".
+    Otherwise, use "N/A".
     """
     for row in data:
         for key, value in row.items():
+            print(f"key: {key}")
             if pd.isna(value):
-                row[key] = "N/A"
+                if key == 'Elevation (meter above sea level)' or key =='2030 Sea Level Rise (in meters)' or key =='2040 Sea Level Rise (in meters)' or key =='2050 Sea Level Rise (in meters)' or key =='2060 Sea Level Rise (in meters)':
+                    row[key] = "Little to no effect"
+                elif key == '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)' or key == '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)' or key == '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)' or key == '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)':
+                    row[key] = "Data not available"
+                else:
+                    row[key] = "N/A"
     return data
 
 def upload_facility_csv(request):
