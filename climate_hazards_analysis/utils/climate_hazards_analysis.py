@@ -11,6 +11,7 @@ from pyproj import CRS
 import time
 import re
 import rasterstats as rstat
+import math
 
 # Import external hazard analyses.
 from sea_level_rise_analysis.utils.sea_level_rise_analysis import generate_sea_level_rise_analysis
@@ -97,15 +98,27 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         gdf = gdf.cx[min_lon:max_lon, min_lat:max_lat].reset_index(drop=True)
         
         print("Step 6: Spatial join to add water stress data")
+
+        # Multiply bws_06_raw values by 100 and round up
+        gdf['bws_06_raw'] = gdf['bws_06_raw'].astype(float).apply(lambda x: math.ceil(x * 100))
+
         if water_dynamic_fields is None:
-            water_dynamic_fields = ['bws_06_lab']
+            water_dynamic_fields = ['bws_06_raw'] 
+
         for field in water_dynamic_fields:
             if field not in gdf.columns:
                 raise ValueError(f"Field {field} not found in water risk data.")
-        facility_gdf = gpd.sjoin(facility_gdf, gdf[['geometry'] + water_dynamic_fields],
-                                  how='left', predicate='intersects').reset_index(drop=True)
+
+        facility_gdf = gpd.sjoin(
+            facility_gdf,
+            gdf[['geometry'] + water_dynamic_fields],
+            how='left',
+            predicate='intersects'
+        ).reset_index(drop=True)
+
         for field in water_dynamic_fields:
             facility_locs[field] = facility_gdf[field]
+
         updated_facility_csv = os.path.join(ws_uploads_dir, 'combined_facility_ws.csv')
         facility_locs.to_csv(updated_facility_csv, index=False)
         print(f"Updated facility CSV with water stress data saved at {updated_facility_csv}")
@@ -153,7 +166,7 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         print("Step 9: Generating combined output table for water stress and flood exposure")
         base_mapping = {
             'Flood': ['Exposure'],
-            'Water Stress': ['bws_06_lab']
+            'Water Stress': ['bws_06_raw']
         }
         base_selected = [hazard for hazard in (selected_fields or []) if hazard in base_mapping]
         required_columns = ['Facility', 'Lat', 'Long']
@@ -254,7 +267,7 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         print("Step 13: Generating final combined output")
         final_order = [
             "Facility", "Lat", "Long",
-            "Exposure", "bws_06_lab",
+            "Exposure", "bws_06_raw",
             "SRTM elevation", "2030 Sea Level Rise Cl 0.5", "2040 Sea Level Rise Cl 0.5",
             "2050 Sea Level Rise Cl 0.5", "2060 Sea Level Rise Cl 0.5",
             "1-min MSW 10 yr RP", "1-min MSW 20 yr RP", "1-min MSW 50 yr RP", "1-min MSW 100 yr RP"

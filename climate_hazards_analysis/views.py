@@ -122,7 +122,7 @@ def climate_hazards_analysis(request):
             'n>30degC_2125': 'Days over 30 degrees Celsius',
             'n>33degC_2125': 'Days over 33 degrees Celsius',
             'n>35degC_2125': 'Days over 35 degrees Celsius',
-            'bws_06_lab': 'Water Stress Exposure',
+            'bws_06_raw': 'Water Stress Exposure (in %)',
             'Exposure': 'Flood Exposure',
             'SRTM elevation': 'Elevation (meter above sea level)',
             '2030 Sea Level Rise Cl 0.5': '2030 Sea Level Rise (in meters)',
