@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
+{% load float_filters %}
+
 
 {% block title %}
     Climate Hazards Analysis
@@ -16,6 +18,8 @@
   .custom-tabs-nav .nav-item {
     flex: 0 0 auto; /* prevents the items from shrinking */
   }
+
+  
 </style>
 
 <div class="container mt-4">
@@ -180,8 +184,158 @@
                   <tbody>
                     {% for row in data %}
                       <tr class="custom-table-row">
-                        {% for value in row.values %}
-                          <td>{{ value }}</td>
+                        {% for key, value in row.items %}
+                           <td>
+                             {# Water Stress Exposure styling #}
+                             {% if key == "Water Stress Exposure (in %)" and value != "N/A" %}
+                               {% with val=value|to_float %}
+                                 {% if val < 10 %}
+                                   <span style="color: green;">{{ value }}</span>
+                                 {% elif val >= 10 and val <= 30 %}
+                                   <span style="color: orange;">{{ value }}</span>
+                                 {% elif val > 30 %}
+                                   <span style="color: red;">{{ value }}</span>
+                                 {% else %}
+                                   {{ value }}
+                                 {% endif %}
+                               {% endwith %}
+                             
+                             {# Flood Depth styling #}
+                             {% elif key == "Flood Depth" %}
+                               {% if value == "0.1 to 0.5 meters" %}
+                                 <span style="color: green;">{{ value }}</span>
+                               {% elif value == "0.5 to 1.5 meters" %}
+                                 <span style="color: orange;">{{ value }}</span>
+                               {% elif value == "Greater than 1.5 meters" %}
+                                 <span style="color: red;">{{ value }}</span>
+                               {% else %}
+                                 {{ value }}
+                               {% endif %}
+                             
+                             {# Days over columns: we check each separately #}
+                             {% elif key == "Days over 30 degrees Celsius" and value != "N/A" %}
+                               {% with num=value|to_float %}
+                                 {% if num < 10 %}
+                                   <span style="color: green;">{{ value }}</span>
+                                 {% elif num >= 10 and num < 45 %}
+                                   <span style="color: orange;">{{ value }}</span>
+                                 {% elif num >= 45 %}
+                                   <span style="color: red;">{{ value }}</span>
+                                 {% else %}
+                                   {{ value }}
+                                 {% endif %}
+                               {% endwith %}
+                             {% elif key == "Days over 33 degrees Celsius" and value != "N/A" %}
+                               {% with num=value|to_float %}
+                                 {% if num < 10 %}
+                                   <span style="color: green;">{{ value }}</span>
+                                 {% elif num >= 10 and num < 45 %}
+                                   <span style="color: orange;">{{ value }}</span>
+                                 {% elif num >= 45 %}
+                                   <span style="color: red;">{{ value }}</span>
+                                 {% else %}
+                                   {{ value }}
+                                 {% endif %}
+                               {% endwith %}
+                             {% elif key == "Days over 35 degrees Celsius" and value != "N/A" %}
+                               {% with num=value|to_float %}
+                                 {% if num < 10 %}
+                                   <span style="color: green;">{{ value }}</span>
+                                 {% elif num >= 10 and num < 45 %}
+                                   <span style="color: orange;">{{ value }}</span>
+                                 {% elif num >= 45 %}
+                                   <span style="color: red;">{{ value }}</span>
+                                 {% else %}
+                                   {{ value }}
+                                 {% endif %}
+                               {% endwith %}
+
+          
+
+                               {% elif key == "1-min Maximum Sustain Windspeed 10 year Return Period (km/h)" %}
+                               {% if value == "Data not available" %}
+                                 <span style="color: black;">{{ value }}</span>
+                               {% elif value != "N/A" %}
+                                 {% with ws=value|to_float %}
+                                   {% if ws < 119 %}
+                                     <span style="color: green;">{{ value }}</span>
+                                   {% elif ws >= 119 and ws < 178 %}
+                                     <span style="color: orange;">{{ value }}</span>
+                                   {% elif ws >= 178 %}
+                                     <span style="color: red;">{{ value }}</span>
+                                   {% else %}
+                                     {{ value }}
+                                   {% endif %}
+                                 {% endwith %}
+                               {% else %}
+                                 {{ value }}
+                               {% endif %}
+
+                               {% elif key == "1-min Maximum Sustain Windspeed 20 year Return Period (km/h)" %}
+                               {% if value == "Data not available" %}
+                                 <span style="color: black;">{{ value }}</span>
+                               {% elif value != "N/A" %}
+                                 {% with ws=value|to_float %}
+                                   {% if ws < 119 %}
+                                     <span style="color: green;">{{ value }}</span>
+                                   {% elif ws >= 119 and ws < 178 %}
+                                     <span style="color: orange;">{{ value }}</span>
+                                   {% elif ws >= 178 %}
+                                     <span style="color: red;">{{ value }}</span>
+                                   {% else %}
+                                     {{ value }}
+                                   {% endif %}
+                                 {% endwith %}
+                               {% else %}
+                                 {{ value }}
+                               {% endif %}
+
+                               {% elif key == "1-min Maximum Sustain Windspeed 50 year Return Period (km/h)" %}
+                               {% if value == "Data not available" %}
+                                 <span style="color: black;">{{ value }}</span>
+                               {% elif value != "N/A" %}
+                                 {% with ws=value|to_float %}
+                                   {% if ws < 119 %}
+                                     <span style="color: green;">{{ value }}</span>
+                                   {% elif ws >= 119 and ws < 178 %}
+                                     <span style="color: orange;">{{ value }}</span>
+                                   {% elif ws >= 178 %}
+                                     <span style="color: red;">{{ value }}</span>
+                                   {% else %}
+                                     {{ value }}
+                                   {% endif %}
+                                 {% endwith %}
+                               {% else %}
+                                 {{ value }}
+                               {% endif %}
+
+                               {% elif key == "1-min Maximum Sustain Windspeed 100 year Return Period (km/h)" %}
+                               {% if value == "Data not available" %}
+                                 <span style="color: black;">{{ value }}</span>
+                               {% elif value != "N/A" %}
+                                 {% with ws=value|to_float %}
+                                   {% if ws < 119 %}
+                                     <span style="color: green;">{{ value }}</span>
+                                   {% elif ws >= 119 and ws < 178 %}
+                                     <span style="color: orange;">{{ value }}</span>
+                                   {% elif ws >= 178 %}
+                                     <span style="color: red;">{{ value }}</span>
+                                   {% else %}
+                                     {{ value }}
+                                   {% endif %}
+                                 {% endwith %}
+                               {% else %}
+                                 {{ value }}
+                               {% endif %}
+                              
+                             
+                            
+                             
+                             {# Fallback: output the value normally #}
+                             {% else %}
+                               {{ value }}
+                             {% endif %}
+                           </td>
                         {% endfor %}
                       </tr>
                     {% endfor %}
