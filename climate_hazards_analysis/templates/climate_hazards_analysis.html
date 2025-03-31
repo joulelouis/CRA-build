@@ -134,6 +134,12 @@
               </a>
             </li>
 
+            <li class="nav-item {% if selected_dynamic_fields|length <= 1 %}d-none{% endif %}">
+              <a class="nav-link custom-tab-link" id="multi-hazard-map-tab" data-bs-toggle="tab" href="#multi-hazard-map" role="tab" aria-controls="map-content" aria-selected="false">
+                Multi-Hazard Map 
+              </a>
+            </li>
+
             <li class="nav-item {% if 'Heat' not in selected_dynamic_fields %}d-none{% endif %}">
               <a class="nav-link custom-tab-link" id="heat-exposure-map-tab" data-bs-toggle="tab" href="#heat-map" role="tab" aria-controls="map-content" aria-selected="false">
                 Heat Exposure Map
@@ -527,37 +533,55 @@
 
         // Function to read the CSV file and populate the preview table in the modal
         function previewCSV() {
+          alert("previewCSV() function called");
+          console.log("previewCSV() function called");
           var input = document.getElementById("facilityCsv");
           if (input.files.length > 0) {
-              var file = input.files[0];
-              var reader = new FileReader();
-              reader.onload = function(e) {
-                  var csvData = e.target.result;
-                  var lines = csvData.split("\n");
-                  var headerHtml = "";
-                  var bodyHtml = "";
-                  if (lines.length > 0) {
-                      // Assume the first line contains headers
-                      var headers = lines[0].split(",");
-                      headerHtml += headers.map(function(header) {
-                          return "<th>" + header.trim() + "</th>";
-                      }).join("");
+            var file = input.files[0];
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              var csvData = e.target.result;
+              // Remove BOM if present
+              csvData = csvData.replace(/^\uFEFF/, '');
+              var lines = csvData.split("\n");
+              console.log("CSV lines:", lines);
+              var headerHtml = "";
+              var bodyHtml = "";
+              if (lines.length > 0) {
+                // Assume the first line contains headers
+                var headers = lines[0].split(",");
+                console.log("Original headers:", headers);
+                headerHtml = headers.map(function(header) {
+                  var trimmed = header.trim();
+                  // Remove BOM from each header if present
+                  trimmed = trimmed.replace(/^\uFEFF/, '');
+                  // Replace header values
+                  if (trimmed.toLowerCase() === "site") {
+                    trimmed = "Facility";
+                  } else if (trimmed.toLowerCase() === "lat") {
+                    trimmed = "Latitude";
+                  } else if (trimmed.toLowerCase() === "long") {
+                    trimmed = "Longitude";
                   }
-                  // Process each row after the header
-                  for (var i = 1; i < lines.length; i++) {
-                      if (lines[i].trim() === "") continue;
-                      var cells = lines[i].split(",");
-                      var rowHtml = cells.map(function(cell) {
-                          return "<td>" + cell.trim() + "</td>";
-                      }).join("");
-                      bodyHtml += "<tr>" + rowHtml + "</tr>";
-                  }
-                  document.getElementById("preview-table-header").innerHTML = headerHtml;
-                  document.getElementById("preview-table-body").innerHTML = bodyHtml;
-                
-              };
-              reader.readAsText(file);
+                  return "<th>" + trimmed + "</th>";
+                }).join("");
+              }
+              // Process each row after the header
+              for (var i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === "") continue;
+                var cells = lines[i].split(",");
+                var rowHtml = cells.map(function(cell) {
+                  return "<td>" + cell.trim() + "</td>";
+                }).join("");
+                bodyHtml += "<tr>" + rowHtml + "</tr>";
+              }
+              document.getElementById("preview-table-header").innerHTML = headerHtml;
+              document.getElementById("preview-table-body").innerHTML = bodyHtml;
+            };
+            reader.readAsText(file);
+          } else {
+            console.log("No file selected.");
           }
-      }
+        }
     </script>
 {% endblock %}
