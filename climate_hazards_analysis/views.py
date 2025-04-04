@@ -176,7 +176,8 @@ def tropical_cyclone_mapbox_ajax(request):
     return render(request, 'tropical_cyclone_mapbox.html')
 
 def multi_hazard_mapbox_ajax(request):
-    return render(request, 'multi_hazard_mapbox.html')
+    selected_dynamic_fields = request.session.get('selected_dynamic_fields', [])
+    return render(request, 'multi_hazard_mapbox.html', {'selected_dynamic_fields': selected_dynamic_fields})
 
 
 def generate_building_report_pdf(buffer, selected_fields):
