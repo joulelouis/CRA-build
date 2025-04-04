@@ -1,0 +1,314 @@
+{% block content %}
+
+<!-- Map Container -->
+<div id="multi-hazard-map" style="width: 100%; height: 500px;"></div>
+
+<!-- Sidebar (initially hidden off-canvas) -->
+<style>
+  /* Sidebar styling */
+  #sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px;  /* hide off-canvas initially */
+    width: 400px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+    overflow-y: auto;
+    transition: right 0.3s ease;
+    z-index: 10000;
+    padding: 20px;
+  }
+  #sidebar.visible {
+    right: 0;
+  }
+  #sidebar .close-btn {
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    float: right;
+  }
+</style>
+
+<div id="sidebar">
+  <button class="close-btn" onclick="closeSidebar()">Close</button>
+  <div id="sidebar-content"></div>
+</div>
+
+<script>
+  // Set your Mapbox access token
+  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
+
+  // Initialize the map
+  const multiHazardMap = new mapboxgl.Map({ 
+      container: 'multi-hazard-map',
+      center: [121.7740, 12.8797],
+      zoom: 4.5,
+      style: 'mapbox://styles/mapbox/dark-v10'
+  })
+  .addControl(new mapboxgl.NavigationControl())
+  .addControl(new mapboxgl.GeolocateControl())
+  .addControl(new mapboxgl.ScaleControl())
+  .addControl(new mapboxgl.FullscreenControl());
+
+  // Create a base blue circle element for markers
+  const baseBlueCircle = document.createElement('div');
+  baseBlueCircle.style.width = '20px';
+  baseBlueCircle.style.height = '20px';
+  baseBlueCircle.style.borderRadius = '50%';
+  baseBlueCircle.style.border = '2px solid white';
+  baseBlueCircle.style.backgroundColor = 'blue';
+
+  // Function to open the sidebar with specific HTML content
+  function openSidebar(content) {
+    document.getElementById('sidebar-content').innerHTML = content;
+    document.getElementById('sidebar').classList.add('visible');
+  }
+
+  // Function to close the sidebar
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('visible');
+  }
+
+  // Marker 1: SM Manila Shakeys Branch
+  const markerContent1 =
+    "<h4><strong>SM Manila Shakeys Branch</strong></h4>" +
+    "<h5><strong>Heat</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>356</strong>" +
+      "</p>" + 
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>87</strong>" +
+      "</p>" + 
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>13</strong>" +
+      "</p>" + 
+    "<h5><strong>Sea Level Rise</strong></h5>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>Elevation (m):</strong> 8.0</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2030 Sea Level Rise (m):</strong> 0.238</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2040 Sea Level Rise (m):</strong> 0.355</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2050 Sea Level Rise (m):</strong> 0.485</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2060 Sea Level Rise (m):</strong> 0.616</p>" +
+    "<h5><strong>Flood</strong></h5>" +
+    "<p>" +
+    "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+    "<strong>Flood Depth:</strong> 0.1 to 0.5 meters" +
+    "</p>" +
+    "<h5><strong>Water Stress</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "<strong>Water Stress Exposure (in %):</strong> 41" +
+      "</p>" +
+      "<h5><strong>Tropical Cyclone</strong></h5>" +
+      "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>132</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>146</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>162</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>173</strong>" +
+      "</p>"
+      
+
+
+  const marker1 = new mapboxgl.Marker({
+      element: baseBlueCircle.cloneNode(true)
+  })
+  .setLngLat([120.9849205, 14.59057479])
+  .addTo(multiHazardMap);
+  marker1.getElement().addEventListener('click', function() {
+      openSidebar(markerContent1);
+  });
+
+  // Marker 2: Commissary in Paranque
+  const markerContent2 =
+    "<h4><strong>Commissary in Paranque</strong></h4>" +
+    "<h5><strong>Heat</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>343</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>75</strong>" +
+      "</p>" + 
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>6</strong>" +
+      "</p>" +
+    "<h5><strong>Sea Level Rise</strong></h5>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>Elevation (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2030 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2040 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2050 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2060 Sea Level Rise (m):</strong> Little to no effect</p>" + 
+    "<h5><strong>Flood</strong></h5>" +
+    "<p>" +
+    "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+    "<strong>Flood Depth:</strong> 0.1 to 0.5 meters" +
+    "</p>" +
+    "<h5><strong>Water Stress</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "<strong>Water Stress Exposure (in %):</strong> 41" +
+      "</p>" +
+      "<h5><strong>Tropical Cyclone</strong></h5>" +
+      "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>133</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>146</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>159</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>172</strong>" +
+      "</p>"
+
+  const marker2 = new mapboxgl.Marker({
+      element: baseBlueCircle.cloneNode(true)
+  })
+  .setLngLat([121.042187, 14.49557534])
+  .addTo(multiHazardMap);
+  marker2.getElement().addEventListener('click', function() {
+      openSidebar(markerContent2);
+  });
+
+  // Marker 3: Coconut Processing Plant in Gen San
+  const markerContent3 =
+    "<h4><strong>Coconut Processing Plant in Gen San</strong></h4>" +
+    "<h5><strong>Heat</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>366</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>219</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>24</strong>" +
+      "</p>" +
+    "<h5><strong>Sea Level Rise</strong></h5>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>Elevation (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2030 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2040 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2050 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2060 Sea Level Rise (m):</strong> Little to no effect</p>" + 
+    "<h5><strong>Flood</strong></h5>" +
+    "<p>" +
+    "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+    "<strong>Flood Depth:</strong> 0.1 to 0.5 meters" +
+    "</p>" +
+    "<h5><strong>Water Stress</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "<strong>Water Stress Exposure (in %):</strong> 41" +
+      "</p>" +
+      "<h5><strong>Tropical Cyclone</strong></h5>" +
+      "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>Data not available</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>Data not available</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>Data not available</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>73</strong>" +
+      "</p>"
+
+  const marker3 = new mapboxgl.Marker({
+      element: baseBlueCircle.cloneNode(true)
+  })
+  .setLngLat([125.1456158, 6.065404576])
+  .addTo(multiHazardMap);
+  marker3.getElement().addEventListener('click', function() {
+      openSidebar(markerContent3);
+  });
+
+  // Marker 4: Tuna Processing Plant in Gen San
+  const markerContent4 =
+    "<h4><strong>Tuna Processing Plant in Gen San</strong></h4>" +
+    "<h5><strong>Heat</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 30 degrees Celsius: <strong>366</strong>" +
+      "</p>" + 
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 33 degrees Celsius: <strong>221</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "Days over 35 degrees Celsius: <strong>25</strong>" +
+      "</p>" +
+    "<h5><strong>Sea Level Rise</strong></h5>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>Elevation (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2030 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2040 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2050 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<p><span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span><strong>2060 Sea Level Rise (m):</strong> Little to no effect</p>" +
+    "<h5><strong>Flood</strong></h5>" +
+    "<p>" +
+    "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+    "<strong>Flood Depth:</strong> 0.1 to 0.5 meters" +
+    "</p>" +
+    "<h5><strong>Water Stress</strong></h5>" +
+    "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "<strong>Water Stress Exposure (in %):</strong> 41" +
+      "</p>" +
+      "<h5><strong>Tropical Cyclone</strong></h5>" +
+      "<p>" +
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 10 year Return Period (km/h): <strong>Data not available</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 20 year Return Period (km/h): <strong>Data not available</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 50 year Return Period (km/h): <strong>Data not available</strong>" +
+      "</p>" +
+      "<p>" + 
+        "<span style='display:inline-block; width:10px; height:10px; background-color: black; margin-right:5px;'></span>" +
+        "1-min Maximum Sustain Windspeed 100 year Return Period (km/h): <strong>75</strong>" +
+      "</p>"
+
+  const marker4 = new mapboxgl.Marker({
+      element: baseBlueCircle.cloneNode(true)
+  })
+  .setLngLat([125.150691, 6.064051003])
+  .addTo(multiHazardMap);
+  marker4.getElement().addEventListener('click', function() {
+      openSidebar(markerContent4);
+  });
+</script>
+
+{% endblock %}

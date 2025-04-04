@@ -175,6 +175,9 @@ def sea_level_rise_mapbox_ajax(request):
 def tropical_cyclone_mapbox_ajax(request):
     return render(request, 'tropical_cyclone_mapbox.html')
 
+def multi_hazard_mapbox_ajax(request):
+    return render(request, 'multi_hazard_mapbox.html')
+
 
 def generate_building_report_pdf(buffer, selected_fields):
     """

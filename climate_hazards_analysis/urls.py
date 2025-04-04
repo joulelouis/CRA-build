@@ -7,7 +7,8 @@ from .views import (
     heat_exposure_mapbox_ajax,
     sea_level_rise_mapbox_ajax,
     tropical_cyclone_mapbox_ajax,
-    generate_report,  # newly added
+    multi_hazard_mapbox_ajax,
+    generate_report,  
 )
 
 app_name = "climate_hazards_analysis"
@@ -20,5 +21,6 @@ urlpatterns = [
     path('heat-exposure-mapbox/', heat_exposure_mapbox_ajax, name='heat_exposure_mapbox_ajax'),
     path('sea-level-rise-mapbox/', sea_level_rise_mapbox_ajax, name='sea_level_rise_mapbox_ajax'),
     path('tropical-cyclone-mapbox/', tropical_cyclone_mapbox_ajax, name='tropical_cyclone_mapbox_ajax'),
+    path('multi-hazard-mapbox/', multi_hazard_mapbox_ajax, name='multi_hazard_mapbox_ajax'),
     path('generate-report/', generate_report, name='generate_report'),
 ]
