@@ -128,16 +128,16 @@ def climate_hazards_analysis(request):
             'Site': 'Facility',
             'Lat': 'Latitude',
             'Long': 'Longitude',
-            'n>30degC_2125': 'Days over 30 degrees Celsius',
-            'n>33degC_2125': 'Days over 33 degrees Celsius',
-            'n>35degC_2125': 'Days over 35 degrees Celsius',
-            'bws_06_raw': 'Water Stress Exposure (in %)',
-            'Exposure': 'Flood Depth',
+            'n>30degC_2125': 'Days over 30° Celsius',
+            'n>33degC_2125': 'Days over 33° Celsius',
+            'n>35degC_2125': 'Days over 35° Celsius',
+            'bws_06_raw': 'Water Stress Exposure (%)',
+            'Exposure': 'Flood Depth (meters)',
             'SRTM elevation': 'Elevation (meter above sea level)',
-            '2030 Sea Level Rise Cl 0.5': '2030 Sea Level Rise (in meters)',
-            '2040 Sea Level Rise Cl 0.5': '2040 Sea Level Rise (in meters)',
-            '2050 Sea Level Rise Cl 0.5': '2050 Sea Level Rise (in meters)',
-            '2060 Sea Level Rise Cl 0.5': '2060 Sea Level Rise (in meters)',
+            '2030 Sea Level Rise Cl 0.5': '2030 Sea Level Rise (meters)',
+            '2040 Sea Level Rise Cl 0.5': '2040 Sea Level Rise (meters)',
+            '2050 Sea Level Rise Cl 0.5': '2050 Sea Level Rise (meters)',
+            '2060 Sea Level Rise Cl 0.5': '2060 Sea Level Rise (meters)',
             '1-min MSW 10 yr RP': '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
             '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
             '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
@@ -217,7 +217,7 @@ def generate_building_report_pdf(buffer, selected_fields):
     ]))
 
     # Create the header title paragraph
-    title_paragraph = Paragraph("Physical Climate Risk Report", header_title_style)
+    title_paragraph = Paragraph("Climate Hazard Exposure Report", header_title_style)
     
     # Calculate the column widths:
     # We reserve the left column for the logo (plus a small margin), and the right column the same width.

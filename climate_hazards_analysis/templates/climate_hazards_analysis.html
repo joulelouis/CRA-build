@@ -208,19 +208,19 @@
                                {% endwith %}
                              
                              {# Flood Depth styling #}
-                             {% elif key == "Flood Depth" %}
-                               {% if value == "0.1 to 0.5 meters" %}
+                             {% elif key == "Flood Depth (in meters)" %}
+                               {% if value == "0.1 to 0.5" %}
                                  <span style="color: green;">{{ value }}</span>
-                               {% elif value == "0.5 to 1.5 meters" %}
+                               {% elif value == "0.5 to 1.5" %}
                                  <span style="color: orange;">{{ value }}</span>
-                               {% elif value == "Greater than 1.5 meters" %}
+                               {% elif value == "Greater than 1.5" %}
                                  <span style="color: red;">{{ value }}</span>
                                {% else %}
                                  {{ value }}
                                {% endif %}
                              
                              {# Days over columns: we check each separately #}
-                             {% elif key == "Days over 30 degrees Celsius" and value != "N/A" %}
+                             {% elif key == "Days over 30° Celsius" and value != "N/A" %}
                                {% with num=value|to_float %}
                                  {% if num < 10 %}
                                    <span style="color: green;">{{ value }}</span>
@@ -232,7 +232,7 @@
                                    {{ value }}
                                  {% endif %}
                                {% endwith %}
-                             {% elif key == "Days over 33 degrees Celsius" and value != "N/A" %}
+                             {% elif key == "Days over 33° Celsius" and value != "N/A" %}
                                {% with num=value|to_float %}
                                  {% if num < 10 %}
                                    <span style="color: green;">{{ value }}</span>
@@ -244,7 +244,7 @@
                                    {{ value }}
                                  {% endif %}
                                {% endwith %}
-                             {% elif key == "Days over 35 degrees Celsius" and value != "N/A" %}
+                             {% elif key == "Days over 35° Celsius" and value != "N/A" %}
                                {% with num=value|to_float %}
                                  {% if num < 10 %}
                                    <span style="color: green;">{{ value }}</span>

@@ -153,11 +153,11 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
         flood_gdf['75th Percentile'] = [stat.get('percentile_75', 1) if stat.get('percentile_75') is not None else 1 for stat in stats]
         def determine_exposure(val):
             if val == 1:
-                return '0.1 to 0.5 meters'
+                return '0.1 to 0.5'
             elif val == 2:
-                return '0.5 to 1.5 meters'
+                return '0.5 to 1.5'
             elif val == 3:
-                return 'Greater than 1.5 meters'
+                return 'Greater than 1.5'
             else:
                 return 'Unknown'
         flood_gdf['Exposure'] = flood_gdf['75th Percentile'].apply(determine_exposure)
