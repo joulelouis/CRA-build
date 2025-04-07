@@ -149,6 +149,30 @@ def climate_hazards_analysis(request):
         columns = df.columns.tolist()
     else:
         data, columns = [], []
+
+    # Define which columns belong to each group
+    asset_cols = ["Facility", "Latitude", "Longitude"]
+    flood_cols = ["Flood Depth (meters)"]
+    heat_cols = ["Days over 30° Celsius", "Days over 33° Celsius", "Days over 35° Celsius"]
+    water_stress_cols = ["Water Stress Exposure (%)"]
+    sea_level_cols = ["Elevation (meter above sea level)",
+                    "2030 Sea Level Rise (meters)",
+                    "2040 Sea Level Rise (meters)",
+                    "2050 Sea Level Rise (meters)",
+                    "2060 Sea Level Rise (meters)"]
+    tropical_cols = ["1-min Maximum Sustain Windspeed 10 year Return Period (km/h)",
+                    "1-min Maximum Sustain Windspeed 20 year Return Period (km/h)",
+                    "1-min Maximum Sustain Windspeed 50 year Return Period (km/h)",
+                    "1-min Maximum Sustain Windspeed 100 year Return Period (km/h)"]
+    
+    # Compute group counts dynamically (only counting columns that exist in your DataFrame)
+    groups = {}
+    groups["Asset Details"] = sum(1 for col in columns if col in asset_cols)
+    groups["Flood"] = sum(1 for col in columns if col in flood_cols)
+    groups["Water Stress"] = sum(1 for col in columns if col in water_stress_cols)
+    groups["Sea Level Rise"] = sum(1 for col in columns if col in sea_level_cols)
+    groups["Tropical Cyclone"] = sum(1 for col in columns if col in tropical_cols)
+    groups["Heat"] = sum(1 for col in columns if col in heat_cols)
     
     context = {
         'data': data,
@@ -156,6 +180,7 @@ def climate_hazards_analysis(request):
         'plot_path': plot_path,
         'climate_hazards_fields': climate_hazards_fields,
         'selected_dynamic_fields': request.session.get('selected_dynamic_fields', []),
+        'groups': groups,
     }
 
     return render(request, 'climate_hazards_analysis.html', context)

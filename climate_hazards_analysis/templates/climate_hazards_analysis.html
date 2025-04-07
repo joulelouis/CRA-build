@@ -182,6 +182,14 @@
               <div class="table-responsive">
                 <table id="data-table" class="table custom-table">
                   <thead>
+                    <!-- Grouping header row -->
+                    <tr class="group-header">
+                      {% for group, count in groups.items %}
+                        {% if count > 0 %}
+                          <th colspan="{{ count }}">{{ group }}</th>
+                        {% endif %}
+                      {% endfor %}
+                    </tr>
                     <tr class="custom-table-header">
                       {% for column in columns %}
                         <th>{{ column }}</th>

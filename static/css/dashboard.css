@@ -310,13 +310,14 @@ input.form-check-input.custom-checkbox {
 /* Custom Table */
 .custom-table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0 8px;
 }
 
 .custom-table th,
 .custom-table td {
-  padding: 12px;
+  border-right: 1px solid #ccc;
+  padding: 8px;
 }
 
 .custom-table-header {
