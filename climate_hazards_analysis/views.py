@@ -259,7 +259,7 @@ def generate_building_report_pdf(buffer, selected_fields):
     )
 
     # Project Overview Table
-    table_title = Paragraph("Climate Hazards Assessment", table_title_style)
+    table_title = Paragraph("Climate Hazard Exposure Assessment", table_title_style)
     elements.append(table_title)
     styles = getSampleStyleSheet()
     wrap_style = styles["Normal"]
@@ -350,5 +350,5 @@ def generate_report(request):
     pdf = buffer.getvalue()
     buffer.close()
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="Physical_Climate_Risk_Report.pdf"'
+    response['Content-Disposition'] = 'attachment; filename="Climate_Hazard_Exposure_Report.pdf"'
     return response
