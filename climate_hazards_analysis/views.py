@@ -42,6 +42,8 @@ def upload_facility_csv(request):
         'Flood',
         'Water Stress',
         'Tropical Cyclones',
+        'Storm Surge',
+        'Rainfall Induced Landslide',
     ]
 
     if request.method == 'POST' and request.FILES.get('facility_csv'):
@@ -83,6 +85,8 @@ def climate_hazards_analysis(request):
         'Flood',
         'Water Stress',
         'Tropical Cyclones',
+        'Storm Surge',
+        'Rainfall Induced Landslide',
     ]
 
     # Define the required file paths using the local UPLOAD_DIR variable
@@ -185,22 +189,22 @@ def climate_hazards_analysis(request):
 
     return render(request, 'climate_hazards_analysis.html', context)
 
-def water_stress_mapbox_ajax(request):
+def water_stress_mapbox_fetch(request):
     return render(request, 'water_stress_mapbox.html')
 
-def flood_exposure_mapbox_ajax(request):
+def flood_exposure_mapbox_fetch(request):
     return render(request, 'flood_exposure_mapbox.html')
 
-def heat_exposure_mapbox_ajax(request):
+def heat_exposure_mapbox_fetch(request):
     return render(request, 'heat_exposure_mapbox.html')
 
-def sea_level_rise_mapbox_ajax(request):
+def sea_level_rise_mapbox_fetch(request):
     return render(request, 'sea_level_rise_mapbox.html')
 
-def tropical_cyclone_mapbox_ajax(request):
+def tropical_cyclone_mapbox_fetch(request):
     return render(request, 'tropical_cyclone_mapbox.html')
 
-def multi_hazard_mapbox_ajax(request):
+def multi_hazard_mapbox_fetch(request):
     selected_dynamic_fields = request.session.get('selected_dynamic_fields', [])
     return render(request, 'multi_hazard_mapbox.html', {'selected_dynamic_fields': selected_dynamic_fields})
 

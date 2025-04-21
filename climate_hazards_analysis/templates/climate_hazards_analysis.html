@@ -202,7 +202,7 @@
                         {% for key, value in row.items %}
                            <td>
                              {# Water Stress Exposure styling #}
-                             {% if key == "Water Stress Exposure (in %)" and value != "N/A" %}
+                             {% if key == "Water Stress Exposure (%)" and value != "N/A" %}
                                {% with val=value|to_float %}
                                  {% if val < 10 %}
                                    <span style="color: green;">{{ value }}</span>
@@ -216,7 +216,7 @@
                                {% endwith %}
                              
                              {# Flood Depth styling #}
-                             {% elif key == "Flood Depth (in meters)" %}
+                             {% elif key == "Flood Depth (meters)" %}
                                {% if value == "0.1 to 0.5" %}
                                  <span style="color: green;">{{ value }}</span>
                                {% elif value == "0.5 to 1.5" %}
@@ -472,6 +472,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+    <!-- Include DataTables FixedColumns CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.2.2/css/fixedColumns.dataTables.min.css">
+    <!-- Include DataTables FixedColumns JS -->
+    <script src="https://cdn.datatables.net/fixedcolumns/4.2.2/js/dataTables.fixedColumns.min.js"></script>
 
     
     <!-- Bootstrap Tabs JS -->
@@ -480,6 +484,8 @@
     <script>
         $(document).ready(function() {
             $('#data-table').DataTable({
+                scrollX: true,          // Enable horizontal scrolling
+                fixedHeader: true,      // Optionally fix the header so it stays visible when scrolling vertically
                 dom: 'Bfrtip',
                 buttons: [
                   
@@ -490,6 +496,10 @@
                     className: 'btn btn-outline-secondary'
                   }
                 ],
+                fixedColumns: {
+                  leftColumns: 3  // Freeze the first three columns
+                },
+
                 initComplete: function () {
                   // Move buttons to a custom container (above the table)
                   $('.dt-buttons').appendTo('.table-controls');
@@ -499,22 +509,22 @@
               $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var target = $(e.target).attr("href");
                 if (target === "#water-map" && $("#water-map-content").is(':empty')) {
-                  $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_ajax' %}");
+                  $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_fetch' %}");
                 }
                 if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
-                  $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_ajax' %}");
+                  $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_fetch' %}");
                 }
                 if (target === "#heat-map" && $("#heat-map-content").is(':empty')) {
-                  $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_ajax' %}");
+                  $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_fetch' %}");
                 }
                 if (target === "#sea-map" && $("#sea-map-content").is(':empty')) {
-                  $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_ajax' %}");
+                  $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_fetch' %}");
                 }
                 if (target === "#cyclone-map" && $("#cyclone-map-content").is(':empty')) {
-                  $("#cyclone-map-content").load("{% url 'climate_hazards_analysis:tropical_cyclone_mapbox_ajax' %}");
+                  $("#cyclone-map-content").load("{% url 'climate_hazards_analysis:tropical_cyclone_mapbox_fetch' %}");
                 }
                 if (target === "#multi-hazard-map" && $("#multi-hazard-map-content").is(':empty')) {
-                  $("#multi-hazard-map-content").load("{% url 'climate_hazards_analysis:multi_hazard_mapbox_ajax' %}");
+                  $("#multi-hazard-map-content").load("{% url 'climate_hazards_analysis:multi_hazard_mapbox_fetch' %}");
                 }
               });
 

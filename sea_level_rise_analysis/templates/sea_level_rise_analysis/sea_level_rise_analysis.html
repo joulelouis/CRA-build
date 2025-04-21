@@ -259,10 +259,10 @@
               $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var target = $(e.target).attr("href");
                 if (target === "#water-map" && $("#water-map-content").is(':empty')) {
-                  $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_ajax' %}");
+                  $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_fetch' %}");
                 }
                 if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
-                  $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_ajax' %}");
+                  $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_fetch' %}");
                 }
               });
 
