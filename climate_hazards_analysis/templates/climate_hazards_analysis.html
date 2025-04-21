@@ -342,6 +342,44 @@
                                {% else %}
                                  {{ value }}
                                {% endif %}
+
+                               {% elif key == "Storm Surge Hazard Rating" %}
+                        {% if value == "Data not available" %}
+                          <span style="color:black">{{ value }}</span>
+                        {% elif value == "N/A" %}
+                          {{ value }}
+                        {% else %}
+                          {% with ss=value|to_float %}
+                            {% if ss < 0.1 %}
+                              <span style="color:black">Little to none</span>
+                            {% elif ss < 0.5 %}
+                              <span style="color:green">{{ value }}</span>
+                            {% elif ss < 1.5 %}
+                              <span style="color:orange">{{ value }}</span>
+                            {% else %}
+                              <span style="color:red">{{ value }}</span>
+                            {% endif %}
+                          {% endwith %}
+                        {% endif %}
+
+                        {% elif key == "Rainfall Induced Landslide Hazard Rating" %}
+                        {% if value == "Data not available" %}
+                          <span style="color:black">{{ value }}</span>
+                        {% elif value == "N/A" %}
+                          {{ value }}
+                        {% else %}
+                          {% with ril=value|to_float %}
+                            {% if ril == 0 %}
+                              <span style="color:black">Generally Stable</span>
+                            {% elif ril < 1 %}
+                              <span style="color:red">{{ value }}</span>
+                            {% elif ril < 1.5 %}
+                              <span style="color:orange">{{ value }}</span>
+                            {% else %}
+                              <span style="color:green">{{ value }}</span>
+                            {% endif %}
+                          {% endwith %}
+                        {% endif %}
                               
                              
                             
