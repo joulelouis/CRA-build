@@ -116,16 +116,17 @@ def climate_hazards_analysis(request):
         water_risk_csv_path, facility_csv_path, raster_path, selected_fields
     )
     
-    if result is None:
+    if result is None or 'error' in result:
+        error_message = result.get('error', 'Unknown error') if result else 'Analysis failed to return results'
         return render(request, 'climate_hazards_analysis/error.html', {
-            'error': 'Combined analysis failed. Please check logs for details.'
+            'error': f'Combined analysis failed: {error_message}'
         })
     
     # Load the combined CSV into a DataFrame
     combined_csv_path = result.get('combined_csv_path')
     plot_path = result.get('plot_path')
     
-    if os.path.exists(combined_csv_path):
+    if combined_csv_path and os.path.exists(combined_csv_path):
         df = pd.read_csv(combined_csv_path)
         # Rename columns according to your requirements
         df.rename(columns={
@@ -138,10 +139,10 @@ def climate_hazards_analysis(request):
             'bws_06_raw': 'Water Stress Exposure (%)',
             'Exposure': 'Flood Depth (meters)',
             'SRTM elevation': 'Elevation (meter above sea level)',
-            '2030 Sea Level Rise Cl 0.5': '2030 Sea Level Rise (meters)',
-            '2040 Sea Level Rise Cl 0.5': '2040 Sea Level Rise (meters)',
-            '2050 Sea Level Rise Cl 0.5': '2050 Sea Level Rise (meters)',
-            '2060 Sea Level Rise Cl 0.5': '2060 Sea Level Rise (meters)',
+            '2030 Sea Level Rise Cl 0.5': '2030 Sea Level Rise (in meters)',
+            '2040 Sea Level Rise Cl 0.5': '2040 Sea Level Rise (in meters)',
+            '2050 Sea Level Rise Cl 0.5': '2050 Sea Level Rise (in meters)',
+            '2060 Sea Level Rise Cl 0.5': '2060 Sea Level Rise (in meters)',
             '1-min MSW 10 yr RP': '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
             '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
             '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
@@ -155,6 +156,7 @@ def climate_hazards_analysis(request):
         columns = df.columns.tolist()
     else:
         data, columns = [], []
+        print(f"Warning: Combined CSV not found or empty path: {combined_csv_path}")
 
     # Define which columns belong to each group
     asset_cols = ["Facility", "Latitude", "Longitude"]
@@ -162,10 +164,10 @@ def climate_hazards_analysis(request):
     heat_cols = ["Days over 30° Celsius", "Days over 33° Celsius", "Days over 35° Celsius"]
     water_stress_cols = ["Water Stress Exposure (%)"]
     sea_level_cols = ["Elevation (meter above sea level)",
-                    "2030 Sea Level Rise (meters)",
-                    "2040 Sea Level Rise (meters)",
-                    "2050 Sea Level Rise (meters)",
-                    "2060 Sea Level Rise (meters)"]
+                    "2030 Sea Level Rise (in meters)",
+                    "2040 Sea Level Rise (in meters)",
+                    "2050 Sea Level Rise (in meters)",
+                    "2060 Sea Level Rise (in meters)"]
     tropical_cols = ["1-min Maximum Sustain Windspeed 10 year Return Period (km/h)",
                     "1-min Maximum Sustain Windspeed 20 year Return Period (km/h)",
                     "1-min Maximum Sustain Windspeed 50 year Return Period (km/h)",

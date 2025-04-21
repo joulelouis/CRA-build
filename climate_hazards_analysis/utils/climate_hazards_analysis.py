@@ -311,9 +311,12 @@ import math
 from sea_level_rise_analysis.utils.sea_level_rise_analysis import generate_sea_level_rise_analysis
 from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
 
-def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_risk_csv_path,
-                                      facility_csv_path, raster_path, selected_fields=None,
-                                      water_dynamic_fields=None, water_plot_fields=None):
+
+def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path,
+                                      water_risk_csv_path, facility_csv_path,
+                                      raster_path, selected_fields=None,
+                                      water_dynamic_fields=None,
+                                      water_plot_fields=None):
     """
     Integrates water stress, flood exposure, sea level rise, tropical cyclone,
     heat exposure, storm surge, and rainfall-induced landslide analyses.
@@ -321,225 +324,276 @@ def generate_climate_hazards_analysis(shapefile_path, dbf_path, shx_path, water_
     try:
         # ---------- WATER STRESS ANALYSIS ----------
         print("Step 1: Validating input files for water stress analysis")
-        required_files = [shapefile_path, dbf_path, shx_path]
-        missing_files = [f for f in required_files if not os.path.exists(f)]
-        if missing_files:
-            raise FileNotFoundError(f"Missing shapefile components: {', '.join(missing_files)}")
-        if not os.path.exists(water_risk_csv_path):
-            raise FileNotFoundError(f"Water risk CSV {water_risk_csv_path} not found!")
-        if not os.path.exists(facility_csv_path):
-            raise FileNotFoundError(f"Facility CSV {facility_csv_path} not found!")
-        
+        # check shapefile parts
+        required = [shapefile_path, dbf_path, shx_path]
+        missing = [f for f in required if not os.path.exists(f)]
+        if missing:
+            raise FileNotFoundError(f"Missing shapefile components: {', '.join(missing)}")
+        # check CSV inputs
+        for f in (water_risk_csv_path, facility_csv_path):
+            if not os.path.exists(f):
+                raise FileNotFoundError(f"Required CSV not found: {f}")
+
         # Load shapefile
         print("Step 2: Loading shapefile")
         hydrobasins = gpd.read_file(shapefile_path)
         if hydrobasins.crs is None:
-            print("WARNING: Shapefile has no CRS! Setting to EPSG:4326...")
             hydrobasins.set_crs("EPSG:4326", inplace=True)
-        
-        # Load water risk CSV
-        print("Step 3: Loading water risk CSV")
-        water_risk_data = pd.read_csv(water_risk_csv_path)
-        if 'PFAF_ID' not in hydrobasins.columns or 'PFAF_ID' not in water_risk_data.columns:
-            raise ValueError("PFAF_ID must exist in both shapefile and water risk CSV")
-        
-        # Merge water risk onto shapefile
-        print("Step 4: Merging water risk data with shapefile")
-        merged_data = hydrobasins.merge(water_risk_data, on='PFAF_ID', suffixes=('_hydro','_risk'))
-        ws_uploads_dir = os.path.join(settings.BASE_DIR, 'water_stress', 'static', 'input_files')
-        os.makedirs(ws_uploads_dir, exist_ok=True)
-        merged_shp = os.path.join(ws_uploads_dir, 'merged_aqueduct.shp')
-        merged_data.to_file(merged_shp)
-        gdf = gpd.read_file(merged_shp)
 
-        # Prepare facility locations
-        print("Step 5: Loading and cleaning facility CSV")
+        # Load water risk data
+        print("Step 3: Loading water risk CSV")
+        water_risk = pd.read_csv(water_risk_csv_path)
+        if 'PFAF_ID' not in hydrobasins.columns or 'PFAF_ID' not in water_risk.columns:
+            raise ValueError("'PFAF_ID' must exist in both shapefile and water risk CSV")
+
+        # Merge water risk
+        print("Step 4: Merging water risk data")
+        merged = hydrobasins.merge(water_risk, on='PFAF_ID', suffixes=('_hydro','_risk'))
+        ws_dir = os.path.join(settings.BASE_DIR, 'water_stress', 'static', 'input_files')
+        os.makedirs(ws_dir, exist_ok=True)
+        shp_out = os.path.join(ws_dir, 'merged_aqueduct.shp')
+        merged.to_file(shp_out)
+        gdf = gpd.read_file(shp_out)
+
+        # ---------- FACILITY DATA PREP ----------
+        print("Step 5: Loading facility CSV and ensuring 'Facility' column")
         facility_locs = pd.read_csv(facility_csv_path)
-        for col in ['Long','Lat']:
-            if col not in facility_locs.columns:
-                raise ValueError(f"Missing '{col}' column in facility CSV.")
+        # robust header rename (case-insensitive)
+        rename_map = {}
+        for col in facility_locs.columns:
+            low = col.strip().lower()
+            if low in ['facility', 'site', 'site name', 'facility name', 'facilty name']:
+                rename_map[col] = 'Facility'
+        if rename_map:
+            facility_locs.rename(columns=rename_map, inplace=True)
+
+        # ensure coords
+        for coord in ['Long','Lat']:
+            if coord not in facility_locs.columns:
+                raise ValueError(f"Missing '{coord}' column in facility CSV.")
         facility_locs['Long'] = pd.to_numeric(facility_locs['Long'], errors='coerce')
         facility_locs['Lat'] = pd.to_numeric(facility_locs['Lat'], errors='coerce')
         facility_locs.dropna(subset=['Long','Lat'], inplace=True)
-        if facility_locs.empty:
-            raise ValueError("Facility CSV is empty after cleaning!")
-        if 'Facility' not in facility_locs.columns:
-            facility_locs['Facility'] = facility_locs.apply(lambda row: f"Facility_{row.name}", axis=1)
 
-        # Create buffered geometries for facilities (~100m)
-        geometry = [Point(xy) for xy in zip(facility_locs['Long'],facility_locs['Lat'])]
-        facility_gdf = gpd.GeoDataFrame(facility_locs, geometry=geometry, crs="EPSG:4326")
+        # require Facility column
+        if 'Facility' not in facility_locs.columns:
+            raise ValueError("Your facility CSV must include a 'Facility' column or equivalent header.")
+
+        # buffer points (~100m)
+        pts = [Point(x,y) for x,y in zip(facility_locs['Long'], facility_locs['Lat'])]
+        facility_gdf = gpd.GeoDataFrame(facility_locs, geometry=pts, crs="EPSG:4326")
         buf = 0.0009
         facility_gdf['geometry'] = facility_gdf.geometry.apply(
-            lambda pt: box(pt.x-buf, pt.y-buf, pt.x+buf, pt.y+buf)
+            lambda p: box(p.x-buf, p.y-buf, p.x+buf, p.y+buf)
         )
-        # Clip water risk extent
+
+        # clip water risk extent & normalize
         gdf = gdf.cx[114:130, 0:20].reset_index(drop=True)
-        # Normalize raw values
-        gdf['bws_06_raw'] = gdf['bws_06_raw'].astype(float).apply(lambda x: math.ceil(x*100))
+        gdf['bws_06_raw'] = gdf['bws_06_raw'].astype(float).apply(lambda v: math.ceil(v*100))
         if water_dynamic_fields is None:
             water_dynamic_fields = ['bws_06_raw']
-        for field in water_dynamic_fields:
-            if field not in gdf.columns:
-                raise ValueError(f"Field {field} not in water risk data")
+        for f in water_dynamic_fields:
+            if f not in gdf.columns:
+                raise ValueError(f"Field {f} missing in water risk data")
 
-        # Spatial join for water stress
-        print("Step 6: Spatial join to add water stress data")
-        facility_gdf = gpd.sjoin(facility_gdf, gdf[['geometry']+water_dynamic_fields], how='left', predicate='intersects').reset_index(drop=True)
-        for field in water_dynamic_fields:
-            facility_locs[field] = facility_gdf[field]
-        updated_facility_csv = os.path.join(ws_uploads_dir, 'combined_facility_ws.csv')
-        facility_locs.to_csv(updated_facility_csv, index=False)
+        # spatial join water stress
+        print("Step 6: Spatial join water stress to facilities")
+        facility_join = gpd.sjoin(
+            facility_gdf, gdf[['geometry']+water_dynamic_fields],
+            how='left', predicate='intersects'
+        ).reset_index(drop=True)
+        for f in water_dynamic_fields:
+            facility_locs[f] = facility_join[f]
+        updated_ws = os.path.join(ws_dir, 'combined_facility_ws.csv')
+        facility_locs.to_csv(updated_ws, index=False)
 
-        # Water stress plot
-        print("Step 7: Generating water stress plot")
+        # plot water stress
+        print("Step 7: Plotting water stress")
         fig, ax = plt.subplots(figsize=(12,8))
         gdf.boundary.plot(ax=ax, linewidth=1, color='black')
-        for field in (water_plot_fields or water_dynamic_fields):
-            if field in gdf.columns:
-                gdf.plot(column=field, ax=ax, legend=True, cmap='OrRd')
-        facility_gdf.plot(ax=ax, color='blue', marker='o', markersize=50, alpha=0.5)
-        ax.set_title('Water Stress and Facility Locations', fontsize=15)
-        ax.set_axis_off()
-        plot_path = os.path.join(ws_uploads_dir, 'water_stress_plot.png')
-        plt.savefig(plot_path, format='png')
-        plt.close(fig)
+        for f in (water_plot_fields or water_dynamic_fields):
+            if f in gdf:
+                gdf.plot(column=f, ax=ax, legend=True, cmap='OrRd')
+        facility_gdf.plot(ax=ax, color='blue', markersize=50, alpha=0.5)
+        ax.set_axis_off(); ax.set_title('Water Stress and Facilities')
+        plot_path = os.path.join(ws_dir, 'water_stress_plot.png')
+        plt.savefig(plot_path, format='png'); plt.close(fig)
 
-        # ---------- FLOOD EXPOSURE ANALYSIS ----------
-        print("Step 8: Performing flood exposure analysis")
-        df_fac = pd.read_csv(updated_facility_csv)
-        df_fac['Facility'] = df_fac.get('Facility', df_fac.index.to_series().apply(lambda i: f"Facility_{i}"))
-        flood_buffer = 0.0045
-        crs_flood = CRS('epsg:32651')
-        flood_geoms = [Point(xy).buffer(flood_buffer, cap_style=3) for xy in zip(df_fac['Long'], df_fac['Lat'])]
-        flood_gdf = gpd.GeoDataFrame(df_fac, geometry=flood_geoms, crs=crs_flood)
-        stats = zonal_stats(flood_gdf.geometry, raster_path, stats='percentile_75')
-        flood_gdf['75th Percentile'] = [s.get('percentile_75',1) for s in stats]
-        def exp_label(val):
-            return '0.1 to 0.5' if val==1 else '0.5 to 1.5' if val==2 else 'Greater than 1.5' if val==3 else 'Unknown'
-        flood_gdf['Exposure'] = flood_gdf['75th Percentile'].apply(exp_label)
+        # ---------- FLOOD EXPOSURE ANALYSIS ----------  
+        print("Step 8: Flood exposure analysis")  
+        df_fac = pd.read_csv(updated_ws)  
+        if 'Facility' not in df_fac.columns:  
+            raise ValueError("Combined facility CSV missing 'Facility'; check your upload headers.")  
 
-        # Build base combined
-        print("Step 9: Generating combined output for water stress and flood exposure")
-        base_map = {'Flood':['Exposure'], 'Water Stress':['bws_06_raw']}
-        base_sel = [h for h in (selected_fields or []) if h in base_map]
-        req_cols = ['Facility','Lat','Long'] + [col for h in base_sel for col in base_map[h]]
-        combined_df = flood_gdf[req_cols]
+        # build ~250 m buffers around each point  
+        flood_buf = 0.0045  
+        flood_polys = [Point(x, y).buffer(flood_buf, cap_style=3)  
+                    for x, y in zip(df_fac['Long'], df_fac['Lat'])]  
+        flood_gdf = gpd.GeoDataFrame(df_fac.copy(), geometry=flood_polys, crs=CRS('epsg:32651'))  
+
+        # extract the 75th‐percentile flood depth  
+        stats = zonal_stats(flood_gdf.geometry, raster_path, stats='percentile_75')  
+        flood_gdf['75th Percentile'] = [stat['percentile_75'] if stat['percentile_75'] is not None else 1 for stat in stats]  
+
+        # bin into your desired categories  
+        def determine_exposure(percentile):  
+            if pd.isna(percentile):  
+                return 'Unknown'  
+            if percentile == 1:  
+                return '0.1 to 0.5'  
+            elif percentile == 2:  
+                return '0.5 to 1.5'  
+            else:  
+                return 'Greater than 1.5'  
+
+        # apply and rename for clarity  
+        flood_gdf['Exposure'] = flood_gdf['75th Percentile'].apply(determine_exposure) 
+
+        # combine base
+        print("Step 9: Combine water stress + flood exposure")
+        mapping = {'Flood':['Exposure'], 'Water Stress':['bws_06_raw']}
+        sel = [h for h in (selected_fields or []) if h in mapping]
+        req_cols = ['Facility','Lat','Long'] + [c for h in sel for c in mapping[h]]
+        combined_df = flood_gdf.loc[:, req_cols]
 
         # ---------- SEA LEVEL RISE ----------
         if 'Sea Level Rise' in (selected_fields or []):
-            print("Step 10: Integrating sea level rise analysis")
+            print("Integrate SLR")
             slr_res = generate_sea_level_rise_analysis(facility_csv_path)
-            if 'error' in slr_res:
-                raise Exception(slr_res['error'])
+            if 'error' in slr_res: raise Exception(slr_res['error'])
             df_slr = pd.read_csv(slr_res['combined_csv_paths'][0])
-            if 'Lon' in df_slr.columns:
-                df_slr.rename(columns={'Lon':'Long'}, inplace=True)
-            median_years = [2030,2040,2050,2060]
-            rename_map = {f"{yr} Sea Level Rise CI 0.5":f"{yr} Sea Level Rise Cl 0.5" for yr in median_years}
-            df_slr.rename(columns=rename_map, inplace=True)
-            slr_cols = ['Facility','Lat','Long'] + list(rename_map.values())
+            if 'Lon' in df_slr: df_slr.rename(columns={'Lon':'Long'}, inplace=True)
+            ren = {f"{yr} Sea Level Rise CI 0.5":f"{yr} Sea Level Rise Cl 0.5"
+                   for yr in [2030,2040,2050,2060]}
+            df_slr.rename(columns=ren, inplace=True)
+            slr_cols = ['Facility','Lat','Long'] + list(ren.values())
             combined_df = combined_df.merge(df_slr[slr_cols], on=['Facility','Lat','Long'], how='left')
 
-        # ---------- TROPICAL CYCLONE ----------
+        # ---------- TROPICAL CYCLONES ----------
         if 'Tropical Cyclones' in (selected_fields or []):
-            print("Step 11: Integrating tropical cyclone analysis")
+            print("Integrate TC")
             tc_res = generate_tropical_cyclone_analysis(facility_csv_path)
-            if 'error' in tc_res:
-                raise Exception(tc_res['error'])
+            if 'error' in tc_res: raise Exception(tc_res['error'])
             df_tc = pd.read_csv(tc_res['combined_csv_paths'][0])
+            df_tc.drop(['1-min MSW 200 yr RP', '1-min MSW 500 yr RP'],axis=1, errors='ignore', inplace=True)
             df_tc.rename(columns={'Facility Name':'Facility','Latitude':'Lat','Longitude':'Long'}, inplace=True)
             combined_df = combined_df.merge(df_tc, on=['Facility','Lat','Long'], how='left')
 
-        # ---------- HEAT EXPOSURE ----------
+        # ---------- HEAT ----------
         if 'Heat' in (selected_fields or []):
-            print("Step 12: Integrating heat exposure analysis")
-            input_dir = Path(settings.BASE_DIR)/'climate_hazards_analysis'/'static'/'input_files'
-            heat_files = [input_dir/f for f in [
+            print("Integrate Heat")
+            idir = Path(settings.BASE_DIR)/'climate_hazards_analysis'/'static'/'input_files'
+            heat_files = [idir/f for f in [
                 'PH_DaysOver30degC_ANN_2021-2025.tif',
                 'PH_DaysOver33degC_ANN_2021-2025.tif',
-                'PH_DaysOver35degC_ANN_2021-2025.tif'
-            ]]
-            df_heat = pd.read_csv(facility_csv_path).dropna(subset=['Lat','Long']).copy()
-            if 'Facility' not in df_heat.columns:
-                df_heat['Facility'] = df_heat.apply(lambda r: f"Facility_{r.name}", axis=1)
+                'PH_DaysOver35degC_ANN_2021-2025.tif']]
+            
+            # Use the same facility CSV as used earlier that already has 'Facility' column mapping
+            df_heat = facility_locs[['Facility', 'Lat', 'Long']].copy()
+            
             gs = gpd.points_from_xy(df_heat['Long'], df_heat['Lat'], crs='EPSG:4326').to_crs('EPSG:32651')
-            gdf_heat = gpd.GeoDataFrame(df_heat.copy(), geometry=gs, crs='EPSG:32651')
-            if 'lot_area' not in gdf_heat.columns:
-                gdf_heat['lot_area'] = 1000**2
+            gdf_heat = gpd.GeoDataFrame(df_heat, geometry=gs, crs='EPSG:32651')
+            gdf_heat['lot_area'] = gdf_heat.get('lot_area', 1000**2)
             gdf_heat['geometry'] = gdf_heat.geometry.buffer(
-                np.sqrt(gdf_heat['lot_area'])/2, cap_style='square', join_style='mitre'
-            )
-            heat_temp_cols = [f"n>{t}degC_2125" for t in [30,33,35]]
-            temp_geo = Path('temp_features.geojson')
-            for col, fp in zip(heat_temp_cols, heat_files):
+                np.sqrt(gdf_heat['lot_area'])/2, cap_style='square', join_style='mitre')
+            heat_cols = [f"n>{t}degC_2125" for t in [30,33,35]]
+            temp_geo = Path('temp.features.geojson')
+            for col, fp in zip(heat_cols, heat_files):
                 gdf_heat.to_crs('EPSG:4326').to_file(str(temp_geo), driver='GeoJSON')
                 out = rstat.zonal_stats(str(temp_geo), str(fp), stats='percentile_75', all_touched=True, geojson_out=True)
-                idxs = [int(feat['id']) for feat in out]
-                vals = [feat['properties']['percentile_75'] for feat in out]
-                gdf_heat[col] = pd.Series(data=vals, index=idxs)
-                temp_geo.unlink()
-            heat_cols_to_keep = ['Facility','Lat','Long'] + heat_temp_cols
-            df_heat_final = gdf_heat.loc[:, heat_cols_to_keep].copy()
-            for col in heat_temp_cols:
-                df_heat_final.loc[:, col] = df_heat_final[col].apply(lambda x: int(np.ceil(x)) if pd.notnull(x) else x)
-            combined_df = combined_df.merge(df_heat_final, on=['Facility','Lat','Long'], how='left')
+                if out:  # Check if we got results
+                    idxs = [int(feat['id']) for feat in out]
+                    vals = [feat['properties']['percentile_75'] for feat in out]
+                    gdf_heat[col] = pd.Series(vals, index=idxs)
+                else:
+                    # Handle no results
+                    for col in heat_cols:
+                        gdf_heat[col] = np.nan
+                
+                # Clean up temp file if it exists
+                if temp_geo.exists():
+                    temp_geo.unlink()
+                    
+            df_hf = gdf_heat[['Facility','Lat','Long'] + [c for c in heat_cols if c in gdf_heat.columns]].copy()
+            for col in [c for c in heat_cols if c in df_hf.columns]:
+                df_hf.loc[:,col] = df_hf[col].apply(lambda v: int(math.ceil(v)) if pd.notnull(v) else v)
+            combined_df = combined_df.merge(df_hf, on=['Facility','Lat','Long'], how='left')
 
         # ---------- STORM SURGE & RIL ----------
         if any(h in (selected_fields or []) for h in ['Storm Surge','Rainfall Induced Landslide']):
-            print("Step 13: Integrating storm surge and rainfall-induced landslide analysis")
-            input_dir = Path(settings.BASE_DIR)/'climate_hazards_analysis'/'static'/'input_files'
-            fp_ls = input_dir/'PH_LandslideHazards_UTM_ProjectNOAH_Unmasked.tif'
-            fp_ss = input_dir/'PH_StormSurge_Advisory4_UTM_ProjectNOAH_Unmasked.tif'
-            # Use cleaned facility_locs from above
-            df_assets = facility_locs[['Facility','Lat','Long']].rename(columns={'Lat':'latitude','Long':'longitude'}).copy()
-            df_assets[['latitude','longitude']] = df_assets[['latitude','longitude']].astype(float)
-            df_assets['sbu'] = ''
-            df_assets['lot_area'] = 250
-            df_assets['asset_value'] = np.nan
-            df_assets['flag'] = ''
-            df_assets['lot_area'] = df_assets['lot_area'].apply(lambda v: float(re.findall(r"[\d\.]+", str(v).replace(',',''))[0]))
-            gs_assets = gpd.points_from_xy(df_assets['longitude'], df_assets['latitude'], crs='EPSG:4326').to_crs('EPSG:32651')
-            gdf_assets = gpd.GeoDataFrame(df_assets, geometry=gs_assets, crs='EPSG:32651')
-            gdf_assets['geometry'] = gdf_assets.geometry.buffer(np.sqrt(gdf_assets['lot_area'])/2, cap_style='square', join_style='mitre')
-            hazards = {'landslide_raster': fp_ls, 'stormsurge_raster': fp_ss}
-            for col, ras in hazards.items():
-                stats = rstat.zonal_stats(gdf_assets, ras, stats='percentile_75', nodata=255)
-                gdf_assets[col] = pd.DataFrame(stats).fillna(0)
-            gdf_assets['Lat'] = gdf_assets['latitude']
-            gdf_assets['Long'] = gdf_assets['longitude']
+            print("Integrate RIL & SS")
+            idir = Path(settings.BASE_DIR)/'climate_hazards_analysis'/'static'/'input_files'
+            fp_ls = idir/'PH_LandslideHazards_UTM_ProjectNOAH_Unmasked.tif'
+            fp_ss = idir/'PH_StormSurge_Advisory4_UTM_ProjectNOAH_Unmasked.tif'
+            
+            # Use facility_locs which already has the correct 'Facility' column
+            df_a = facility_locs[['Facility','Lat','Long']].copy()
+            df_a.rename(columns={'Lat':'latitude','Long':'longitude'}, inplace=True)
+            
+            df_a[['latitude','longitude']] = df_a[['latitude','longitude']].astype(float)
+            df_a['lot_area'] = 250
+            gs_a = gpd.points_from_xy(df_a['longitude'], df_a['latitude'], crs='EPSG:4326').to_crs('EPSG:32651')
+            gdf_a = gpd.GeoDataFrame(df_a, geometry=gs_a, crs='EPSG:32651')
+            gdf_a['geometry'] = gdf_a.geometry.buffer(np.sqrt(gdf_a['lot_area'])/2, cap_style='square', join_style='mitre')
+            for lbl, ras in [('landslide_raster', fp_ls), ('stormsurge_raster', fp_ss)]:
+                # Check if raster file exists
+                if os.path.exists(str(ras)):
+                    stats = rstat.zonal_stats(gdf_a, ras, stats='percentile_75', nodata=255)
+                    gdf_a[lbl] = pd.DataFrame(stats)['percentile_75'].fillna(0)
+                else:
+                    print(f"Warning: Raster file not found: {ras}")
+                    gdf_a[lbl] = 0  # Default value
+                    
+            gdf_a.rename(columns={'latitude':'Lat','longitude':'Long'}, inplace=True)
             if 'Storm Surge' in (selected_fields or []):
                 combined_df = combined_df.merge(
-                    gdf_assets[['Facility','Lat','Long','stormsurge_raster']], on=['Facility','Lat','Long'], how='left'
+                    gdf_a[['Facility','Lat','Long','stormsurge_raster']], on=['Facility','Lat','Long'], how='left'
                 )
             if 'Rainfall Induced Landslide' in (selected_fields or []):
                 combined_df = combined_df.merge(
-                    gdf_assets[['Facility','Lat','Long','landslide_raster']], on=['Facility','Lat','Long'], how='left'
+                    gdf_a[['Facility','Lat','Long','landslide_raster']], on=['Facility','Lat','Long'], how='left'
                 )
 
         # ---------- FINAL OUTPUT ----------
-        print("Step 14: Generating final combined output")
-        final_order = [
-            'Facility','Lat','Long','Exposure','bws_06_raw',
-            'SRTM elevation','2030 Sea Level Rise Cl 0.5','2040 Sea Level Rise Cl 0.5',
-            '2050 Sea Level Rise Cl 0.5','2060 Sea Level Rise Cl 0.5',
-            '1-min MSW 10 yr RP','1-min MSW 20 yr RP','1-min MSW 50 yr RP','1-min MSW 100 yr RP'
-        ]
+        print("Step 14: Writing output CSV")
+        # Only include columns that actually exist in combined_df
+        order = ['Facility','Lat','Long']
+        
+        if 'Exposure' in combined_df.columns:
+            order.append('Exposure')
+        if 'bws_06_raw' in combined_df.columns:
+            order.append('bws_06_raw')
+            
+        slr_cols = [c for c in combined_df.columns if 'Sea Level Rise Cl' in c]
+        if slr_cols:
+            order.extend(slr_cols)
+            
+        tc_cols = [c for c in combined_df.columns if 'MSW' in c]
+        if tc_cols:
+            order.extend(tc_cols)
+            
         if 'Heat' in (selected_fields or []):
-            final_order += heat_temp_cols
-        if 'Storm Surge' in (selected_fields or []):
-            final_order.append('stormsurge_raster')
-        if 'Rainfall Induced Landslide' in (selected_fields or []):
-            final_order.append('landslide_raster')
-        final_columns = [c for c in final_order if c in combined_df.columns]
-        final_df = combined_df[final_columns]
-        combined_dir = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
-        os.makedirs(combined_dir, exist_ok=True)
-        final_csv = os.path.join(combined_dir, 'final_combined_output.csv')
-        final_df.to_csv(final_csv, index=False)
-        print(f"Final combined CSV saved at {final_csv}")
-        return {'plot_path': plot_path, 'combined_csv_path': final_csv}
+            heat_cols = [c for c in combined_df.columns if 'degC_2125' in c]
+            if heat_cols:
+                order.extend(heat_cols)
+                
+        if 'Storm Surge' in (selected_fields or []) and 'stormsurge_raster' in combined_df.columns:
+            order.append('stormsurge_raster')
+            
+        if 'Rainfall Induced Landslide' in (selected_fields or []) and 'landslide_raster' in combined_df.columns:
+            order.append('landslide_raster')
+            
+        # Only select columns that exist in combined_df
+        final_df = combined_df.loc[:, [c for c in order if c in combined_df.columns]]
+        out_dir = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
+        os.makedirs(out_dir, exist_ok=True)
+        out_csv = os.path.join(out_dir, 'final_combined_output.csv')
+        final_df.to_csv(out_csv, index=False)
+        print(f"Saved {out_csv}")
+        return {'plot_path': plot_path, 'combined_csv_path': out_csv}
     except Exception as e:
         print(f"Error in generate_climate_hazards_analysis: {e}")
-        return {'error': str(e)}
+        import traceback
+        traceback.print_exc()  # Print full stack trace for debugging
+        return {'error': str(e), 'combined_csv_path': None, 'plot_path': None}  # Return empty paths
 
