@@ -146,6 +146,8 @@ def climate_hazards_analysis(request):
             '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
             '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
             '1-min MSW 100 yr RP': '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)',
+            'stormsurge_raster': 'Storm Surge Hazard Rating',
+            'landslide_raster': 'Rainfall Induced Landslide Hazard Rating',
         }, inplace=True)
         data = df.to_dict(orient="records")
         # Process data to replace any NaN values with "N/A"
@@ -168,6 +170,8 @@ def climate_hazards_analysis(request):
                     "1-min Maximum Sustain Windspeed 20 year Return Period (km/h)",
                     "1-min Maximum Sustain Windspeed 50 year Return Period (km/h)",
                     "1-min Maximum Sustain Windspeed 100 year Return Period (km/h)"]
+    storm_surge_cols = ["Storm Surge Hazard Rating"]
+    rainfall_induced_landslide_cols = ["Rainfall Induced Landslide Hazard Rating"]
     
     # Compute group counts dynamically (only counting columns that exist in your DataFrame)
     groups = {}
@@ -177,6 +181,8 @@ def climate_hazards_analysis(request):
     groups["Sea Level Rise"] = sum(1 for col in columns if col in sea_level_cols)
     groups["Tropical Cyclone"] = sum(1 for col in columns if col in tropical_cols)
     groups["Heat"] = sum(1 for col in columns if col in heat_cols)
+    groups["Storm Surge"] = sum(1 for col in columns if col in storm_surge_cols)
+    groups["Rainfall Induced Landslide"] = sum(1 for col in columns if col in rainfall_induced_landslide_cols)
     
     context = {
         'data': data,
