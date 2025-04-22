@@ -41,10 +41,8 @@
 {{ selected_dynamic_fields|json_script:"selected-hazards" }}
 
 <script>
-  // Set your Mapbox access token
   mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
 
-  // Initialize the map
   const multiHazardMap = new mapboxgl.Map({ 
       container: 'multi-hazard-map',
       center: [121.7740, 12.8797],
@@ -55,6 +53,46 @@
   .addControl(new mapboxgl.GeolocateControl())
   .addControl(new mapboxgl.ScaleControl())
   .addControl(new mapboxgl.FullscreenControl());
+
+  multiHazardMap.on('load', () => {
+    // 1) Add the Philippines GeoJSON source directly from GitHub
+    multiHazardMap.addSource('hazards-source', {
+      type: 'geojson',
+      data: 'https://raw.githubusercontent.com/macoymejia/geojsonph/master/Country/Country.minimal.json'
+    });
+  
+    // 2) Draw it as filled polygons
+    multiHazardMap.addLayer({
+      id: 'hazards-layer',
+      type: 'fill',
+      source: 'hazards-source',
+      paint: {
+        'fill-color': '#888',
+        'fill-opacity': 0.5
+      }
+    });
+  
+    // 3) Log the feature’s geometry when clicked
+    multiHazardMap.on('click', 'hazards-layer', (e) => {
+      const feat = e.features && e.features[0];
+      if (feat) {
+        console.log('GeoJSON feature coords:', feat.geometry.coordinates);
+      }
+    });
+  
+    // 4) Change cursor on hover
+    multiHazardMap.on('mouseenter', 'hazards-layer', () => {
+      multiHazardMap.getCanvas().style.cursor = 'pointer';
+    });
+    multiHazardMap.on('mouseleave', 'hazards-layer', () => {
+      multiHazardMap.getCanvas().style.cursor = '';
+    });
+  });
+  
+  // 5) Still log the raw click location
+  multiHazardMap.on('click', (e) => {
+    console.log('Map clicked at:', e.lngLat.lng, e.lngLat.lat);
+  });
 
   // Create a base blue circle element for markers
   const baseBlueCircle = document.createElement('div');
