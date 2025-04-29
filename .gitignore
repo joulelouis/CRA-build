@@ -6,3 +6,5 @@ sea_level_rise_analysis/static/input_files
 climate_hazards_analysis/static/input_files
 
 heat_exposure_analysis/static/input_files
+
+climate_hazards_analysis/static/javascript

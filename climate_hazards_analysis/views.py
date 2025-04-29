@@ -178,8 +178,8 @@ def climate_hazards_analysis(request):
     # Compute group counts dynamically (only counting columns that exist in your DataFrame)
     groups = {}
     groups["Asset Details"] = sum(1 for col in columns if col in asset_cols)
-    groups["Flood"] = sum(1 for col in columns if col in flood_cols)
     groups["Water Stress"] = sum(1 for col in columns if col in water_stress_cols)
+    groups["Flood"] = sum(1 for col in columns if col in flood_cols)
     groups["Sea Level Rise"] = sum(1 for col in columns if col in sea_level_cols)
     groups["Tropical Cyclone"] = sum(1 for col in columns if col in tropical_cols)
     groups["Heat"] = sum(1 for col in columns if col in heat_cols)

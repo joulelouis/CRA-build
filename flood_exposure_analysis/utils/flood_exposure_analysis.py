@@ -3,63 +3,158 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
-from pathlib import Path
+import matplotlib.pyplot as plt
 from pyproj import CRS
 from rasterstats import zonal_stats
 from django.conf import settings
 
-
-def generate_flood_exposure_analysis(facility_csv_path, raster_path, dynamic_fields=None):
+def generate_flood_exposure_analysis(facility_csv_path):
+    """
+    Performs flood exposure analysis for facility locations.
+    
+    Args:
+        facility_csv_path (str): Path to the facility CSV file with locations
+        
+    Returns:
+        dict: Dictionary containing file paths to generated outputs
+    """
     try:
-        # Set square buffer around point location in the absence of facility extent
-        buffer = 0.0045  # degree, ~250 meters radius, ~500 m x 500 m
-
-        # Set geospatial map projection
-        proj1 = 4326
-
-
-        # Open facility location and georeference
+        # Lists to track generated files
+        output_csv_files = []
+        output_png_files = []
+        
+        # Define path for climate_hazards_analysis input_files directory
+        output_dir = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Path to the flood raster file
+        raster_path = os.path.join(
+            settings.BASE_DIR, 'flood_exposure_analysis', 'static', 
+            'input_files', 'Abra_Flood_100year.tif'
+        )
+        
+        # Check if raster file exists
+        if not os.path.exists(raster_path):
+            print(f"Warning: Flood raster file not found: {raster_path}")
+            raster_path = os.path.join(
+                settings.BASE_DIR, 'climate_hazards_analysis', 'static', 
+                'input_files', 'Abra_Flood_100year.tif'
+            )
+            if not os.path.exists(raster_path):
+                raise FileNotFoundError("Flood raster file not found in either flood_exposure_analysis or climate_hazards_analysis directories")
+        
+        # Load facility locations
         df_fac = pd.read_csv(facility_csv_path)
-        crs = CRS("epsg:32651")
-
-        # Create geometry from Long and Lat
-        geometry = [Point(xy).buffer(buffer, cap_style=3) for xy in zip(df_fac['Long'], df_fac['Lat'])]
-        geo_df = gpd.GeoDataFrame(df_fac, crs=crs, geometry=geometry)
-
-        # Zonal statistics
-        stats = zonal_stats(geo_df.geometry, raster_path, stats="percentile_75")
-        geo_df['75th Percentile'] = [stat['percentile_75'] if stat['percentile_75'] is not None else 1 for stat in stats]
-
-        # Define Exposure based on 75th Percentile
+        
+        # Ensure Facility, Lat, Long columns exist
+        rename_map = {}
+        for col in df_fac.columns:
+            low = col.strip().lower()
+            if low in ['facility', 'site', 'site name', 'facility name', 'facilty name']:
+                rename_map[col] = 'Facility'
+        if rename_map:
+            df_fac.rename(columns=rename_map, inplace=True)
+            
+        # Ensure coordinates are present
+        for coord in ['Long', 'Lat']:
+            if coord not in df_fac.columns:
+                raise ValueError(f"Missing '{coord}' column in facility CSV.")
+        
+        # Convert to numeric and drop invalid coordinates
+        df_fac['Long'] = pd.to_numeric(df_fac['Long'], errors='coerce')
+        df_fac['Lat'] = pd.to_numeric(df_fac['Lat'], errors='coerce')
+        df_fac.dropna(subset=['Long', 'Lat'], inplace=True)
+        
+        if 'Facility' not in df_fac.columns:
+            raise ValueError("Your facility CSV must include a 'Facility' column or equivalent header.")
+        
+        # Set buffer size for analysis (~250 meters)
+        buffer = 0.0045
+        
+        # Create polygons with buffer for flood analysis
+        flood_polys = [
+            Point(x, y).buffer(buffer, cap_style=3) 
+            for x, y in zip(df_fac['Long'], df_fac['Lat'])
+        ]
+        
+        # Create GeoDataFrame with proper projection
+        flood_gdf = gpd.GeoDataFrame(df_fac.copy(), geometry=flood_polys, crs=CRS('epsg:32651'))
+        
+        # Extract 75th percentile flood depth from raster
+        stats = zonal_stats(flood_gdf.geometry, raster_path, stats='percentile_75')
+        
+        # Process the results
+        flood_gdf['75th Percentile'] = [
+            stat['percentile_75'] if stat['percentile_75'] is not None else 1 
+            for stat in stats
+        ]
+        
+        # Classify exposure based on flood depth
         def determine_exposure(percentile):
-            if percentile == 1:
-                return 'Low'
-            elif percentile == 2:
-                return 'Medium'
-            elif percentile == 3:
-                return 'High'
-            else:
+            if pd.isna(percentile):
                 return 'Unknown'
-
-        geo_df['Exposure'] = geo_df['75th Percentile'].apply(determine_exposure)
-
+            if percentile == 1:
+                return '0.1 to 0.5'
+            elif percentile == 2:
+                return '0.5 to 1.5'
+            else:
+                return 'Greater than 1.5'
         
-        uploads_dir = os.path.join(settings.BASE_DIR, 'flood_exposure_analysis', 'static', 'input_files')
-        os.makedirs(uploads_dir, exist_ok=True)
-
-
-
-        #set dynamic fields if not provided
-        if dynamic_fields is None:
-            dynamic_fields = ['75th Percentile', 'Exposure']
+        # Apply classification and add to GeoDataFrame
+        flood_gdf['Exposure'] = flood_gdf['75th Percentile'].apply(determine_exposure)
         
-        print(f"dynamic fields are: {dynamic_fields}")
-
-        # Save to CSV
-        output_csv_path = os.path.join(uploads_dir, 'output_with_exposure.csv')
-        geo_df[['Site', 'Long', 'Lat'] + dynamic_fields].to_csv(output_csv_path, index=False)
-        print("CSV file saved successfully.")
-
+        # Rename 'Exposure' to 'Flood Depth (meters)' for the correct column name
+        flood_gdf.rename(columns={'Exposure': 'Flood Depth (meters)'}, inplace=True)
+        
+        # Create a visualization of the flood exposure
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        # Create a colormap for different exposure categories
+        cmap = {
+            '0.1 to 0.5': 'green',
+            '0.5 to 1.5': 'orange',
+            'Greater than 1.5': 'red',
+            'Unknown': 'gray'
+        }
+        
+        # Create a point-based GeoDataFrame for visualization
+        points_gdf = gpd.GeoDataFrame(
+            flood_gdf[['Facility', 'Lat', 'Long', 'Flood Depth (meters)']],
+            geometry=gpd.points_from_xy(flood_gdf['Long'], flood_gdf['Lat']),
+            crs='EPSG:4326'
+        )
+        
+        # Simple plot with facility locations
+        points_gdf.plot(ax=ax, color='blue', markersize=100)
+        
+        ax.set_title('Flood Exposure for Facility Locations')
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        
+        # Save the plot to the climate_hazards_analysis input_files directory
+        plot_path = os.path.join(output_dir, 'flood_exposure_plot.png')
+        plt.savefig(plot_path, format='png', dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        output_png_files.append(plot_path)
+        
+        # Save the results to CSV in the climate_hazards_analysis input_files directory
+        output_csv = os.path.join(output_dir, 'flood_exposure_analysis_output.csv')
+        
+        # Only include relevant columns in the output
+        flood_gdf[['Facility', 'Lat', 'Long', 'Flood Depth (meters)']].to_csv(
+            output_csv, index=False
+        )
+        output_csv_files.append(output_csv)
+        
+        print(f"Flood analysis output saved to: {output_csv}")
+        
+        # Return paths to the generated files
+        return {
+            "combined_csv_paths": output_csv_files,
+            "png_paths": output_png_files
+        }
+        
     except Exception as e:
-        print(f"Error in generate_flood_exposure_analysis: {e}")
-        return None
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e)}
