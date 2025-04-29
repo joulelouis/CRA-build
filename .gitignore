@@ -1,10 +1,28 @@
+# virtual environment
 .venv/
 CRAproject/.env
 
-sea_level_rise_analysis/static/input_files
+# Django static files
+staticfiles/
+static/admin/
+media/
 
-climate_hazards_analysis/static/input_files
+# Climate Risk Assessment app specific static files
+*/static/input_files/
+tropical_cyclone_analysis/static/input_files/
+sea_level_rise_analysis/static/input_files/
+climate_hazards_analysis/static/input_files/
+flood_exposure_analysis/static/input_files/
+water_stress/static/input_files/
+heat_exposure_analysis/static/input_files/
 
-heat_exposure_analysis/static/input_files
+# Database files
+*.sqlite3
+*.db
 
-climate_hazards_analysis/static/javascript
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

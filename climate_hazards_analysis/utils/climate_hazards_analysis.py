@@ -85,39 +85,15 @@ def generate_climate_hazards_analysis(shapefile_path=None, dbf_path=None, shx_pa
         # Track plots for visualization
         plot_paths = []
         
-        # Create variables to store the actual values for later swapping
-        water_stress_values = None
+        # Create variables to store the actual values for later merging
         flood_exposure_values = None
-        
-        # ---------- WATER STRESS ANALYSIS ----------
-        if 'Water Stress' in selected_fields:
-            print("Integrating Water Stress Analysis")
-            ws_res = generate_water_stress_analysis(facility_csv_path)
-            if 'error' in ws_res:
-                print(f"Warning in Water Stress Analysis: {ws_res['error']}")
-            else:
-                if ws_res.get('combined_csv_paths'):
-                    df_ws = pd.read_csv(ws_res['combined_csv_paths'][0])
-                    # Ensure column name consistency
-                    for old, new in [('Site', 'Facility'), ('latitude', 'Lat'), ('longitude', 'Long')]:
-                        if old in df_ws.columns and new not in df_ws.columns:
-                            df_ws.rename(columns={old: new}, inplace=True)
-                    
-                    # Get water stress values
-                    if 'Water Stress Exposure (%)' in df_ws.columns:
-                        # Merge into the main DataFrame with a temporary name
-                        df_ws_values = df_ws[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']]
-                        water_stress_values = df_ws_values.copy()
-                    elif 'bws_06_raw' in df_ws.columns:
-                        # Fall back to old column name if needed
-                        df_ws.rename(columns={'bws_06_raw': 'Water Stress Exposure (%)'}, inplace=True)
-                        df_ws_values = df_ws[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']]
-                        water_stress_values = df_ws_values.copy()
-                        
-                if ws_res.get('png_paths'):
-                    plot_paths.extend(ws_res['png_paths'])
+        water_stress_values = None
+        slr_values = None
+        tc_values = None
+        heat_values = None
+        ss_ril_values = None
 
-        # ---------- FLOOD EXPOSURE ANALYSIS ----------
+        # ---------- 1. FLOOD EXPOSURE ANALYSIS ----------
         if 'Flood' in selected_fields:
             print("Integrating Flood Exposure Analysis")
             flood_res = generate_flood_exposure_analysis(facility_csv_path)
@@ -145,8 +121,103 @@ def generate_climate_hazards_analysis(shapefile_path=None, dbf_path=None, shx_pa
                 if flood_res.get('png_paths'):
                     plot_paths.extend(flood_res['png_paths'])
 
-        # ---------- HEAT EXPOSURE ANALYSIS ----------
-        heat_values = None
+        # ---------- 2. WATER STRESS ANALYSIS ----------
+        if 'Water Stress' in selected_fields:
+            print("Integrating Water Stress Analysis")
+            ws_res = generate_water_stress_analysis(facility_csv_path)
+            if 'error' in ws_res:
+                print(f"Warning in Water Stress Analysis: {ws_res['error']}")
+            else:
+                if ws_res.get('combined_csv_paths'):
+                    df_ws = pd.read_csv(ws_res['combined_csv_paths'][0])
+                    # Ensure column name consistency
+                    for old, new in [('Site', 'Facility'), ('latitude', 'Lat'), ('longitude', 'Long')]:
+                        if old in df_ws.columns and new not in df_ws.columns:
+                            df_ws.rename(columns={old: new}, inplace=True)
+                    
+                    # Get water stress values
+                    if 'Water Stress Exposure (%)' in df_ws.columns:
+                        # Merge into the main DataFrame with a temporary name
+                        df_ws_values = df_ws[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']]
+                        water_stress_values = df_ws_values.copy()
+                    elif 'bws_06_raw' in df_ws.columns:
+                        # Fall back to old column name if needed
+                        df_ws.rename(columns={'bws_06_raw': 'Water Stress Exposure (%)'}, inplace=True)
+                        df_ws_values = df_ws[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']]
+                        water_stress_values = df_ws_values.copy()
+                        
+                if ws_res.get('png_paths'):
+                    plot_paths.extend(ws_res['png_paths'])
+
+        # ---------- 3. SEA LEVEL RISE ANALYSIS ----------
+        if 'Sea Level Rise' in selected_fields:
+            print("Integrating Sea Level Rise Analysis")
+            slr_res = generate_sea_level_rise_analysis(facility_csv_path)
+            if 'error' in slr_res:
+                print(f"Warning in Sea Level Rise Analysis: {slr_res['error']}")
+            else:
+                if slr_res.get('combined_csv_paths'):
+                    df_slr = pd.read_csv(slr_res['combined_csv_paths'][0])
+                    # Ensure column name consistency
+                    for old, new in [('Site', 'Facility'), ('Lon', 'Long')]:
+                        if old in df_slr.columns and new not in df_slr.columns:
+                            df_slr.rename(columns={old: new}, inplace=True)
+                    # Standardize Sea Level Rise column names
+                    ren = {
+                        f"{yr} Sea Level Rise CI 0.5": f"{yr} Sea Level Rise (in meters)"
+                        for yr in [2030, 2040, 2050, 2060]
+                    }
+                    df_slr.rename(columns=ren, inplace=True)
+                    # Also rename SRTM elevation
+                    if 'SRTM elevation' in df_slr.columns:
+                        df_slr.rename(columns={'SRTM elevation': 'Elevation (meter above sea level)'}, inplace=True)
+                    
+                    # Get SLR columns
+                    slr_cols = ['Elevation (meter above sea level)'] + list(ren.values())
+                    available_slr_cols = [c for c in slr_cols if c in df_slr.columns]
+                    
+                    if available_slr_cols:
+                        # Store SLR values for later
+                        slr_values = df_slr[['Facility', 'Lat', 'Long'] + available_slr_cols].copy()
+                if slr_res.get('png_paths'):
+                    plot_paths.extend(slr_res['png_paths'])
+
+        # ---------- 4. TROPICAL CYCLONES ANALYSIS ----------
+        if 'Tropical Cyclones' in selected_fields:
+            print("Integrating Tropical Cyclones Analysis")
+            tc_res = generate_tropical_cyclone_analysis(facility_csv_path)
+            if 'error' in tc_res:
+                print(f"Warning in Tropical Cyclones Analysis: {tc_res['error']}")
+            else:
+                if tc_res.get('combined_csv_paths'):
+                    df_tc = pd.read_csv(tc_res['combined_csv_paths'][0])
+                    # Ensure column name consistency
+                    rename_map = {
+                        'Facility Name': 'Facility',
+                        'Latitude': 'Lat',
+                        'Longitude': 'Long'
+                    }
+                    for old, new in rename_map.items():
+                        if old in df_tc.columns and new not in df_tc.columns:
+                            df_tc.rename(columns={old: new}, inplace=True)
+                    
+                    # Standardize TC column names
+                    tc_rename = {
+                        '1-min MSW 10 yr RP': '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
+                        '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
+                        '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
+                        '1-min MSW 100 yr RP': '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)'
+                    }
+                    df_tc.rename(columns=tc_rename, inplace=True)
+                    
+                    # Identify TC columns (exclude 200yr and 500yr if present)
+                    tc_cols = [col for col in df_tc.columns if 'Maximum Sustain Windspeed' in col]
+                    
+                    if tc_cols:
+                        # Store TC values for later
+                        tc_values = df_tc[['Facility', 'Lat', 'Long'] + tc_cols].copy()
+
+        # ---------- 5. HEAT EXPOSURE ANALYSIS ----------
         if 'Heat' in selected_fields:
             print("Integrating Heat Exposure Analysis")
             heat_res = generate_heat_exposure_analysis(facility_csv_path)
@@ -193,79 +264,8 @@ def generate_climate_hazards_analysis(shapefile_path=None, dbf_path=None, shx_pa
                 if heat_res.get('png_paths'):
                     plot_paths.extend(heat_res['png_paths'])
 
-        # ---------- SEA LEVEL RISE ANALYSIS ----------
-        slr_values = None
-        if 'Sea Level Rise' in selected_fields:
-            print("Integrating Sea Level Rise Analysis")
-            slr_res = generate_sea_level_rise_analysis(facility_csv_path)
-            if 'error' in slr_res:
-                print(f"Warning in Sea Level Rise Analysis: {slr_res['error']}")
-            else:
-                if slr_res.get('combined_csv_paths'):
-                    df_slr = pd.read_csv(slr_res['combined_csv_paths'][0])
-                    # Ensure column name consistency
-                    for old, new in [('Site', 'Facility'), ('Lon', 'Long')]:
-                        if old in df_slr.columns and new not in df_slr.columns:
-                            df_slr.rename(columns={old: new}, inplace=True)
-                    # Standardize Sea Level Rise column names
-                    ren = {
-                        f"{yr} Sea Level Rise CI 0.5": f"{yr} Sea Level Rise (in meters)"
-                        for yr in [2030, 2040, 2050, 2060]
-                    }
-                    df_slr.rename(columns=ren, inplace=True)
-                    # Also rename SRTM elevation
-                    if 'SRTM elevation' in df_slr.columns:
-                        df_slr.rename(columns={'SRTM elevation': 'Elevation (meter above sea level)'}, inplace=True)
-                    
-                    # Get SLR columns
-                    slr_cols = ['Elevation (meter above sea level)'] + list(ren.values())
-                    available_slr_cols = [c for c in slr_cols if c in df_slr.columns]
-                    
-                    if available_slr_cols:
-                        # Store SLR values for later
-                        slr_values = df_slr[['Facility', 'Lat', 'Long'] + available_slr_cols].copy()
-                if slr_res.get('png_paths'):
-                    plot_paths.extend(slr_res['png_paths'])
-
-        # ---------- TROPICAL CYCLONES ANALYSIS ----------
-        tc_values = None
-        if 'Tropical Cyclones' in selected_fields:
-            print("Integrating Tropical Cyclones Analysis")
-            tc_res = generate_tropical_cyclone_analysis(facility_csv_path)
-            if 'error' in tc_res:
-                print(f"Warning in Tropical Cyclones Analysis: {tc_res['error']}")
-            else:
-                if tc_res.get('combined_csv_paths'):
-                    df_tc = pd.read_csv(tc_res['combined_csv_paths'][0])
-                    # Ensure column name consistency
-                    rename_map = {
-                        'Facility Name': 'Facility',
-                        'Latitude': 'Lat',
-                        'Longitude': 'Long'
-                    }
-                    for old, new in rename_map.items():
-                        if old in df_tc.columns and new not in df_tc.columns:
-                            df_tc.rename(columns={old: new}, inplace=True)
-                    
-                    # Standardize TC column names
-                    tc_rename = {
-                        '1-min MSW 10 yr RP': '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
-                        '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
-                        '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
-                        '1-min MSW 100 yr RP': '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)'
-                    }
-                    df_tc.rename(columns=tc_rename, inplace=True)
-                    
-                    # Identify TC columns (exclude 200yr and 500yr if present)
-                    tc_cols = [col for col in df_tc.columns if 'Maximum Sustain Windspeed' in col]
-                    
-                    if tc_cols:
-                        # Store TC values for later
-                        tc_values = df_tc[['Facility', 'Lat', 'Long'] + tc_cols].copy()
-
-        # ---------- STORM SURGE & RAINFALL INDUCED LANDSLIDE ----------
+        # ---------- 6-7. STORM SURGE & RAINFALL INDUCED LANDSLIDE ----------
         # These are still embedded in the main function since they haven't been modularized yet
-        ss_ril_values = None
         if any(h in selected_fields for h in ['Storm Surge', 'Rainfall Induced Landslide']):
             print("Integrating Storm Surge & Rainfall Induced Landslide Analyses")
             try:
@@ -301,8 +301,8 @@ def generate_climate_hazards_analysis(shapefile_path=None, dbf_path=None, shx_pa
                     
                     # Process each raster file if selected and present
                     for lbl, ras, hazard_type in [
-                        ('landslide_raster', fp_ls, 'Rainfall Induced Landslide'),
-                        ('stormsurge_raster', fp_ss, 'Storm Surge')
+                        ('stormsurge_raster', fp_ss, 'Storm Surge'),  # Storm Surge first
+                        ('landslide_raster', fp_ls, 'Rainfall Induced Landslide')  # Rainfall Induced Landslide second
                     ]:
                         if hazard_type in selected_fields and os.path.exists(str(ras)):
                             stats = rstat.zonal_stats(gdf_a, ras, stats='percentile_75', nodata=255)
@@ -329,53 +329,34 @@ def generate_climate_hazards_analysis(shapefile_path=None, dbf_path=None, shx_pa
             except Exception as e:
                 print(f"Warning in Storm Surge/Landslide analysis: {e}")
 
-        # ---------- SWAP WATER STRESS AND FLOOD EXPOSURE DATA ----------
-        # Now we swap the actual values and column names between water stress and flood exposure
-        if water_stress_values is not None and flood_exposure_values is not None:
-            # Swap columns: Flood data goes into Water Stress column, and vice versa
-            water_stress_values.rename(columns={'Water Stress Exposure (%)': 'Water Stress Exposure (%) (original)'}, inplace=True)
-            flood_exposure_values.rename(columns={'Flood Depth (meters)': 'Flood Depth (meters) (original)'}, inplace=True)
-            
-            # Add the swapped columns to the combined_df
-            combined_df = combined_df.merge(water_stress_values, on=['Facility', 'Lat', 'Long'], how='left')
+        # ---------- Now add all hazard data to combined DataFrame in the correct order ----------
+        
+        # 1. Add Flood Exposure data
+        if flood_exposure_values is not None:
+            print(f"Merging flood exposure values with {len(flood_exposure_values)} rows")
             combined_df = combined_df.merge(flood_exposure_values, on=['Facility', 'Lat', 'Long'], how='left')
             
-            # Swap values and column names
-            combined_df['Water Stress Exposure (%)'] = combined_df['Water Stress Exposure (%) (original)']
-            combined_df['Flood Depth (meters)'] = combined_df['Flood Depth (meters) (original)']
-            
-            # Drop the original columns
-            combined_df.drop(['Water Stress Exposure (%) (original)', 'Flood Depth (meters) (original)'], axis=1, inplace=True)
-        
-        elif water_stress_values is not None:
-            # Only water stress data exists - add it to flood depth column
-            water_stress_values.rename(columns={'Water Stress Exposure (%)': 'Flood Depth (meters)'}, inplace=True)
+        # 2. Add Water Stress data
+        if water_stress_values is not None:
+            print(f"Merging water stress values with {len(water_stress_values)} rows")
             combined_df = combined_df.merge(water_stress_values, on=['Facility', 'Lat', 'Long'], how='left')
-        
-        elif flood_exposure_values is not None:
-            # Only flood exposure data exists - add it to water stress column
-            flood_exposure_values.rename(columns={'Flood Depth (meters)': 'Water Stress Exposure (%)'}, inplace=True)
-            combined_df = combined_df.merge(flood_exposure_values, on=['Facility', 'Lat', 'Long'], how='left')
-
-        # ---------- ADD OTHER HAZARD DATA ----------
-        # Now add each of the other hazard datasets that we've stored
-        
-        # Add Heat Exposure data
-        if heat_values is not None:
-            print(f"Merging heat values with {len(heat_values)} rows")
-            combined_df = combined_df.merge(heat_values, on=['Facility', 'Lat', 'Long'], how='left')
             
-        # Add Sea Level Rise data
+        # 3. Add Sea Level Rise data
         if slr_values is not None:
             print(f"Merging SLR values with {len(slr_values)} rows")
             combined_df = combined_df.merge(slr_values, on=['Facility', 'Lat', 'Long'], how='left')
             
-        # Add Tropical Cyclones data
+        # 4. Add Tropical Cyclones data
         if tc_values is not None:
             print(f"Merging TC values with {len(tc_values)} rows")
             combined_df = combined_df.merge(tc_values, on=['Facility', 'Lat', 'Long'], how='left')
             
-        # Add Storm Surge / Rainfall Induced Landslide data
+        # 5. Add Heat Exposure data
+        if heat_values is not None:
+            print(f"Merging heat values with {len(heat_values)} rows")
+            combined_df = combined_df.merge(heat_values, on=['Facility', 'Lat', 'Long'], how='left')
+            
+        # 6-7. Add Storm Surge / Rainfall Induced Landslide data
         if ss_ril_values is not None:
             print(f"Merging SS/RIL values with {len(ss_ril_values)} rows")
             combined_df = combined_df.merge(ss_ril_values, on=['Facility', 'Lat', 'Long'], how='left')
@@ -403,17 +384,17 @@ def generate_climate_hazards_analysis(shapefile_path=None, dbf_path=None, shx_pa
         print("Writing combined output CSV")
         
         # Save the combined output to CSV
-        out_csv = os.path.join(input_dir, 'final_combined_output.csv')
+        out_csv = os.path.join(input_dir, 'combined_output.csv')
         combined_df.to_csv(out_csv, index=False)
         print(f"Saved combined output CSV: {out_csv}")
         
-        # Select the main plot for display (prioritizing water stress if available)
+        # Select the main plot for display (prioritizing flood exposure if available)
         main_plot = None
         if plot_paths:
-            # Prioritize water stress plot if available
-            ws_plots = [p for p in plot_paths if 'water_stress' in p.lower()]
-            if ws_plots:
-                main_plot = ws_plots[0]
+            # Prioritize flood exposure plot if available
+            flood_plots = [p for p in plot_paths if 'flood_exposure' in p.lower()]
+            if flood_plots:
+                main_plot = flood_plots[0]
             else:
                 main_plot = plot_paths[0]
         
