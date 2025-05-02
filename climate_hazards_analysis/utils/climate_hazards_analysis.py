@@ -264,6 +264,7 @@ def process_sea_level_rise_analysis(facility_csv_path, selected_fields):
 def process_tropical_cyclone_analysis(facility_csv_path, selected_fields):
     """
     Process tropical cyclone analysis if selected.
+    Modified to exclude 200 and 500-year return period columns.
     
     Args:
         facility_csv_path (str): Path to facility CSV
@@ -301,26 +302,33 @@ def process_tropical_cyclone_analysis(facility_csv_path, selected_fields):
             if old in df_tc.columns and new not in df_tc.columns:
                 df_tc.rename(columns={old: new}, inplace=True)
         
-        # Standardize TC column names
+        # Standardize TC column names - EXCLUDE 200 and 500-year periods
         tc_rename = {
             '1-min MSW 10 yr RP': '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
             '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
             '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
             '1-min MSW 100 yr RP': '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)',
-            '1-min MSW 200 yr RP': '1-min Maximum Sustain Windspeed 200 year Return Period (km/h)',
-            '1-min MSW 500 yr RP': '1-min Maximum Sustain Windspeed 500 year Return Period (km/h)'
+            # 200 and 500-year periods are removed
         }
         df_tc.rename(columns=tc_rename, inplace=True)
         
-        # Identify TC columns
-        tc_cols = [col for col in df_tc.columns if 'Maximum Sustain Windspeed' in col]
+        # Identify TC columns - ONLY include the desired return periods
+        tc_cols = [
+            '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
+            '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
+            '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
+            '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)'
+        ]
         
-        if not tc_cols:
+        # Filter columns that exist in the DataFrame
+        available_tc_cols = [col for col in tc_cols if col in df_tc.columns]
+        
+        if not available_tc_cols:
             logger.warning("No TC columns found in analysis output")
             return None, plot_paths
             
         # Create TC values dataframe
-        tc_values = df_tc[['Facility', 'Lat', 'Long'] + tc_cols].copy()
+        tc_values = df_tc[['Facility', 'Lat', 'Long'] + available_tc_cols].copy()
         
         return tc_values, plot_paths
         
