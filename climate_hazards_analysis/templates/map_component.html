@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Map Container -->
+<div id="map-component" style="width: 100%; height: 100vh;"></div>
+
+<!-- Sidebar (initially hidden off-canvas) -->
+<style>
+  /* Sidebar styling */
+  #sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px;  /* hide off-canvas initially */
+    width: 400px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+    overflow-y: auto;
+    transition: right 0.3s ease;
+    z-index: 10000;
+    padding: 20px;
+  }
+  #sidebar.visible {
+    right: 0;
+  }
+  #sidebar .close-btn {
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    float: right;
+  }
+</style>
+
+<div id="sidebar">
+  <button class="close-btn" onclick="closeSidebar()">Close</button>
+  <div id="sidebar-content"></div>
+</div>
+
+{# Output the selected hazards list as JSON for client-side use #}
+{{ selected_dynamic_fields|json_script:"selected-hazards" }}
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
+
+  const mapComponent = new mapboxgl.Map({ 
+      container: 'map-component',
+      center: [121.7740, 12.8797],
+      zoom: 4.5,
+      style: 'mapbox://styles/mapbox/dark-v10'
+  })
+  .addControl(new mapboxgl.NavigationControl())
+  .addControl(new mapboxgl.GeolocateControl())
+  .addControl(new mapboxgl.ScaleControl())
+  .addControl(new mapboxgl.FullscreenControl());
+
+  mapComponent.on('load', () => {
+    // Add the Philippines GeoJSON source
+    mapComponent.addSource('hazards-source', {
+      type: 'geojson',
+      data: 'https://raw.githubusercontent.com/macoymejia/geojsonph/master/Country/Country.minimal.json'
+    });
+  
+    // Draw filled polygons
+    mapComponent.addLayer({
+      id: 'hazards-layer',
+      type: 'fill',
+      source: 'hazards-source',
+      paint: {
+        'fill-color': '#888',
+        'fill-opacity': 0.5
+      }
+    });
+  
+    // Change cursor on hover
+    mapComponent.on('mouseenter', 'hazards-layer', () => {
+      mapComponent.getCanvas().style.cursor = 'pointer';
+    });
+    mapComponent.on('mouseleave', 'hazards-layer', () => {
+      mapComponent.getCanvas().style.cursor = '';
+    });
+  });
+
+  // Create a base blue circle element for markers
+  const baseBlueCircle = document.createElement('div');
+  baseBlueCircle.style.width = '20px';
+  baseBlueCircle.style.height = '20px';
+  baseBlueCircle.style.borderRadius = '50%';
+  baseBlueCircle.style.border = '2px solid white';
+  baseBlueCircle.style.backgroundColor = 'blue';
+
+  // Variable to hold the current user-created marker
+  let userMarker = null;
+
+  // On map click: remove existing marker, add a new one at the clicked location
+  mapComponent.on('click', (e) => {
+    const coords = [e.lngLat.lng, e.lngLat.lat];
+
+    // Remove previous marker if it exists
+    if (userMarker) {
+      userMarker.remove();
+    }
+
+    // Create and add new marker
+    const el = baseBlueCircle.cloneNode(true);
+    userMarker = new mapboxgl.Marker({ element: el })
+      .setLngLat(coords)
+      .addTo(mapComponent);
+
+    console.log('Latitude: ' + e.lngLat.lat + ', Longitude: ' + e.lngLat.lng);
+  });
+
+  // Functions for sidebar (if you later want to integrate info on click)
+  function openSidebar(content) {
+    document.getElementById('sidebar-content').innerHTML = content;
+    document.getElementById('sidebar').classList.add('visible');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('visible');
+  }
+</script>
+
+{% endblock %}
