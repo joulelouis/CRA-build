@@ -1,0 +1,45 @@
+<div class="col-md-6">
+    <div class="card h-100 mb-3 custom-card">
+        <div class="card-header no-border upload-card-header">
+            <strong>Upload Facility Location Excel Sheet</strong>
+        </div>
+        <div class="card-body upload-card-body">
+            <!-- Label Container -->
+            <div class="upload-label-container">
+                {% comment %} <label class="control-label">
+                    Please upload the facility location CSV.
+                </label> {% endcomment %}
+            </div>
+        <div class="file-input-wrapper">
+            <!-- File Input Container -->
+            <div class="file-upload-box" onclick="document.getElementById('facilityCsv').click()">
+                <!-- Upload Icon -->
+                <i class="fas fa-upload upload-icon"></i>
+                
+                <!-- Choose File Text -->
+                <label for="facilityCsv" class="upload-label">
+                    Choose File
+                </label>
+                
+                <!-- File Name Display -->
+                <p id="file-name" class="file-name-display">No file chosen</p>
+            </div>
+        </div>
+    </div>
+    <!-- Moved Card Footer Inside the Card -->
+    <div class="card-footer text-center card-footer-no-border">
+        <div class="footer-button-wrapper d-flex justify-content-center gap-2">
+            <!-- Preview Button now triggers modal -->
+            <button type="button" class="btn btn-warning preview-button flex-fill" 
+                    data-bs-toggle="modal" data-bs-target="#csvPreviewModal" onclick="previewCSV()">
+                <strong>Preview Excel Upload</strong>
+            </button>
+            <button type="submit" class="btn btn-warning upload-button flex-fill">
+                <strong>Generate Exposure Data</strong>
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Hidden File Input (using Bootstrap's d-none class) -->
+<input type="file" name="facility_csv" id="facilityCsv" accept=".csv" class="d-none" onchange="updateFileName()">
+</div>
