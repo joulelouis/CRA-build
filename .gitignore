@@ -6,6 +6,7 @@ CRAproject/.env
 staticfiles/
 static/admin/
 media/
+*/static/
 
 # Climate Risk Assessment app specific static files
 */static/input_files/
