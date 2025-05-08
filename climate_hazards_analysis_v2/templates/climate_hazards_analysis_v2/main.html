@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Climate Hazard Analysis Map
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Loading overlay styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        flex-direction: column;
+        display: none;
+    }
+    
+    .loading-spinner {
+        border: 5px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 5px solid #ffcc00;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+    
+    .loading-text {
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Alert styles */
+    .alert-fade {
+        animation: fadeOut 5s forwards;
+        animation-delay: 3s;
+    }
+    
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; display: none; }
+    }
+    
+    /* Step Progress Styles */
+    .steps-container {
+        padding: 0 30px;
+    }
+    
+    .step-item {
+        transition: all 0.3s ease;
+    }
+    
+    .step-circle {
+        transition: background-color 0.3s ease, color 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .step-label {
+        transition: color 0.3s ease;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    @media (max-width: 768px) {
+        .step-label {
+            font-size: 12px;
+        }
+        
+        .step-circle {
+            width: 40px !important;
+            height: 40px !important;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-6 d-flex flex-column">
+            <!-- Rounded Icon Container with Margin -->
+            <div class="icon-container">
+                <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
+            </div>
+            
+            <!-- Heading below the icon with Margin -->
+            <h1 class="page-heading">Climate Hazard Analysis Map</h1>
+        </div>
+    </div>
+
+    <!-- Step by Step Procedure UI -->
+<div class="row mt-4 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="steps-container d-flex justify-content-between position-relative">
+                    <!-- Progress Line -->
+                    <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
+                    
+                    <!-- Active Progress -->
+                    <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 33%; z-index: 2; transition: width 0.5s ease;"></div>
+                    
+                    <!-- Step 1 -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                            1
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                            2
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Select Climate/Weather Hazard</div>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                            3
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Asset Exposure Result</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    <!-- Alert Messages -->
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    
+    {% if success_message %}
+    <div class="alert alert-success alert-dismissible fade show alert-fade" role="alert">
+        {{ success_message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <!-- Left side: Upload Facility Component -->
+        <div class="col-md-4">
+            <form id="upload-form" action="{% url 'climate_hazards_analysis_v2:view_map' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="card h-100 mb-3 custom-card">
+                    <div class="card-header no-border upload-card-header">
+                        <strong>Upload Facility Location Excel Sheet</strong>
+                    </div>
+                    <div class="card-body upload-card-body">
+                        <div class="file-input-wrapper">
+                            <!-- File Input Container -->
+                            <div class="file-upload-box" onclick="document.getElementById('facilityCsv').click()">
+                                <!-- Upload Icon -->
+                                <i class="fas fa-upload upload-icon"></i>
+                                
+                                <!-- Choose File Text -->
+                                <label for="facilityCsv" class="upload-label">
+                                    Choose File
+                                </label>
+                                
+                                <!-- File Name Display -->
+                                <p id="file-name" class="file-name-display">No file chosen</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card Footer Inside the Card -->
+                    <div class="card-footer text-center card-footer-no-border">
+                        <div class="footer-button-wrapper d-flex justify-content-center gap-2">
+                            <!-- Preview Button now triggers modal -->
+                            <button type="button" class="btn btn-warning preview-button flex-fill" 
+                                    data-bs-toggle="modal" data-bs-target="#csvPreviewModal" onclick="previewCSV()">
+                                <strong>Preview Excel Upload</strong>
+                            </button>
+                            <button type="submit" id="upload-btn" class="btn btn-warning upload-button flex-fill">
+                                <strong>Generate Map</strong>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Hidden File Input -->
+                <input type="file" name="facility_csv" id="facilityCsv" accept=".csv" class="d-none" onchange="updateFileName()">
+            </form>
+
+            <!-- Instructions Panel -->
+            <div class="card mt-3 custom-card">
+                <div class="card-header no-border">
+                    <strong>Instructions</strong>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Upload a CSV file with facility locations (must include Latitude/Longitude columns)</li>
+                        <li>Click "Generate Map" to display facilities on the map</li>
+                        <li>Click anywhere on the map to add a new marker</li>
+                        <li>Click on markers to view facility details</li>
+                        <li>Hover over markers to see facility names</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right side: Map Component -->
+        <div class="col-md-8">
+            <div class="card custom-card">
+                <div class="card-header no-border">
+                    <strong>Interactive Climate Hazard Map</strong>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Include the map component -->
+                    {% include "climate_hazards_analysis_v2/climate_hazard_map.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Processing Data...</div>
+</div>
+
+<!-- Modal for CSV Preview -->
+<div class="modal fade" id="csvPreviewModal" tabindex="-1" aria-labelledby="csvPreviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="csvPreviewModalLabel">CSV Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Loading indicator for preview -->
+        <div id="preview-loading" class="text-center" style="display: none;">
+            <div class="spinner-border text-warning" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading preview...</p>
+        </div>
+        
+        <!-- Datatable for CSV Preview -->
+        <div id="preview-table-container" class="table-responsive">
+          <table id="preview-data-table" class="table custom-table">
+            <thead>
+              <tr id="preview-table-header">
+                <!-- Headers will be inserted dynamically -->
+              </tr>
+            </thead>
+            <tbody id="preview-table-body">
+              <!-- CSV rows will be inserted dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Show loading overlay when form is submitted
+    document.getElementById('upload-form').addEventListener('submit', function() {
+        document.getElementById('loading-overlay').style.display = 'flex';
+    });
+    
+    function updateFileName() {
+        var input = document.getElementById("facilityCsv");
+        var fileNameDisplay = document.getElementById("file-name");
+  
+        if (input.files.length > 0) {
+            fileNameDisplay.textContent = input.files[0].name;
+        } else {
+            fileNameDisplay.textContent = "No file chosen";
+        }
+    }
+
+    // Function to read the CSV file and populate the preview table in the modal
+    function previewCSV() {
+      var input = document.getElementById("facilityCsv");
+      if (input.files.length > 0) {
+          // Show loading indicator
+          document.getElementById('preview-loading').style.display = 'block';
+          document.getElementById('preview-table-container').style.display = 'none';
+          
+          var file = input.files[0];
+          var reader = new FileReader();
+          reader.onload = function(e) {
+              // Hide loading indicator and show table
+              document.getElementById('preview-loading').style.display = 'none';
+              document.getElementById('preview-table-container').style.display = 'block';
+              
+              var csvData = e.target.result;
+              var lines = csvData.split("\n");
+              var headerHtml = "";
+              var bodyHtml = "";
+              if (lines.length > 0) {
+                  // Assume the first line contains headers
+                  var headers = lines[0].split(",");
+                  headerHtml += headers.map(function(header) {
+                      return "<th>" + header.trim() + "</th>";
+                  }).join("");
+              }
+              // Process each row after the header
+              for (var i = 1; i < lines.length; i++) {
+                  if (lines[i].trim() === "") continue;
+                  var cells = lines[i].split(",");
+                  var rowHtml = cells.map(function(cell) {
+                      return "<td>" + cell.trim() + "</td>";
+                  }).join("");
+                  bodyHtml += "<tr>" + rowHtml + "</tr>";
+              }
+              document.getElementById("preview-table-header").innerHTML = headerHtml;
+              document.getElementById("preview-table-body").innerHTML = bodyHtml;
+          };
+          reader.readAsText(file);
+      } else {
+          alert("Please select a file first");
+      }
+    }
+    
+    // Call loadFacilityData when page loads to ensure markers are shown
+    document.addEventListener('DOMContentLoaded', function() {
+        // If the map is initialized, try to load facility data
+        if (typeof loadFacilityData === 'function') {
+            setTimeout(loadFacilityData, 1000); // Delay slightly to ensure map is fully loaded
+        }
+
+        // Update progress steps based on session state
+        updateProgressSteps();
+    });
+
+    // Function to update the step progress UI
+    function updateProgressSteps() {
+        const fileInput = document.getElementById('facilityCsv');
+        const hasFile = fileInput.files.length > 0;
+        const mapHasMarkers = facilityMarkers && facilityMarkers.length > 0;
+        
+        // Get step elements
+        const step1 = document.querySelectorAll('.step-item')[0];
+        const step2 = document.querySelectorAll('.step-item')[1];
+        const step3 = document.querySelectorAll('.step-item')[2];
+        const activeProgress = document.querySelector('.active-progress');
+        
+        // Step 1 is always active (upload facility)
+        
+        // Step 2 becomes active if a file is selected or markers are on map
+        if (hasFile || mapHasMarkers) {
+            step2.querySelector('.step-circle').style.backgroundColor = '#F1D500';
+            step2.querySelector('.step-circle').style.color = '#000';
+            step2.querySelector('.step-label').style.color = '#000';
+            activeProgress.style.width = '66%';
+        }
+        
+        // Step 3 becomes active if markers are on map (result is shown)
+        if (mapHasMarkers) {
+            step3.querySelector('.step-circle').style.backgroundColor = '#F1D500';
+            step3.querySelector('.step-circle').style.color = '#000';
+            step3.querySelector('.step-label').style.color = '#000';
+            activeProgress.style.width = '100%';
+        }
+    }
+
+    // Update progress when file is selected
+    document.getElementById('facilityCsv').addEventListener('change', function() {
+        updateProgressSteps();
+    });
+</script>
+{% endblock %}
