@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Select Climate/Weather Hazards
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Checkbox styles */
+    .hazard-checkbox-container {
+        background-color: #F8F9FA;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+    
+    .hazard-checkbox-container.checked {
+        background-color: #FFF8C7;
+        border: 2px solid #F1D500;
+    }
+    
+    .hazard-checkbox {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+    }
+    
+    .hazard-icon {
+        width: 40px;
+        height: 40px;
+        background-color: #F1D500;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 15px;
+    }
+    
+    .hazard-name {
+        font-size: 16px;
+        font-weight: 500;
+    }
+    
+    .hazard-description {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #6c757d;
+    }
+    
+    /* Step Progress Styles */
+    .steps-container {
+        padding: 0 30px;
+    }
+    
+    .step-item {
+        transition: all 0.3s ease;
+    }
+    
+    .step-circle {
+        transition: background-color 0.3s ease, color 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .step-label {
+        transition: color 0.3s ease;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-6 d-flex flex-column">
+            <!-- Rounded Icon Container with Margin -->
+            <div class="icon-container">
+                <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
+            </div>
+            
+            <!-- Heading below the icon with Margin -->
+            <h1 class="page-heading">Climate Hazard Analysis</h1>
+        </div>
+    </div>
+    
+    <!-- Step by Step Procedure UI -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-4">
+                    <div class="steps-container d-flex justify-content-between position-relative">
+                        <!-- Progress Line -->
+                        <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
+                        
+                        <!-- Active Progress (66% - Step 2) -->
+                        <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 66%; z-index: 2; transition: width 0.5s ease;"></div>
+                        
+                        <!-- Step 1 (completed) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                                1
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+                        </div>
+                        
+                        <!-- Step 2 (active) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                                2
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazard</div>
+                        </div>
+                        
+                        <!-- Step 3 (upcoming) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                                3
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Asset Exposure Result</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert Messages -->
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    
+    {% if success_message %}
+    <div class="alert alert-success alert-dismissible fade show alert-fade" role="alert">
+        {{ success_message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    
+    <div class="row mt-4">
+        <div class="col-md-8 mx-auto">
+            <div class="card custom-card">
+                <div class="card-header no-border">
+                    <strong>Select Climate/Weather Hazards</strong>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">You have {{ facility_count }} facilities loaded. Select the climate/weather hazards you want to analyze:</p>
+                    
+                    <form id="hazard-form" method="POST" action="{% url 'climate_hazards_analysis_v2:select_hazards' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            {% for hazard in hazard_types %}
+                            <div class="col-md-6">
+                                <div class="hazard-checkbox-container d-flex align-items-center{% if hazard in selected_hazards %} checked{% endif %}" onclick="toggleCheckbox('hazard-{{ forloop.counter }}')">
+                                    <input type="checkbox" class="hazard-checkbox" id="hazard-{{ forloop.counter }}" name="hazards" value="{{ hazard }}" {% if hazard in selected_hazards %}checked{% endif %}>
+                                    <div class="hazard-icon">
+                                        {% if hazard == 'Flood' %}
+                                        <i class="fas fa-water"></i>
+                                        {% elif hazard == 'Water Stress' %}
+                                        <i class="fas fa-tint-slash"></i>
+                                        {% elif hazard == 'Heat' %}
+                                        <i class="fas fa-temperature-high"></i>
+                                        {% elif hazard == 'Sea Level Rise' %}
+                                        <i class="fas fa-water"></i>
+                                        {% elif hazard == 'Tropical Cyclones' %}
+                                        <i class="fas fa-wind"></i>
+                                        {% elif hazard == 'Storm Surge' %}
+                                        <i class="fas fa-water"></i>
+                                        {% elif hazard == 'Rainfall Induced Landslide' %}
+                                        <i class="fas fa-mountain"></i>
+                                        {% else %}
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="hazard-name">{{ hazard }}</div>
+                                        <div class="hazard-description">
+                                            {% if hazard == 'Flood' %}
+                                            Analyze flood depth and exposure risk for your facilities
+                                            {% elif hazard == 'Water Stress' %}
+                                            Assess water stress levels and future water availability
+                                            {% elif hazard == 'Heat' %}
+                                            Evaluate heat exposure days and temperature thresholds
+                                            {% elif hazard == 'Sea Level Rise' %}
+                                            Project sea level rise impacts on coastal facilities
+                                            {% elif hazard == 'Tropical Cyclones' %}
+                                            Analyze wind speeds and return period risks
+                                            {% elif hazard == 'Storm Surge' %}
+                                            Assess coastal storm surge hazards
+                                            {% elif hazard == 'Rainfall Induced Landslide' %}
+                                            Evaluate landslide hazard risk from heavy rainfall
+                                            {% else %}
+                                            Analyze general climate hazard exposure
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'climate_hazards_analysis_v2:view_map' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Facility Map
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <strong>Generate Hazard Analysis</strong>
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCheckbox(id) {
+        const checkbox = document.getElementById(id);
+        const container = checkbox.closest('.hazard-checkbox-container');
+        
+        checkbox.checked = !checkbox.checked;
+        
+        if (checkbox.checked) {
+            container.classList.add('checked');
+        } else {
+            container.classList.remove('checked');
+        }
+    }
+</script>
+{% endblock %}

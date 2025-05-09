@@ -248,246 +248,220 @@
     });
   }
 
-  // Add a marker for a facility
-  function addFacilityMarker(facility) {
-    // Create marker element
-    const el = baseBlueCircle.cloneNode(true);
-    
-    // Create popup content for detailed sidebar
-    let sidebarContent = `
-      <h4><strong>${facility.Facility}</strong></h4>
-      <p><strong>Coordinates:</strong> ${facility.Lat.toFixed(6)}, ${facility.Long.toFixed(6)}</p>
-      <hr>
-      <h5>Hazard Profile</h5>
-      <div style="text-align: center; margin-bottom: 10px;">
-        <ul style="list-style: none; padding: 0; margin: 0 auto; display: inline-block;">
-          <li style="display: inline-block; margin-right: 15px; vertical-align: middle;">
-            <span style="display: inline-block; width: 15px; height: 15px; background-color: green; margin-right: 8px;"></span>
-            Low
-          </li>
-          <li style="display: inline-block; margin-right: 15px; vertical-align: middle;">
-            <span style="display: inline-block; width: 15px; height: 15px; background-color: orange; margin-right: 8px;"></span>
-            Medium
-          </li>
-          <li style="display: inline-block; vertical-align: middle;">
-            <span style="display: inline-block; width: 15px; height: 15px; background-color: red; margin-right: 8px;"></span>
-            High
-          </li>
-        </ul>
-      </div>
-    `;
-    
-    // Add hazard data if available
-    if (facility.hasOwnProperty('Flood Depth (meters)')) {
-      let floodClass = 'green';
-      if (facility['Flood Depth (meters)'] === '0.5 to 1.5') floodClass = 'orange';
-      if (facility['Flood Depth (meters)'] === 'Greater than 1.5') floodClass = 'red';
-      
-      sidebarContent += `
-        <h5><strong>Flood</strong></h5>
-        <p>
-          <span style="display:inline-block; width:10px; height:10px; background-color: ${floodClass}; margin-right:5px;"></span>
-          <strong>Flood Depth:</strong> ${facility['Flood Depth (meters)']}
-        </p>
-      `;
-    }
-    
-    if (facility.hasOwnProperty('Water Stress Exposure (%)')) {
-      let wsValue = parseFloat(facility['Water Stress Exposure (%)']);
-      let wsClass = 'green';
-      if (wsValue >= 10 && wsValue <= 30) wsClass = 'orange';
-      if (wsValue > 30) wsClass = 'red';
-      
-      sidebarContent += `
-        <h5><strong>Water Stress</strong></h5>
-        <p>
-          <span style="display:inline-block; width:10px; height:10px; background-color: ${wsClass}; margin-right:5px;"></span>
-          <strong>Water Stress Exposure:</strong> ${facility['Water Stress Exposure (%)']}%
-        </p>
-      `;
-    }
-    
-    if (facility.hasOwnProperty('Days over 30° Celsius')) {
-      sidebarContent += `
-        <h5><strong>Heat</strong></h5>
-        <p>
-          <span style="display:inline-block; width:10px; height:10px; background-color: red; margin-right:5px;"></span>
-          Days over 30°C: <strong>${facility['Days over 30° Celsius']}</strong>
-        </p>
-      `;
-      
-      if (facility.hasOwnProperty('Days over 33° Celsius')) {
-        sidebarContent += `
-          <p>
-            <span style="display:inline-block; width:10px; height:10px; background-color: orange; margin-right:5px;"></span>
-            Days over 33°C: <strong>${facility['Days over 33° Celsius']}</strong>
-          </p>
-        `;
-      }
-      
-      if (facility.hasOwnProperty('Days over 35° Celsius')) {
-        sidebarContent += `
-          <p>
-            <span style="display:inline-block; width:10px; height:10px; background-color: green; margin-right:5px;"></span>
-            Days over 35°C: <strong>${facility['Days over 35° Celsius']}</strong>
-          </p>
-        `;
-      }
-    }
-    
-    // Add tropical cyclone data if available
-    if (facility.hasOwnProperty('1-min Maximum Sustain Windspeed 100 year Return Period (km/h)')) {
-      sidebarContent += `
-        <h5><strong>Tropical Cyclone</strong></h5>
-        <p>
-          <span style="display:inline-block; width:10px; height:10px; background-color: orange; margin-right:5px;"></span>
-          1-min Maximum Sustain Windspeed 100yr RP: <strong>${facility['1-min Maximum Sustain Windspeed 100 year Return Period (km/h)']}</strong>
-        </p>
-      `;
-    }
-    
-    // Create hover popup with just the facility name
-    const popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      offset: 25,
-      className: 'facility-hover-popup'
-    }).setHTML(`<strong>${facility.Facility}</strong>`);
-    
-    // Create marker with hover popup
-    const marker = new mapboxgl.Marker({ element: el })
-      .setLngLat([facility.Long, facility.Lat])
-      .setPopup(popup)
-      .addTo(multiHazardMap);
-    
-    // Add mousenter event to show popup on hover
-    marker.getElement().addEventListener('mouseenter', () => {
-      marker.togglePopup();
-    });
-    
-    // Add mouseleave event to hide popup
-    marker.getElement().addEventListener('mouseleave', () => {
-      marker.togglePopup();
-    });
-    
-    // Add click handler to show detailed info in sidebar
-    marker.getElement().addEventListener('click', () => {
-      openSidebar(sidebarContent);
-    });
-    
-    // Track markers
-    facilityMarkers.push(marker);
-    
-    return marker;
-  }
+  
+  // Make facilityMarkers accessible at window level
+window.facilityMarkers = [];
 
-  // Load facility data from session
-  function loadFacilityData() {
-    console.log("Loading facility data...");
+// Function to add a marker for a facility
+function addFacilityMarker(facility) {
+  // Create marker element
+  const el = baseBlueCircle.cloneNode(true);
+  
+  // Create popup content for detailed sidebar
+  let sidebarContent = `
+    <h4><strong>${facility.Facility}</strong></h4>
+    <p><strong>Coordinates:</strong> ${facility.Lat.toFixed(6)}, ${facility.Long.toFixed(6)}</p>
+    <hr>
+    <h5>Hazard Profile</h5>
+    <div style="text-align: center; margin-bottom: 10px;">
+      <ul style="list-style: none; padding: 0; margin: 0 auto; display: inline-block;">
+        <li style="display: inline-block; margin-right: 15px; vertical-align: middle;">
+          <span style="display: inline-block; width: 15px; height: 15px; background-color: green; margin-right: 8px;"></span>
+          Low
+        </li>
+        <li style="display: inline-block; margin-right: 15px; vertical-align: middle;">
+          <span style="display: inline-block; width: 15px; height: 15px; background-color: orange; margin-right: 8px;"></span>
+          Medium
+        </li>
+        <li style="display: inline-block; vertical-align: middle;">
+          <span style="display: inline-block; width: 15px; height: 15px; background-color: red; margin-right: 8px;"></span>
+          High
+        </li>
+      </ul>
+    </div>
+  `;
+  
+  // Add hazard data if available
+  if (facility.hasOwnProperty('Flood Depth (meters)')) {
+    let floodClass = 'green';
+    if (facility['Flood Depth (meters)'] === '0.5 to 1.5') floodClass = 'orange';
+    if (facility['Flood Depth (meters)'] === 'Greater than 1.5') floodClass = 'red';
     
-    // Show map loading indicator
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = 'map-loading';
-    loadingDiv.style.position = 'absolute';
-    loadingDiv.style.top = '50%';
-    loadingDiv.style.left = '50%';
-    loadingDiv.style.transform = 'translate(-50%, -50%)';
-    loadingDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    loadingDiv.style.color = 'white';
-    loadingDiv.style.padding = '15px 20px';
-    loadingDiv.style.borderRadius = '5px';
-    loadingDiv.style.zIndex = '1000';
-    loadingDiv.innerHTML = `
-      <div style="display: flex; flex-direction: column; align-items: center;">
-        <div style="margin-bottom: 10px;">
-          <div style="border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #ffcc00; width: 25px; height: 25px; animation: spin 1s linear infinite;"></div>
-        </div>
-        <div>Loading map data...</div>
-      </div>
+    sidebarContent += `
+      <h5><strong>Flood</strong></h5>
+      <p>
+        <span style="display:inline-block; width:10px; height:10px; background-color: ${floodClass}; margin-right:5px;"></span>
+        <strong>Flood Depth:</strong> ${facility['Flood Depth (meters)']}
+      </p>
     `;
-    
-    document.getElementById('multi-hazard-map').appendChild(loadingDiv);
-    
-    fetch('/climate-hazards-analysis-v2/api/facility-data/')
-      .then(response => response.json())
-      .then(data => {
-        console.log("Received facility data:", data);
-        
-        // Clear existing markers
-        clearFacilityMarkers();
-        
-        // Add new markers
-        if (data.facilities && data.facilities.length > 0) {
-          console.log(`Adding ${data.facilities.length} markers to map`);
-          data.facilities.forEach(facility => {
-            addFacilityMarker(facility);
-          });
-          
-          // Zoom to fit all markers
-          fitMapToMarkers();
-          
-          // Update progress steps if the function exists
-          if (typeof updateProgressSteps === 'function') {
-            updateProgressSteps();
-          }
-        } else {
-          console.log("No facilities found in data");
-        }
-        
-        // Remove loading indicator
-        const loadingElement = document.getElementById('map-loading');
-        if (loadingElement) {
-          loadingElement.remove();
-        }
-        
-        // Remove loading overlay
-        const loadingOverlay = document.getElementById('loading-overlay');
-        if (loadingOverlay) {
-          loadingOverlay.style.display = 'none';
-        }
-      })
-      .catch(error => {
-        console.error('Error loading facility data:', error);
-        
-        // Remove loading indicator
-        const loadingElement = document.getElementById('map-loading');
-        if (loadingElement) {
-          loadingElement.remove();
-        }
-        
-        // Remove loading overlay
-        const loadingOverlay = document.getElementById('loading-overlay');
-        if (loadingOverlay) {
-          loadingOverlay.style.display = 'none';
-        }
-        
-        // Show error message on map
-        const errorDiv = document.createElement('div');
-        errorDiv.style.position = 'absolute';
-        errorDiv.style.top = '50%';
-        errorDiv.style.left = '50%';
-        errorDiv.style.transform = 'translate(-50%, -50%)';
-        errorDiv.style.backgroundColor = 'rgba(220, 53, 69, 0.8)';
-        errorDiv.style.color = 'white';
-        errorDiv.style.padding = '15px 20px';
-        errorDiv.style.borderRadius = '5px';
-        errorDiv.style.zIndex = '1000';
-        errorDiv.style.maxWidth = '80%';
-        errorDiv.style.textAlign = 'center';
-        errorDiv.innerHTML = `
-          <div>
-            <div style="font-weight: bold; margin-bottom: 5px;">Error Loading Data</div>
-            <div>${error.message || 'Failed to load facility data'}</div>
-          </div>
-        `;
-        document.getElementById('multi-hazard-map').appendChild(errorDiv);
-        
-        // Auto-remove error after 5 seconds
-        setTimeout(() => {
-          errorDiv.remove();
-        }, 5000);
-      });
   }
+  
+  // Create hover popup with just the facility name
+  const popup = new mapboxgl.Popup({
+    closeButton: false,
+    closeOnClick: false,
+    offset: 25,
+    className: 'facility-hover-popup'
+  }).setHTML(`<strong>${facility.Facility}</strong>`);
+  
+  // Create marker with hover popup
+  const marker = new mapboxgl.Marker({ element: el })
+    .setLngLat([facility.Long, facility.Lat])
+    .setPopup(popup)
+    .addTo(multiHazardMap);
+  
+  // Add mouseenter event to show popup on hover
+  marker.getElement().addEventListener('mouseenter', () => {
+    marker.togglePopup();
+  });
+  
+  // Add mouseleave event to hide popup
+  marker.getElement().addEventListener('mouseleave', () => {
+    marker.togglePopup();
+  });
+  
+  // Add click handler to show detailed info in sidebar
+  marker.getElement().addEventListener('click', () => {
+    openSidebar(sidebarContent);
+  });
+  
+  // Track markers
+  window.facilityMarkers.push(marker);
+  
+  // Update proceed button visibility whenever markers are added
+  if (typeof updateProceedButtonVisibility === 'function') {
+    updateProceedButtonVisibility();
+  }
+  
+  return marker;
+}
+
+// Clear all facility markers
+function clearFacilityMarkers() {
+  window.facilityMarkers.forEach(marker => marker.remove());
+  window.facilityMarkers = [];
+  
+  // Update proceed button visibility whenever markers are cleared
+  if (typeof updateProceedButtonVisibility === 'function') {
+    updateProceedButtonVisibility();
+  }
+}
+
+// Load facility data from session
+function loadFacilityData() {
+  console.log("Loading facility data...");
+  
+  // Show map loading indicator
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'map-loading';
+  loadingDiv.style.position = 'absolute';
+  loadingDiv.style.top = '50%';
+  loadingDiv.style.left = '50%';
+  loadingDiv.style.transform = 'translate(-50%, -50%)';
+  loadingDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  loadingDiv.style.color = 'white';
+  loadingDiv.style.padding = '15px 20px';
+  loadingDiv.style.borderRadius = '5px';
+  loadingDiv.style.zIndex = '1000';
+  loadingDiv.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <div style="margin-bottom: 10px;">
+        <div style="border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #ffcc00; width: 25px; height: 25px; animation: spin 1s linear infinite;"></div>
+      </div>
+      <div>Loading map data...</div>
+    </div>
+  `;
+  
+  document.getElementById('multi-hazard-map').appendChild(loadingDiv);
+  
+  fetch('/climate-hazards-analysis-v2/api/facility-data/')
+    .then(response => response.json())
+    .then(data => {
+      console.log("Received facility data:", data);
+      
+      // Clear existing markers
+      clearFacilityMarkers();
+      
+      // Add new markers
+      if (data.facilities && data.facilities.length > 0) {
+        console.log(`Adding ${data.facilities.length} markers to map`);
+        data.facilities.forEach(facility => {
+          addFacilityMarker(facility);
+        });
+        
+        // Zoom to fit all markers
+        fitMapToMarkers();
+        
+        // Update progress steps if the function exists
+        if (typeof updateProgressSteps === 'function') {
+          updateProgressSteps();
+        }
+        
+        // Update proceed button visibility if the function exists
+        if (typeof updateProceedButtonVisibility === 'function') {
+          updateProceedButtonVisibility();
+        }
+      } else {
+        console.log("No facilities found in data");
+      }
+      
+      // Remove loading indicator
+      const loadingElement = document.getElementById('map-loading');
+      if (loadingElement) {
+        loadingElement.remove();
+      }
+      
+      // Remove loading overlay
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+      }
+    })
+    .catch(error => {
+      console.error('Error loading facility data:', error);
+      
+      // Clear existing markers on error
+      clearFacilityMarkers();
+      
+      // Remove loading indicator
+      const loadingElement = document.getElementById('map-loading');
+      if (loadingElement) {
+        loadingElement.remove();
+      }
+      
+      // Remove loading overlay
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+      }
+      
+      // Show error message on map
+      const errorDiv = document.createElement('div');
+      errorDiv.style.position = 'absolute';
+      errorDiv.style.top = '50%';
+      errorDiv.style.left = '50%';
+      errorDiv.style.transform = 'translate(-50%, -50%)';
+      errorDiv.style.backgroundColor = 'rgba(220, 53, 69, 0.8)';
+      errorDiv.style.color = 'white';
+      errorDiv.style.padding = '15px 20px';
+      errorDiv.style.borderRadius = '5px';
+      errorDiv.style.zIndex = '1000';
+      errorDiv.style.maxWidth = '80%';
+      errorDiv.style.textAlign = 'center';
+      errorDiv.innerHTML = `
+        <div>
+          <div style="font-weight: bold; margin-bottom: 5px;">Error Loading Data</div>
+          <div>${error.message || 'Failed to load facility data'}</div>
+        </div>
+      `;
+      document.getElementById('multi-hazard-map').appendChild(errorDiv);
+      
+      // Auto-remove error after 5 seconds
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 5000);
+    });
+}
 
   // Clear all facility markers
   function clearFacilityMarkers() {

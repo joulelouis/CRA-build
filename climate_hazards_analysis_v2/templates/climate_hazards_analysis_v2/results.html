@@ -1,0 +1,681 @@
+{% extends "base.html" %}
+{% load static %}
+{% load float_filters %}
+
+{% block title %}
+    Climate Hazard Analysis Results
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom Tabs Navigation */
+    .custom-tabs-nav {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+    }
+    
+    .custom-tabs-nav .nav-item {
+        flex: 0 0 auto;
+    }
+    
+    .custom-tab-link {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .custom-tab-link.active {
+        background-color: #EDEDED;
+        color: #333;
+    }
+
+    .custom-tab-link:not(.active) {
+        background-color: transparent;
+        color: #888;
+    }
+    
+    /* Step Progress Styles */
+    .steps-container {
+        padding: 0 30px;
+    }
+    
+    .step-item {
+        transition: all 0.3s ease;
+    }
+    
+    .step-circle {
+        transition: background-color 0.3s ease, color 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .step-label {
+        transition: color 0.3s ease;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    /* Custom Table Styles */
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0 8px;
+    }
+
+    .custom-table th,
+    .custom-table td {
+        border-right: 1px solid #ccc;
+        padding: 8px;
+    }
+
+    .custom-table-header {
+        background-color: #F8F8F8;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    .custom-table-row {
+        background-color: #FFFFFF;
+        border-radius: 8px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Column Selector Styles */
+    .column-selector {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .column-selector .form-check {
+        margin-bottom: 0.5rem;
+    }
+    
+    .column-selector .fw-bold {
+        font-weight: bold !important;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-6 d-flex flex-column">
+            <!-- Rounded Icon Container with Margin -->
+            <div class="icon-container">
+                <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
+            </div>
+            
+            <!-- Heading below the icon with Margin -->
+            <h1 class="page-heading">Climate Hazard Analysis Results</h1>
+        </div>
+    </div>
+
+    <!-- Step by Step Procedure UI -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-4">
+                    <div class="steps-container d-flex justify-content-between position-relative">
+                        <!-- Progress Line -->
+                        <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
+                        
+                        <!-- Active Progress (100% - All Steps Complete) -->
+                        <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 100%; z-index: 2; transition: width 0.5s ease;"></div>
+                        
+                        <!-- Step 1 (completed) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                                1
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+                        </div>
+                        
+                        <!-- Step 2 (completed) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                                2
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazard</div>
+                        </div>
+                        
+                        <!-- Step 3 (active) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                                3
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Result</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert Messages -->
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    
+    {% if success_message %}
+    <div class="alert alert-success alert-dismissible fade show alert-fade" role="alert">
+        {{ success_message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Results Content -->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Left Column: Column Selector -->
+            <div class="col-md-3">
+                {% include "climate_hazards_analysis_v2/column_selector.html" %}
+            </div>
+            
+            <!-- Right Column: Results Table -->
+            <div class="col-md-9">
+                <div class="card custom-card">
+                    <div class="card-header no-border">
+                        <strong>Hazard Analysis Results</strong>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tabs Navigation -->
+                        <ul class="nav nav-tabs mt-2 custom-tabs-nav" id="hazardTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link custom-tab-link active" id="table-tab" data-bs-toggle="tab" href="#table-content" role="tab" aria-controls="table-content" aria-selected="true">
+                                    Hazard Exposure Table
+                                </a>
+                            </li>
+
+                            <li class="nav-item {% if selected_hazards|length <= 1 %}d-none{% endif %}">
+                                <a class="nav-link custom-tab-link" id="multi-hazard-map-tab" data-bs-toggle="tab" href="#multi-hazard-map" role="tab" aria-controls="map-content" aria-selected="false">
+                                    Multi-Hazard Map 
+                                </a>
+                            </li>
+
+                            {% for hazard in selected_hazards %}
+                                {% if hazard == "Heat" %}
+                                <li class="nav-item">
+                                    <a class="nav-link custom-tab-link" id="heat-exposure-map-tab" data-bs-toggle="tab" href="#heat-map" role="tab" aria-controls="map-content" aria-selected="false">
+                                        Heat Exposure Map
+                                    </a>
+                                </li>
+                                {% elif hazard == "Sea Level Rise" %}
+                                <li class="nav-item">
+                                    <a class="nav-link custom-tab-link" id="sea-level-rise-map-tab" data-bs-toggle="tab" href="#sea-map" role="tab" aria-controls="map-content" aria-selected="false">
+                                        Sea Level Rise Exposure Map
+                                    </a>
+                                </li>
+                                {% elif hazard == "Flood" %}
+                                <li class="nav-item">
+                                    <a class="nav-link custom-tab-link" id="flood-exposure-map-tab" data-bs-toggle="tab" href="#flood-map" role="tab" aria-controls="map-content" aria-selected="false">
+                                        Flood Exposure Map
+                                    </a>
+                                </li>
+                                {% elif hazard == "Water Stress" %}
+                                <li class="nav-item">
+                                    <a class="nav-link custom-tab-link" id="water-stress-map-tab" data-bs-toggle="tab" href="#water-map" role="tab" aria-controls="map-content" aria-selected="false">
+                                        Water Stress Exposure Map
+                                    </a>
+                                </li>
+                                {% elif hazard == "Tropical Cyclones" %}
+                                <li class="nav-item">
+                                    <a class="nav-link custom-tab-link" id="tropical-cyclone-map-tab" data-bs-toggle="tab" href="#cyclone-map" role="tab" aria-controls="map-content" aria-selected="false">
+                                        Tropical Cyclone Exposure Map
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                  
+                        <!-- Tab Content -->
+                        <div class="tab-content mt-3" id="hazardTabsContent">
+                            <!-- Facility Locations Table Tab -->
+                            <div class="tab-pane fade show active" id="table-content" role="tabpanel" aria-labelledby="table-tab">
+                                <!-- Styled Table -->
+                                <div class="table-responsive">
+                                    <table id="data-table" class="table custom-table">
+                                        <thead>
+                                            <!-- Grouping header row -->
+                                            <tr class="group-header">
+                                                {% for group, count in groups.items %}
+                                                    {% if count > 0 %}
+                                                        <th colspan="{{ count }}">{{ group }}</th>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                            <tr class="custom-table-header">
+                                                {% for column in columns %}
+                                                    <th>{{ column }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in data %}
+                                                <tr class="custom-table-row">
+                                                    {% for key, value in row.items %}
+                                                        <td>
+                                                            {# Water Stress Exposure styling #}
+                                                            {% if key == "Water Stress Exposure (%)" and value != "N/A" %}
+                                                                {% with val=value|to_float %}
+                                                                    {% if val < 10 %}
+                                                                        <span style="color: green;">{{ value }}</span>
+                                                                    {% elif val >= 10 and val <= 30 %}
+                                                                        <span style="color: orange;">{{ value }}</span>
+                                                                    {% elif val > 30 %}
+                                                                        <span style="color: red;">{{ value }}</span>
+                                                                    {% else %}
+                                                                        {{ value }}
+                                                                    {% endif %}
+                                                                {% endwith %}
+                                                            
+                                                            {# Flood Depth styling #}
+                                                            {% elif key == "Flood Depth (meters)" %}
+                                                                {% if value == "0.1 to 0.5" %}
+                                                                    <span style="color: green;">{{ value }}</span>
+                                                                {% elif value == "0.5 to 1.5" %}
+                                                                    <span style="color: orange;">{{ value }}</span>
+                                                                {% elif value == "Greater than 1.5" %}
+                                                                    <span style="color: red;">{{ value }}</span>
+                                                                {% else %}
+                                                                    {{ value }}
+                                                                {% endif %}
+                                                            
+                                                            {# Days over columns: we check each separately #}
+                                                            {% elif key == "Days over 30° Celsius" and value != "N/A" %}
+                                                                {% with num=value|to_float %}
+                                                                    {% if num < 10 %}
+                                                                        <span style="color: green;">{{ value }}</span>
+                                                                    {% elif num >= 10 and num < 45 %}
+                                                                        <span style="color: orange;">{{ value }}</span>
+                                                                    {% elif num >= 45 %}
+                                                                        <span style="color: red;">{{ value }}</span>
+                                                                    {% else %}
+                                                                        {{ value }}
+                                                                    {% endif %}
+                                                                {% endwith %}
+                                                            {% elif key == "Days over 33° Celsius" and value != "N/A" %}
+                                                                {% with num=value|to_float %}
+                                                                    {% if num < 10 %}
+                                                                        <span style="color: green;">{{ value }}</span>
+                                                                    {% elif num >= 10 and num < 45 %}
+                                                                        <span style="color: orange;">{{ value }}</span>
+                                                                    {% elif num >= 45 %}
+                                                                        <span style="color: red;">{{ value }}</span>
+                                                                    {% else %}
+                                                                        {{ value }}
+                                                                    {% endif %}
+                                                                {% endwith %}
+                                                            {% elif key == "Days over 35° Celsius" and value != "N/A" %}
+                                                                {% with num=value|to_float %}
+                                                                    {% if num < 10 %}
+                                                                        <span style="color: green;">{{ value }}</span>
+                                                                    {% elif num >= 10 and num < 45 %}
+                                                                        <span style="color: orange;">{{ value }}</span>
+                                                                    {% elif num >= 45 %}
+                                                                        <span style="color: red;">{{ value }}</span>
+                                                                    {% else %}
+                                                                        {{ value }}
+                                                                    {% endif %}
+                                                                {% endwith %}
+
+                                                            {% elif key == "1-min Maximum Sustain Windspeed 10 year Return Period (km/h)" %}
+                                                                {% if value == "Data not available" %}
+                                                                    <span style="color: black;">{{ value }}</span>
+                                                                {% elif value != "N/A" %}
+                                                                    {% with ws=value|to_float %}
+                                                                        {% if ws < 119 %}
+                                                                            <span style="color: green;">{{ value }}</span>
+                                                                        {% elif ws >= 119 and ws < 178 %}
+                                                                            <span style="color: orange;">{{ value }}</span>
+                                                                        {% elif ws >= 178 %}
+                                                                            <span style="color: red;">{{ value }}</span>
+                                                                        {% else %}
+                                                                            {{ value }}
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                {% else %}
+                                                                    {{ value }}
+                                                                {% endif %}
+
+                                                            {% elif key == "1-min Maximum Sustain Windspeed 20 year Return Period (km/h)" %}
+                                                                {% if value == "Data not available" %}
+                                                                    <span style="color: black;">{{ value }}</span>
+                                                                {% elif value != "N/A" %}
+                                                                    {% with ws=value|to_float %}
+                                                                        {% if ws < 119 %}
+                                                                            <span style="color: green;">{{ value }}</span>
+                                                                        {% elif ws >= 119 and ws < 178 %}
+                                                                            <span style="color: orange;">{{ value }}</span>
+                                                                        {% elif ws >= 178 %}
+                                                                            <span style="color: red;">{{ value }}</span>
+                                                                        {% else %}
+                                                                            {{ value }}
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                {% else %}
+                                                                    {{ value }}
+                                                                {% endif %}
+
+                                                            {% elif key == "1-min Maximum Sustain Windspeed 50 year Return Period (km/h)" %}
+                                                                {% if value == "Data not available" %}
+                                                                    <span style="color: black;">{{ value }}</span>
+                                                                {% elif value != "N/A" %}
+                                                                    {% with ws=value|to_float %}
+                                                                        {% if ws < 119 %}
+                                                                            <span style="color: green;">{{ value }}</span>
+                                                                        {% elif ws >= 119 and ws < 178 %}
+                                                                            <span style="color: orange;">{{ value }}</span>
+                                                                        {% elif ws >= 178 %}
+                                                                            <span style="color: red;">{{ value }}</span>
+                                                                        {% else %}
+                                                                            {{ value }}
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                {% else %}
+                                                                    {{ value }}
+                                                                {% endif %}
+
+                                                            {% elif key == "1-min Maximum Sustain Windspeed 100 year Return Period (km/h)" %}
+                                                                {% if value == "Data not available" %}
+                                                                    <span style="color: black;">{{ value }}</span>
+                                                                {% elif value != "N/A" %}
+                                                                    {% with ws=value|to_float %}
+                                                                        {% if ws < 119 %}
+                                                                            <span style="color: green;">{{ value }}</span>
+                                                                        {% elif ws >= 119 and ws < 178 %}
+                                                                            <span style="color: orange;">{{ value }}</span>
+                                                                        {% elif ws >= 178 %}
+                                                                            <span style="color: red;">{{ value }}</span>
+                                                                        {% else %}
+                                                                            {{ value }}
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                {% else %}
+                                                                    {{ value }}
+                                                                {% endif %}
+
+                                                            {% elif key == "Storm Surge Hazard Rating" %}
+                                                                {% if value == "Data not available" %}
+                                                                    <span style="color:black">{{ value }}</span>
+                                                                {% elif value == "N/A" %}
+                                                                    {{ value }}
+                                                                {% else %}
+                                                                    {% with ss=value|to_float %}
+                                                                        {% if ss < 0.1 %}
+                                                                            <span style="color:black">{{ value }}</span>
+                                                                        {% elif ss < 0.5 %}
+                                                                            <span style="color:green">{{ value }}</span>
+                                                                        {% elif ss < 1.5 %}
+                                                                            <span style="color:orange">{{ value }}</span>
+                                                                        {% else %}
+                                                                            <span style="color:red">{{ value }}</span>
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                {% endif %}
+
+                                                            {% elif key == "Rainfall Induced Landslide Hazard Rating" %}
+                                                                {% if value == "Data not available" %}
+                                                                    <span style="color:black">{{ value }}</span>
+                                                                {% elif value == "N/A" %}
+                                                                    {{ value }}
+                                                                {% else %}
+                                                                    {% with ril=value|to_float %}
+                                                                        {% if ril == 0 %}
+                                                                            <span style="color:black">{{ value }}</span>
+                                                                        {% elif ril < 1 %}
+                                                                            <span style="color:red">{{ value }}</span>
+                                                                        {% elif ril < 1.5 %}
+                                                                            <span style="color:orange">{{ value }}</span>
+                                                                        {% else %}
+                                                                            <span style="color:green">{{ value }}</span>
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                {% endif %}
+                                                            
+                                                            {# Fallback: output the value normally #}
+                                                            {% else %}
+                                                                {{ value }}
+                                                            {% endif %}
+                                                        </td>
+                                                    {% endfor %}
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                              
+                                <!-- After table controls -->
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <!-- Legend on the left -->
+                                    <ul class="legend d-flex" style="list-style: none; padding: 0; margin: 0;">
+                                        <li class="low" style="display: flex; align-items: center; margin-right: 15px;">
+                                            <span style="display: inline-block; width: 15px; height: 15px; background-color: green; margin-right: 8px;"></span>
+                                            Low
+                                        </li>
+                                        <li class="medium" style="display: flex; align-items: center; margin-right: 15px;">
+                                            <span style="display: inline-block; width: 15px; height: 15px; background-color: orange; margin-right: 8px;"></span>
+                                            Medium
+                                        </li>
+                                        <li class="high" style="display: flex; align-items: center;">
+                                            <span style="display: inline-block; width: 15px; height: 15px; background-color: red; margin-right: 8px;"></span>
+                                            High
+                                        </li>
+                                    </ul>
+                                    <!-- Generate Report Button on the right -->
+                                    <div class="text-end">
+                                        <a href="{% url 'climate_hazards_analysis:generate_report' %}" class="btn btn-warning">
+                                            <strong>Generate Report</strong>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Multi-Hazard Map Tab -->
+                            <div class="tab-pane fade text-center" id="multi-hazard-map" role="tabpanel" aria-labelledby="multi-hazard-map-tab">
+                                <h2>Multi-Hazard Map</h2>
+                                <div id="multi-hazard-map-content"></div>
+                            </div>
+
+                            <!-- Individual Hazard Map Tabs -->
+                            {% for hazard in selected_hazards %}
+                                {% if hazard == "Heat" %}
+                                <div class="tab-pane fade text-center" id="heat-map" role="tabpanel" aria-labelledby="heat-exposure-map-tab">
+                                    <h2>Heat Exposure Map</h2>
+                                    <div id="heat-map-content"></div>
+                                </div>
+                                {% elif hazard == "Sea Level Rise" %}
+                                <div class="tab-pane fade text-center" id="sea-map" role="tabpanel" aria-labelledby="sea-level-rise-map-tab">
+                                    <h2>Sea Level Rise Exposure Map</h2>
+                                    <div id="sea-map-content"></div>
+                                </div>
+                                {% elif hazard == "Flood" %}
+                                <div class="tab-pane fade text-center" id="flood-map" role="tabpanel" aria-labelledby="flood-exposure-map-tab">
+                                    <h2>Flood Exposure Map</h2>
+                                    <div id="flood-map-content"></div>
+                                </div>
+                                {% elif hazard == "Water Stress" %}
+                                <div class="tab-pane fade text-center" id="water-map" role="tabpanel" aria-labelledby="water-stress-map-tab">
+                                    <h2>Water Stress Exposure Map</h2>
+                                    <div id="water-map-content"></div>
+                                </div>
+                                {% elif hazard == "Tropical Cyclones" %}
+                                <div class="tab-pane fade text-center" id="cyclone-map" role="tabpanel" aria-labelledby="tropical-cyclone-map-tab">
+                                    <h2>Tropical Cyclone Exposure Map</h2>
+                                    <div id="cyclone-map-content"></div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12 d-flex justify-content-between">
+            <a href="{% url 'climate_hazards_analysis_v2:select_hazards' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Hazard Selection
+            </a>
+            <a href="{% url 'climate_hazards_analysis_v2:view_map' %}" class="btn btn-primary">
+                <i class="fas fa-map-marker-alt me-2"></i> Return to Map
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Include DataTables CSS & JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.2.2/css/fixedColumns.dataTables.min.css">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/fixedcolumns/4.2.2/js/dataTables.fixedColumns.min.js"></script>
+
+<script>
+    // Column visibility management
+    $(document).ready(function() {
+        let dataTable;
+        
+        // Initialize DataTable with column visibility support
+        function initializeDataTable() {
+            dataTable = $('#data-table').DataTable({
+                scrollX: true,
+                fixedHeader: true,
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Save to Excel',
+                        className: 'btn btn-outline-secondary',
+                        exportOptions: {
+                            columns: ':visible'  // Only export visible columns
+                        }
+                    }
+                ],
+                fixedColumns: {
+                    leftColumns: 3  // Freeze the first three columns
+                }
+            });
+            
+            // Apply initial column visibility (all should be visible)
+            updateColumnVisibility();
+        }
+        
+        // Handle parent hazard checkbox click
+        $('.hazard-group').on('change', function() {
+            const isChecked = $(this).prop('checked');
+            const hazardClass = $(this).data('hazard');
+            
+            // Check/uncheck all child checkboxes
+            $(`.hazard-column.${hazardClass}`).prop('checked', isChecked);
+            
+            // Update column visibility
+            updateColumnVisibility();
+        });
+        
+        // Handle individual column checkbox click
+        $('.hazard-column').on('change', function() {
+            const hazardClass = $(this).attr('class').split(' ').find(cls => cls !== 'form-check-input' && cls !== 'hazard-column');
+            const hazardColumns = $(`.hazard-column.${hazardClass}`);
+            const checkedColumns = $(`.hazard-column.${hazardClass}:checked`);
+            
+            // Update parent checkbox based on children
+            $(`[data-hazard="${hazardClass}"]`).prop('checked', checkedColumns.length > 0);
+            $(`[data-hazard="${hazardClass}"]`).prop('indeterminate', checkedColumns.length > 0 && checkedColumns.length < hazardColumns.length);
+            
+            // Update column visibility
+            updateColumnVisibility();
+        });
+        
+        // Show all columns
+        $('#show-all-columns').on('click', function() {
+            $('.hazard-group, .hazard-column').prop('checked', true);
+            $('.hazard-group').prop('indeterminate', false);
+            updateColumnVisibility();
+        });
+        
+        // Hide all columns (except base columns)
+        $('#hide-all-columns').on('click', function() {
+            $('.hazard-group, .hazard-column').prop('checked', false);
+            $('.hazard-group').prop('indeterminate', false);
+            updateColumnVisibility();
+        });
+        
+        // Function to update column visibility based on checkboxes
+        function updateColumnVisibility() {
+            if (!dataTable) return;
+            
+            // First, show the base columns (first 3)
+            dataTable.columns(0).visible(true);
+            dataTable.columns(1).visible(true);
+            dataTable.columns(2).visible(true);
+            
+            // Then, handle the hazard columns
+            $('.hazard-column').each(function() {
+                const columnName = $(this).data('column');
+                const isVisible = $(this).prop('checked');
+
+                // Find the column index by header text
+                const columnIndex = findColumnIndexByName(columnName);
+                if (columnIndex !== -1) {
+                    dataTable.column(columnIndex).visible(isVisible);
+                }
+            });
+            
+            // Adjust column widths
+            dataTable.columns.adjust().draw();
+        }
+        
+        // Helper function to find column index by header text
+        function findColumnIndexByName(columnName) {
+            let index = -1;
+            
+            $('#data-table th').each(function(i) {
+                if ($(this).text().trim() === columnName) {
+                    index = i;
+                    return false; // Break the loop
+                }
+            });
+            
+            return index;
+        }
+        
+        // Load map content when tab is shown
+        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = $(e.target).attr("href");
+            
+            // Load appropriate map content based on selected tab
+            if (target === "#water-map" && $("#water-map-content").is(':empty')) {
+                $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_fetch' %}");
+            }
+            if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
+                $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_fetch' %}");
+            }
+            if (target === "#heat-map" && $("#heat-map-content").is(':empty')) {
+                $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_fetch' %}");
+            }
+            if (target === "#sea-map" && $("#sea-map-content").is(':empty')) {
+                $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_fetch' %}");
+            }
+            if (target === "#cyclone-map" && $("#cyclone-map-content").is(':empty')) {
+                $("#cyclone-map-content").load("{% url 'climate_hazards_analysis:tropical_cyclone_mapbox_fetch' %}");
+            }
+            if (target === "#multi-hazard-map" && $("#multi-hazard-map-content").is(':empty')) {
+                $("#multi-hazard-map-content").load("{% url 'climate_hazards_analysis:multi_hazard_mapbox_fetch' %}");
+            }
+        });
+        
+        // Initialize the DataTable
+        initializeDataTable();
+    });
+</script>
+{% endblock %}

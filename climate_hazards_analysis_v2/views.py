@@ -7,6 +7,9 @@ from django.conf import settings
 from .utils import standardize_facility_dataframe, load_cached_hazard_data, combine_facility_with_hazard_data
 import logging
 
+# Import from climate_hazards_analysis module
+from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
+
 logger = logging.getLogger(__name__)
 
 def view_map(request):
@@ -135,3 +138,156 @@ def add_facility(request):
         'success': False,
         'error': 'Only POST method is allowed'
     }, status=405)
+
+def select_hazards(request):
+    """
+    View for selecting climate/weather hazards for analysis.
+    This is the second step in the climate hazard analysis workflow.
+    """
+    # Get facility data from session
+    facility_data = request.session.get('climate_hazards_v2_facility_data', [])
+    
+    # Define available hazard types
+    hazard_types = [
+        'Flood',
+        'Water Stress',
+        'Heat',
+        'Sea Level Rise', 
+        'Tropical Cyclones',
+        'Storm Surge',
+        'Rainfall Induced Landslide'
+    ]
+    
+    context = {
+        'facility_count': len(facility_data),
+        'hazard_types': hazard_types,
+        'selected_hazards': request.session.get('climate_hazards_v2_selected_hazards', []),
+    }
+    
+    # Handle form submission
+    if request.method == 'POST':
+        selected_hazards = request.POST.getlist('hazards')
+        request.session['climate_hazards_v2_selected_hazards'] = selected_hazards
+        
+        # Redirect to results page
+        return redirect('climate_hazards_analysis_v2:show_results')
+        
+    # For GET requests, just display the hazard selection form
+    return render(request, 'climate_hazards_analysis_v2/select_hazards.html', context)
+
+def show_results(request):
+    """
+    View to display climate hazard analysis results.
+    This is the third step in the climate hazard analysis workflow.
+    """
+    # Get facility data and selected hazards from session
+    facility_data = request.session.get('climate_hazards_v2_facility_data', [])
+    selected_hazards = request.session.get('climate_hazards_v2_selected_hazards', [])
+    facility_csv_path = request.session.get('climate_hazards_v2_facility_csv_path')
+    
+    # Check if we have the necessary data
+    if not facility_data or not selected_hazards:
+        return redirect('climate_hazards_analysis_v2:select_hazards')
+    
+    try:
+        # Re-use the generate_climate_hazards_analysis function from the original module
+        # This function processes the CSV file and generates hazard analysis results
+        result = generate_climate_hazards_analysis(
+            facility_csv_path=facility_csv_path,
+            selected_fields=selected_hazards
+        )
+        
+        # Check for errors in the result
+        if result is None or 'error' in result:
+            error_message = result.get('error', 'Unknown error') if result else 'Analysis failed.'
+            logger.error(f"Climate hazards analysis error: {error_message}")
+            
+            return render(request, 'climate_hazards_analysis_v2/select_hazards.html', {
+                'error': error_message,
+                'facility_count': len(facility_data),
+                'hazard_types': [
+                    'Flood',
+                    'Water Stress',
+                    'Heat',
+                    'Sea Level Rise', 
+                    'Tropical Cyclones',
+                    'Storm Surge',
+                    'Rainfall Induced Landslide'
+                ],
+                'selected_hazards': selected_hazards
+            })
+        
+        # Get the combined CSV path and load the data
+        combined_csv_path = result.get('combined_csv_path')
+        
+        if not combined_csv_path or not os.path.exists(combined_csv_path):
+            logger.error(f"Combined CSV not found: {combined_csv_path}")
+            return render(request, 'climate_hazards_analysis_v2/select_hazards.html', {
+                'error': 'Combined analysis output not found.',
+                'facility_count': len(facility_data),
+                'hazard_types': [
+                    'Flood',
+                    'Water Stress',
+                    'Heat',
+                    'Sea Level Rise', 
+                    'Tropical Cyclones',
+                    'Storm Surge',
+                    'Rainfall Induced Landslide'
+                ],
+                'selected_hazards': selected_hazards
+            })
+        
+        # Load the combined CSV file
+        df = pd.read_csv(combined_csv_path)
+        data = df.to_dict(orient="records")
+        columns = df.columns.tolist()
+        
+        # Create groups for column headers (optional)
+        # This is a simplified version, you may want to enhance this
+        groups = {
+            'Facility Info': 3,  # First 3 columns (Facility, Lat, Long)
+            'Climate Hazards': len(columns) - 3  # Rest of the columns
+        }
+        
+        # Get the paths to any generated plots
+        plot_path = result.get('plot_path')
+        all_plots = result.get('all_plots', [])
+        
+        # Store analysis results in session for potential reuse
+        request.session['climate_hazards_v2_results'] = {
+            'data': data,
+            'columns': columns,
+            'plot_path': plot_path if plot_path else None,
+            'all_plots': all_plots
+        }
+        
+        # Prepare context for the template
+        context = {
+            'data': data,
+            'columns': columns,
+            'groups': groups,
+            'plot_path': plot_path,
+            'all_plots': all_plots,
+            'selected_hazards': selected_hazards,
+            'success_message': f"Successfully analyzed {len(data)} facilities for {len(selected_hazards)} hazard types."
+        }
+        
+        return render(request, 'climate_hazards_analysis_v2/results.html', context)
+        
+    except Exception as e:
+        logger.exception(f"Error in climate hazards analysis: {str(e)}")
+        
+        return render(request, 'climate_hazards_analysis_v2/select_hazards.html', {
+            'error': f"Error in climate hazards analysis: {str(e)}",
+            'facility_count': len(facility_data),
+            'hazard_types': [
+                'Flood',
+                'Water Stress',
+                'Heat',
+                'Sea Level Rise', 
+                'Tropical Cyclones',
+                'Storm Surge',
+                'Rainfall Induced Landslide'
+            ],
+            'selected_hazards': selected_hazards
+        })
