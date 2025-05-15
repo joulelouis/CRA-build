@@ -138,6 +138,73 @@
     .group-header th:nth-child(8) {
         background-color: #e2e3e5; /* Rainfall-Induced Landslide - light gray */
     }
+
+    /* Improved table layout for proportionate columns */
+.dataTables_wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* Allow table to take full width */
+.dataTables_scrollHeadInner,
+.dataTables_scrollHeadInner table,
+.dataTables_scrollBody,
+.dataTables_scrollBody table {
+    width: 100% !important;
+}
+
+/* Better header wrapping */
+.custom-table thead th {
+    white-space: normal;
+    word-wrap: break-word;
+    vertical-align: top;
+    padding: 8px 4px;
+}
+
+/* Better group header styling */
+.group-header th {
+    text-align: center;
+    font-weight: bold;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 10px 4px;
+}
+
+/* Better cell styling for uniform look */
+.custom-table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px 4px;
+    word-break: break-word;
+}
+
+/* Keep header text centered as well */
+.custom-table th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Class that DataTables can use for header wrapping */
+.dt-head-wrap {
+    white-space: normal !important;
+}
+
+/* Make sure the fixed first column looks good */
+.DTFC_LeftBodyLiner {
+    overflow-x: hidden !important;
+}
+
+/* Ensure vertical scroll shows when needed */
+.dataTables_scrollBody {
+    max-height: 600px; /* Or adjust as needed */
+}
+
+/* Center content in DataTables fixed columns too */
+.DTFC_LeftWrapper td, 
+.DTFC_LeftWrapper th {
+    text-align: center;
+    vertical-align: middle;
+}
 </style>
 
 <div class="container-fluid mt-4">
@@ -609,7 +676,9 @@ $(document).ready(function() {
     function initializeDataTable() {
         dataTable = $('#data-table').DataTable({
             scrollX: true,
+            scrollCollapse: true, // Helps with height adjustment
             fixedHeader: true,
+            autoWidth: true, // Allow automatic width calculation
             dom: 'Bfrtip',
             buttons: [
                 {
@@ -617,64 +686,81 @@ $(document).ready(function() {
                     text: '<i class="fas fa-file-excel"></i> Save to Excel',
                     className: 'btn btn-outline-secondary',
                     exportOptions: {
-                        columns: ':visible'  // Only export visible columns
+                        columns: ':visible'
                     }
                 }
             ],
             fixedColumns: {
-                leftColumns: 1  // Freeze the first three columns
+                leftColumns: 1
             },
-            // Set initial visible columns
+            // Better column sizing for proportional layout
             columnDefs: [
-                { targets: [0], visible: true },  // Facility column
-                { targets: [1, 2], visible: false }  // Hide Lat and Long columns
-            ]
+                // Hide Lat/Long
+                { targets: [1, 2], visible: false },
+                
+                // Column proportions
+                { width: '18%', targets: 0 }, // Facility name gets more space
+                { width: '10%', targets: '_all' }, // Other columns share remaining space
+                
+                // Improve wrapping behavior 
+                { className: "dt-head-center dt-body-center", targets: "_all" }
+            ],
+            // Improve drawing
+            drawCallback: function() {
+                // Force redraw of table header to ensure alignment
+                $(window).trigger('resize');
+            }
         });
-
-        // Make sure the header row with groups is not sorted
-        orderCellsTop: true
         
-        // Apply initial column visibility (all should be visible)
-        setTimeout(updateColumnVisibility, 100); // Delay to ensure table is fully initialized
+        // Apply initial column visibility with a delay to ensure table is rendered
+        setTimeout(function() {
+            updateColumnVisibility();
+            // Additional redraw to ensure correct proportions
+            dataTable.columns.adjust().draw(false);
+        }, 150);
+        
+        // Handle window resize better
+        $(window).on('resize', function() {
+            if (dataTable) {
+                // Delay slightly to batch resize events
+                clearTimeout(window.resizeTimeout);
+                window.resizeTimeout = setTimeout(function() {
+                    dataTable.columns.adjust();
+                }, 100);
+            }
+        });
     }
     
-    // Handle parent hazard checkbox click
+    // Update hazard group checkbox handler
     $('.hazard-group').on('change', function() {
         const isChecked = $(this).prop('checked');
         const hazardClass = $(this).data('hazard');
         
-        // Check/uncheck all child checkboxes
+        // Update all child checkboxes without triggering individual change events
         $(`.hazard-column.${hazardClass}`).prop('checked', isChecked);
         
-        // Update column visibility
+        // Do a single update to column visibility
         updateColumnVisibility();
     });
     
-    // Handle individual column checkbox click
+    // Individual column checkbox handler
     $('.hazard-column').on('change', function() {
-        const hazardClass = $(this).attr('class').split(' ').find(cls => cls !== 'form-check-input' && cls !== 'hazard-column');
-        const hazardColumns = $(`.hazard-column.${hazardClass}`);
-        const checkedColumns = $(`.hazard-column.${hazardClass}:checked`);
-        
-        // Update parent checkbox based on children
-        $(`[data-hazard="${hazardClass}"]`).prop('checked', checkedColumns.length > 0);
-        $(`[data-hazard="${hazardClass}"]`).prop('indeterminate', checkedColumns.length > 0 && checkedColumns.length < hazardColumns.length);
-        
+        // Update parent checkbox state
+        updateParentCheckboxState($(this));
         // Update column visibility
         updateColumnVisibility();
     });
     
-    // Show all columns
+    // Make show/hide all buttons more efficient
     $('#show-all-columns').on('click', function() {
-        $('.hazard-group, .hazard-column').prop('checked', true);
-        $('.hazard-group').prop('indeterminate', false);
+        $('.hazard-column').prop('checked', true);
+        updateParentCheckboxes();
         updateColumnVisibility();
     });
-    
-    // Hide all columns (except base columns)
+
     $('#hide-all-columns').on('click', function() {
-        $('.hazard-group, .hazard-column').prop('checked', false);
-        $('.hazard-group').prop('indeterminate', false);
+        $('.hazard-column').prop('checked', false);
+        updateParentCheckboxes();
         updateColumnVisibility();
     });
     
@@ -686,67 +772,76 @@ $(document).ready(function() {
         }
         
         try {
-            // Get column names from DataTable
-            const tableColumns = [];
-            dataTable.columns().every(function(index) {
-                const headerText = $(this.header()).text().trim();
-                tableColumns.push({ index: index, text: headerText });
-            });
-            
-            // Create mapping of column names to indices
+            // Map column names to indices
             const columnMap = {};
-            tableColumns.forEach(col => {
-                columnMap[col.text] = col.index;
+            dataTable.columns().every(function(index) {
+                columnMap[$(this.header()).text().trim()] = index;
             });
             
-            // Always show Facility column, hide Lat/Long
-            dataTable.column(0).visible(true);
-            dataTable.column(1).visible(false);
-            dataTable.column(2).visible(false);
+            // Track which columns should be visible
+            const visibleColumns = new Set(['Facility']); // Always show Facility
             
-            // Track which groups have visible columns
-            const groupVisibility = {
-                'Facility Information': true,
-                'Flood': false,
-                'Water Stress': false,
-                'Sea Level Rise': false,
-                'Tropical Cyclone': false,
-                'Heat': false,
-                'Storm Surge': false,
-                'Rainfall-Induced Landslide': false
-            };
-            
-            // Process each checkbox
+            // Determine which columns to show based on checkboxes
             $('.hazard-column').each(function() {
                 const columnName = $(this).data('column');
-                const isVisible = $(this).prop('checked');
-                const hazardType = $(this).closest('.mb-3').find('.fw-bold').text().trim();
-                
-                // Set column visibility
-                if (columnName in columnMap) {
-                    dataTable.column(columnMap[columnName]).visible(isVisible);
-                    
-                    // Update group visibility tracking
-                    if (isVisible) {
-                        // Mark the corresponding group as having visible columns
-                        if (hazardType === 'Flood') groupVisibility['Flood'] = true;
-                        else if (hazardType === 'Water Stress') groupVisibility['Water Stress'] = true;
-                        else if (hazardType === 'Sea Level Rise') groupVisibility['Sea Level Rise'] = true;
-                        else if (hazardType === 'Tropical Cyclone') groupVisibility['Tropical Cyclone'] = true;
-                        else if (hazardType === 'Heat') groupVisibility['Heat'] = true;
-                        else if (hazardType === 'Storm Surge') groupVisibility['Storm Surge'] = true;
-                        else if (hazardType === 'Rainfall Induced Landslide') groupVisibility['Rainfall-Induced Landslide'] = true;
-                    }
+                if ($(this).prop('checked') && columnMap.hasOwnProperty(columnName)) {
+                    visibleColumns.add(columnName);
                 }
             });
             
-            // Adjust column widths and redraw
-            dataTable.columns.adjust().draw();
+            // Update column visibility without redrawing for each column
+            dataTable.columns().every(function() {
+                const headerText = $(this.header()).text().trim();
+                const shouldBeVisible = visibleColumns.has(headerText);
+                
+                // Only change visibility if needed (avoids unnecessary redraws)
+                if (this.visible() !== shouldBeVisible) {
+                    this.visible(shouldBeVisible, false); // false = no redraw
+                }
+            });
+            
+            // Do a single redraw after all columns are updated
+            dataTable.columns.adjust().draw(false);
+            
+            // Additional redraw after a short delay to fix any remaining layout issues
+            setTimeout(function() {
+                $(window).trigger('resize');
+                dataTable.columns.adjust();
+            }, 50);
             
         } catch (error) {
             console.error("Error updating column visibility:", error);
         }
     }
+
+    // Helper function to update a specific parent checkbox state
+    function updateParentCheckboxState(changedCheckbox) {
+        const hazardClass = changedCheckbox.attr('class').split(' ').find(cls => 
+            cls !== 'form-check-input' && cls !== 'hazard-column');
+        
+        if (!hazardClass) return;
+        
+        const parentCheckbox = $(`[data-hazard="${hazardClass}"]`);
+        const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+        const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+        
+        parentCheckbox.prop('checked', checkedChilds.length > 0);
+        parentCheckbox.prop('indeterminate', 
+            checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+    }
+
+    // Helper function to update all parent checkbox states
+    function updateParentCheckboxes() {
+        $('.hazard-group').each(function() {
+            const hazardClass = $(this).data('hazard');
+            const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+            const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+            
+            $(this).prop('checked', checkedChilds.length > 0);
+            $(this).prop('indeterminate', 
+                checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+        });
+    }   
     
     // Load map content when tab is shown
     $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
