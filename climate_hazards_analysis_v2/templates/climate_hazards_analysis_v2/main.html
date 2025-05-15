@@ -208,6 +208,22 @@
                                 <p id="file-name" class="file-name-display">No file chosen</p>
                             </div>
                         </div>
+
+                        <!-- Instructions Panel - MOVED HERE -->
+        <div class="mt-4">
+            <div class="card-header no-border">
+                <strong>Instructions</strong>
+            </div>
+            <div class="card-body p-3 bg-light rounded">
+                <ol class="mb-0 ps-3">
+                    <li>Upload a CSV file with facility locations (must include Latitude/Longitude columns).</li>
+                    <li>Click "Generate Map" to display facilities on the map.</li>
+                    <li>Click anywhere on the map to add a new marker.</li>
+                    <li>Hover over markers to see facility names.</li>
+                    <li>Click "Proceed to Select Climate/Weather Hazard" button to select climate/weather hazards and generate asset exposure.</li>
+                </ol>
+            </div>
+        </div>
                     </div>
                     <!-- Card Footer Inside the Card -->
                     <div class="card-footer text-center card-footer-no-border">
@@ -226,22 +242,6 @@
                 <!-- Hidden File Input -->
                 <input type="file" name="facility_csv" id="facilityCsv" accept=".csv" class="d-none" onchange="updateFileName()">
             </form>
-
-            <!-- Instructions Panel -->
-            <div class="card mt-3 custom-card">
-                <div class="card-header no-border">
-                    <strong>Instructions</strong>
-                </div>
-                <div class="card-body">
-                    <ol>
-                        <li>Upload a CSV file with facility locations (must include Latitude/Longitude columns)</li>
-                        <li>Click "Generate Map" to display facilities on the map</li>
-                        <li>Click anywhere on the map to add a new marker</li>
-                        <li>Click on markers to view facility details</li>
-                        <li>Hover over markers to see facility names</li>
-                    </ol>
-                </div>
-            </div>
         </div>
         
         <!-- Right side: Map Component -->
