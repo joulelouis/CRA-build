@@ -45,7 +45,8 @@ def standardize_facility_dataframe(df):
     # Standardize facility name column
     facility_name_variations = [
         'facility', 'site', 'site name', 
-        'facility name', 'facilty name'
+        'facility name', 'facilty name', 'name',
+        'asset name'  # Add this to recognize "Asset Name" column
     ]
     
     # Find and rename facility name column
@@ -54,11 +55,12 @@ def standardize_facility_dataframe(df):
             df.rename(columns={col: 'Facility'}, inplace=True)
             break
             
-    # Standardize lat/long columns
+    # Standardize lat/long columns - make it case-insensitive
     coord_mapping = {'latitude': 'Lat', 'longitude': 'Long'}
     for old, new in coord_mapping.items():
-        if old in df.columns and new not in df.columns:
-            df.rename(columns={old: new}, inplace=True)
+        for col in df.columns:
+            if col.lower() == old.lower() and new not in df.columns:
+                df.rename(columns={col: new}, inplace=True)
     
     # Validate required columns
     required_cols = ['Facility', 'Lat', 'Long']

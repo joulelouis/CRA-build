@@ -21,10 +21,11 @@ def standardize_facility_dataframe(df):
     # Standardize facility name column - Include 'Site' as a valid name column
     facility_name_variations = [
         'facility', 'site', 'site name', 
-        'facility name', 'facilty name', 'name'
+        'facility name', 'facilty name', 'name',
+        'asset name'  
     ]
     
-    # Find and rename facility name column
+     # Find and rename facility name column
     for col in df.columns:
         if col.strip().lower() in facility_name_variations:
             df.rename(columns={col: 'Facility'}, inplace=True)
