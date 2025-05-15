@@ -24,7 +24,7 @@ def process_data(data):
             if pd.isna(value):
                 if key == 'Elevation (meter above sea level)' or key =='2030 Sea Level Rise (in meters)' or key =='2040 Sea Level Rise (in meters)' or key =='2050 Sea Level Rise (in meters)' or key =='2060 Sea Level Rise (in meters)':
                     row[key] = "Little to no effect"
-                elif key == '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)' or key == '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)' or key == '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)' or key == '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)':
+                elif key == 'Extreme Windspeed 10 year Return Period (km/h)' or key == 'Extreme Windspeed 20 year Return Period (km/h)' or key == 'Extreme Windspeed 50 year Return Period (km/h)' or key == 'Extreme Windspeed 100 year Return Period (km/h)':
                     row[key] = "Data not available"
                 else:
                     row[key] = "N/A"

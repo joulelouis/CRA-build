@@ -304,20 +304,20 @@ def process_tropical_cyclone_analysis(facility_csv_path, selected_fields):
         
         # Standardize TC column names - EXCLUDE 200 and 500-year periods
         tc_rename = {
-            '1-min MSW 10 yr RP': '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
-            '1-min MSW 20 yr RP': '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
-            '1-min MSW 50 yr RP': '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
-            '1-min MSW 100 yr RP': '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)',
+            '1-min MSW 10 yr RP': 'Extreme Windspeed 10 year Return Period (km/h)',
+            '1-min MSW 20 yr RP': 'Extreme Windspeed 20 year Return Period (km/h)',
+            '1-min MSW 50 yr RP': 'Extreme Windspeed 50 year Return Period (km/h)',
+            '1-min MSW 100 yr RP': 'Extreme Windspeed 100 year Return Period (km/h)',
             # 200 and 500-year periods are removed
         }
         df_tc.rename(columns=tc_rename, inplace=True)
         
         # Identify TC columns - ONLY include the desired return periods
         tc_cols = [
-            '1-min Maximum Sustain Windspeed 10 year Return Period (km/h)',
-            '1-min Maximum Sustain Windspeed 20 year Return Period (km/h)',
-            '1-min Maximum Sustain Windspeed 50 year Return Period (km/h)',
-            '1-min Maximum Sustain Windspeed 100 year Return Period (km/h)'
+            'Extreme Windspeed 10 year Return Period (km/h)',
+            'Extreme Windspeed 20 year Return Period (km/h)',
+            'Extreme Windspeed 50 year Return Period (km/h)',
+            'Extreme Windspeed 100 year Return Period (km/h)'
         ]
         
         # Filter columns that exist in the DataFrame
@@ -510,7 +510,7 @@ def process_nan_values(df):
             df[col] = df[col].apply(
                 lambda v: "Little to no effect" if pd.isna(v) else v
             )
-        elif 'Maximum Sustain Windspeed' in col:
+        elif 'Extreme Windspeed' in col:
             df[col] = df[col].apply(
                 lambda v: "Data not available" if pd.isna(v) else v
             )
