@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import os
+from io import BytesIO
 import pandas as pd
 import json
 from django.conf import settings
@@ -9,6 +10,7 @@ import logging
 
 # Import from climate_hazards_analysis module
 from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
+from climate_hazards_analysis.utils.generate_report import generate_climate_hazards_report_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -291,3 +293,32 @@ def show_results(request):
             ],
             'selected_hazards': selected_hazards
         })
+    
+def generate_report(request):
+    """
+    Django view that generates the PDF report and returns it as an HTTP response.
+    """
+    # Get selected hazards from the v2 module's session key
+    selected_fields = request.session.get('climate_hazards_v2_selected_hazards', [])
+    
+    # If no hazards are selected, try to get from results
+    if not selected_fields:
+        # Try to get from results data if available
+        results = request.session.get('climate_hazards_v2_results', {})
+        if results and 'selected_hazards' in results:
+            selected_fields = results.get('selected_hazards', [])
+    
+    # Initialize a BytesIO buffer for the PDF
+    buffer = BytesIO()
+    
+    # Generate the PDF report
+    generate_climate_hazards_report_pdf(buffer, selected_fields)
+    
+    # Get the PDF content
+    pdf = buffer.getvalue()
+    buffer.close()
+    
+    # Create and return the HTTP response with the PDF
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Climate_Hazard_Exposure_Report_V2.pdf"'
+    return response

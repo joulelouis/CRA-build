@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    Climate Hazard Analysis
+    Climate Hazard Exposure Analysis
 {% endblock %}
 
 {% block content %}
@@ -107,7 +107,7 @@
             </div>
             
             <!-- Heading below the icon with Margin -->
-            <h1 class="page-heading">Climate Hazard Analysis</h1>
+            <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
         </div>
     </div>
 
@@ -120,31 +120,47 @@
                     <!-- Progress Line -->
                     <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
                     
-                    <!-- Active Progress -->
-                    <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 33%; z-index: 2; transition: width 0.5s ease;"></div>
+                    <!-- Active Progress (60% for step 3 completion) -->
+                    <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 60%; z-index: 2; transition: width 0.5s ease;"></div>
                     
-                    <!-- Step 1 -->
-                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                    <!-- Step 1 (completed) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                             1
                         </div>
                         <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
                     </div>
                     
-                    <!-- Step 2 -->
-                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
-                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                    <!-- Step 2 (completed) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                             2
                         </div>
-                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Select Climate/Weather Hazard</div>
+                        <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
                     </div>
                     
-                    <!-- Step 3 -->
-                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
-                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                    <!-- Step 3 (active) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                             3
                         </div>
-                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Asset Exposure Result</div>
+                        <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+                    </div>
+                    
+                    <!-- Step 4 (upcoming) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                            4
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Set Sensitivity Parameters</div>
+                    </div>
+                    
+                    <!-- Step 5 (upcoming) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                            5
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
                     </div>
                 </div>
             </div>
@@ -421,5 +437,53 @@
         alert("Proceeding to select climate/weather hazards...");
         window.location.href = "{% url 'climate_hazards_analysis_v2:select_hazards' %}";
     }
+
+    // Function to update the steps progress
+    function updateStepProgress(currentStep) {
+        const totalSteps = 5;
+        const progressPercentage = (currentStep / totalSteps) * 100;
+        
+        // Update progress bar width
+        document.querySelector('.active-progress').style.width = progressPercentage + '%';
+        
+        // Update step circles and labels
+        for (let i = 1; i <= totalSteps; i++) {
+            const stepItem = document.querySelectorAll('.step-item')[i-1];
+            const stepCircle = stepItem.querySelector('.step-circle');
+            const stepLabel = stepItem.querySelector('.step-label');
+            
+            if (i <= currentStep) {
+                // Completed or current step
+                stepCircle.style.backgroundColor = '#F1D500';
+                stepCircle.style.color = '#000';
+                stepLabel.style.color = '#000';
+                stepLabel.style.fontWeight = '500';
+            } else {
+                // Upcoming step
+                stepCircle.style.backgroundColor = '#e9ecef';
+                stepCircle.style.color = '#6c757d';
+                stepLabel.style.color = '#6c757d';
+            }
+        }
+    }
+
+    // Initialize with current step
+    document.addEventListener('DOMContentLoaded', function() {
+        // Determine which page we're on and set the current step
+        const path = window.location.pathname;
+        let currentStep = 1; // Default to step 1
+        
+        if (path.includes('select-hazards')) {
+            currentStep = 2;
+        } else if (path.includes('results')) {
+            currentStep = 3;
+        } else if (path.includes('sensitivity-parameters')) {
+            currentStep = 4;
+        } else if (path.includes('sensitivity-results')) {
+            currentStep = 5;
+        }
+        
+        updateStepProgress(currentStep);
+    });
 </script>
 {% endblock %}

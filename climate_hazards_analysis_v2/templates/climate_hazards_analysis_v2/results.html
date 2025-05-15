@@ -105,7 +105,7 @@
             </div>
             
             <!-- Heading below the icon with Margin -->
-            <h1 class="page-heading">Climate Hazard Analysis Results</h1>
+            <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
         </div>
     </div>
 
@@ -118,11 +118,11 @@
                         <!-- Progress Line -->
                         <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
                         
-                        <!-- Active Progress (100% - All Steps Complete) -->
-                        <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 100%; z-index: 2; transition: width 0.5s ease;"></div>
+                        <!-- Active Progress (60% for step 3 completion) -->
+                        <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 60%; z-index: 2; transition: width 0.5s ease;"></div>
                         
                         <!-- Step 1 (completed) -->
-                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
                             <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                                 1
                             </div>
@@ -130,19 +130,35 @@
                         </div>
                         
                         <!-- Step 2 (completed) -->
-                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
                             <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                                 2
                             </div>
-                            <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazard</div>
+                            <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
                         </div>
                         
                         <!-- Step 3 (active) -->
-                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 33%;">
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
                             <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                                 3
                             </div>
-                            <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Result</div>
+                            <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+                        </div>
+                        
+                        <!-- Step 4 (upcoming) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                                4
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Set Sensitivity Parameters</div>
+                        </div>
+                        
+                        <!-- Step 5 (upcoming) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                                5
+                            </div>
+                            <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
                         </div>
                     </div>
                 </div>
@@ -465,7 +481,7 @@
                                     </ul>
                                     <!-- Generate Report Button on the right -->
                                     <div class="text-end">
-                                        <a href="{% url 'climate_hazards_analysis:generate_report' %}" class="btn btn-warning">
+                                        <a href="{% url 'climate_hazards_analysis_v2:generate_report' %}" class="btn btn-warning">
                                             <strong>Generate Report</strong>
                                         </a>
                                     </div>
@@ -518,10 +534,10 @@
     <div class="row mt-4 mb-5">
         <div class="col-12 d-flex justify-content-between">
             <a href="{% url 'climate_hazards_analysis_v2:select_hazards' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i> Back to Hazard Selection
+                <i class="fas fa-arrow-left me-2"></i> Back to Select Climate/Weather Hazards
             </a>
             <a href="{% url 'climate_hazards_analysis_v2:view_map' %}" class="btn btn-primary">
-                <i class="fas fa-map-marker-alt me-2"></i> Return to Map
+                <i class="fas fa-arrow-left me-2"></i> Return to Upload Facility Location
             </a>
         </div>
     </div>
@@ -542,140 +558,224 @@
 
 <script>
     // Column visibility management
-    $(document).ready(function() {
-        let dataTable;
-        
-        // Initialize DataTable with column visibility support
-        function initializeDataTable() {
-            dataTable = $('#data-table').DataTable({
-                scrollX: true,
-                fixedHeader: true,
-                dom: 'Bfrtip',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        text: '<i class="fas fa-file-excel"></i> Save to Excel',
-                        className: 'btn btn-outline-secondary',
-                        exportOptions: {
-                            columns: ':visible'  // Only export visible columns
-                        }
+$(document).ready(function() {
+    let dataTable;
+    
+    // Initialize DataTable with column visibility support
+    function initializeDataTable() {
+        dataTable = $('#data-table').DataTable({
+            scrollX: true,
+            fixedHeader: true,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> Save to Excel',
+                    className: 'btn btn-outline-secondary',
+                    exportOptions: {
+                        columns: ':visible'  // Only export visible columns
                     }
-                ],
-                fixedColumns: {
-                    leftColumns: 3  // Freeze the first three columns
                 }
-            });
-            
-            // Apply initial column visibility (all should be visible)
-            updateColumnVisibility();
+            ],
+            fixedColumns: {
+                leftColumns: 1  // Freeze the first three columns
+            },
+            // Set initial visible columns
+            columnDefs: [
+                { targets: [0], visible: true },  // Facility column
+                { targets: [1, 2], visible: false }  // Hide Lat and Long columns
+            ]
+        });
+        
+        // Apply initial column visibility (all should be visible)
+        setTimeout(updateColumnVisibility, 100); // Delay to ensure table is fully initialized
+    }
+    
+    // Handle parent hazard checkbox click
+    $('.hazard-group').on('change', function() {
+        const isChecked = $(this).prop('checked');
+        const hazardClass = $(this).data('hazard');
+        
+        // Check/uncheck all child checkboxes
+        $(`.hazard-column.${hazardClass}`).prop('checked', isChecked);
+        
+        // Update column visibility
+        updateColumnVisibility();
+    });
+    
+    // Handle individual column checkbox click
+    $('.hazard-column').on('change', function() {
+        const hazardClass = $(this).attr('class').split(' ').find(cls => cls !== 'form-check-input' && cls !== 'hazard-column');
+        const hazardColumns = $(`.hazard-column.${hazardClass}`);
+        const checkedColumns = $(`.hazard-column.${hazardClass}:checked`);
+        
+        // Update parent checkbox based on children
+        $(`[data-hazard="${hazardClass}"]`).prop('checked', checkedColumns.length > 0);
+        $(`[data-hazard="${hazardClass}"]`).prop('indeterminate', checkedColumns.length > 0 && checkedColumns.length < hazardColumns.length);
+        
+        // Update column visibility
+        updateColumnVisibility();
+    });
+    
+    // Show all columns
+    $('#show-all-columns').on('click', function() {
+        $('.hazard-group, .hazard-column').prop('checked', true);
+        $('.hazard-group').prop('indeterminate', false);
+        updateColumnVisibility();
+    });
+    
+    // Hide all columns (except base columns)
+    $('#hide-all-columns').on('click', function() {
+        $('.hazard-group, .hazard-column').prop('checked', false);
+        $('.hazard-group').prop('indeterminate', false);
+        updateColumnVisibility();
+    });
+    
+    // Function to update column visibility based on checkboxes
+    function updateColumnVisibility() {
+        if (!dataTable) {
+            console.error("DataTable not initialized");
+            return;
         }
         
-        // Handle parent hazard checkbox click
-        $('.hazard-group').on('change', function() {
-            const isChecked = $(this).prop('checked');
-            const hazardClass = $(this).data('hazard');
+        try {
+            // Get column names from actual DataTable API
+            const tableColumns = [];
+            dataTable.columns().every(function(index) {
+                const headerText = $(this.header()).text().trim();
+                tableColumns.push({ index: index, text: headerText });
+                console.log(`DataTable column [${index}]: "${headerText}"`);
+            });
             
-            // Check/uncheck all child checkboxes
-            $(`.hazard-column.${hazardClass}`).prop('checked', isChecked);
+            // Create a mapping of column names to column indices
+            const columnMap = {};
+            tableColumns.forEach(col => {
+                columnMap[col.text] = col.index;
+            });
             
-            // Update column visibility
-            updateColumnVisibility();
-        });
-        
-        // Handle individual column checkbox click
-        $('.hazard-column').on('change', function() {
-            const hazardClass = $(this).attr('class').split(' ').find(cls => cls !== 'form-check-input' && cls !== 'hazard-column');
-            const hazardColumns = $(`.hazard-column.${hazardClass}`);
-            const checkedColumns = $(`.hazard-column.${hazardClass}:checked`);
+            console.log("Column map:", columnMap);
             
-            // Update parent checkbox based on children
-            $(`[data-hazard="${hazardClass}"]`).prop('checked', checkedColumns.length > 0);
-            $(`[data-hazard="${hazardClass}"]`).prop('indeterminate', checkedColumns.length > 0 && checkedColumns.length < hazardColumns.length);
+            // Always show the base columns (first 3)
+            dataTable.column(0).visible(true);
+            dataTable.column(1).visible(false);
+            dataTable.column(2).visible(false);
             
-            // Update column visibility
-            updateColumnVisibility();
-        });
-        
-        // Show all columns
-        $('#show-all-columns').on('click', function() {
-            $('.hazard-group, .hazard-column').prop('checked', true);
-            $('.hazard-group').prop('indeterminate', false);
-            updateColumnVisibility();
-        });
-        
-        // Hide all columns (except base columns)
-        $('#hide-all-columns').on('click', function() {
-            $('.hazard-group, .hazard-column').prop('checked', false);
-            $('.hazard-group').prop('indeterminate', false);
-            updateColumnVisibility();
-        });
-        
-        // Function to update column visibility based on checkboxes
-        function updateColumnVisibility() {
-            if (!dataTable) return;
-            
-            // First, show the base columns (first 3)
-            dataTable.columns(0).visible(true);
-            dataTable.columns(1).visible(true);
-            dataTable.columns(2).visible(true);
-            
-            // Then, handle the hazard columns
+            // Process each hazard column checkbox
             $('.hazard-column').each(function() {
                 const columnName = $(this).data('column');
                 const isVisible = $(this).prop('checked');
-
-                // Find the column index by header text
-                const columnIndex = findColumnIndexByName(columnName);
-                if (columnIndex !== -1) {
-                    dataTable.column(columnIndex).visible(isVisible);
+                const checkboxId = $(this).attr('id');
+                
+                console.log(`Processing checkbox ${checkboxId} for column "${columnName}" - checked: ${isVisible}`);
+                
+                // Try to find an exact match first
+                if (columnName in columnMap) {
+                    dataTable.column(columnMap[columnName]).visible(isVisible);
+                    console.log(`  Set column "${columnName}" visibility to ${isVisible}`);
+                } else {
+                    // Try to find a partial match if exact match fails
+                    let found = false;
+                    for (const [headerText, colIndex] of Object.entries(columnMap)) {
+                        // Skip the first 3 columns (base columns)
+                        if (colIndex < 3) continue;
+                        
+                        if (headerText.includes(columnName) || columnName.includes(headerText)) {
+                            dataTable.column(colIndex).visible(isVisible);
+                            console.log(`  Partial match: Set column "${headerText}" visibility to ${isVisible}`);
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        console.warn(`  No match found for column "${columnName}"`);
+                    }
                 }
             });
             
             // Adjust column widths
             dataTable.columns.adjust().draw();
+            
+        } catch (error) {
+            console.error("Error updating column visibility:", error);
         }
+    }
+    
+    // Load map content when tab is shown
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var target = $(e.target).attr("href");
         
-        // Helper function to find column index by header text
-        function findColumnIndexByName(columnName) {
-            let index = -1;
-            
-            $('#data-table th').each(function(i) {
-                if ($(this).text().trim() === columnName) {
-                    index = i;
-                    return false; // Break the loop
-                }
-            });
-            
-            return index;
+        // Load appropriate map content based on selected tab
+        if (target === "#water-map" && $("#water-map-content").is(':empty')) {
+            $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_fetch' %}");
         }
-        
-        // Load map content when tab is shown
-        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var target = $(e.target).attr("href");
-            
-            // Load appropriate map content based on selected tab
-            if (target === "#water-map" && $("#water-map-content").is(':empty')) {
-                $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_fetch' %}");
-            }
-            if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
-                $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_fetch' %}");
-            }
-            if (target === "#heat-map" && $("#heat-map-content").is(':empty')) {
-                $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_fetch' %}");
-            }
-            if (target === "#sea-map" && $("#sea-map-content").is(':empty')) {
-                $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_fetch' %}");
-            }
-            if (target === "#cyclone-map" && $("#cyclone-map-content").is(':empty')) {
-                $("#cyclone-map-content").load("{% url 'climate_hazards_analysis:tropical_cyclone_mapbox_fetch' %}");
-            }
-            if (target === "#multi-hazard-map" && $("#multi-hazard-map-content").is(':empty')) {
-                $("#multi-hazard-map-content").load("{% url 'climate_hazards_analysis:multi_hazard_mapbox_fetch' %}");
-            }
-        });
-        
-        // Initialize the DataTable
-        initializeDataTable();
+        if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
+            $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_fetch' %}");
+        }
+        if (target === "#heat-map" && $("#heat-map-content").is(':empty')) {
+            $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_fetch' %}");
+        }
+        if (target === "#sea-map" && $("#sea-map-content").is(':empty')) {
+            $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_fetch' %}");
+        }
+        if (target === "#cyclone-map" && $("#cyclone-map-content").is(':empty')) {
+            $("#cyclone-map-content").load("{% url 'climate_hazards_analysis:tropical_cyclone_mapbox_fetch' %}");
+        }
+        if (target === "#multi-hazard-map" && $("#multi-hazard-map-content").is(':empty')) {
+            $("#multi-hazard-map-content").load("{% url 'climate_hazards_analysis:multi_hazard_mapbox_fetch' %}");
+        }
     });
+    
+    // Initialize the DataTable
+    initializeDataTable();
+});
+
+// Function to update the steps progress
+function updateStepProgress(currentStep) {
+    const totalSteps = 5;
+    const progressPercentage = (currentStep / totalSteps) * 100;
+    
+    // Update progress bar width
+    document.querySelector('.active-progress').style.width = progressPercentage + '%';
+    
+    // Update step circles and labels
+    for (let i = 1; i <= totalSteps; i++) {
+        const stepItem = document.querySelectorAll('.step-item')[i-1];
+        const stepCircle = stepItem.querySelector('.step-circle');
+        const stepLabel = stepItem.querySelector('.step-label');
+        
+        if (i <= currentStep) {
+            // Completed or current step
+            stepCircle.style.backgroundColor = '#F1D500';
+            stepCircle.style.color = '#000';
+            stepLabel.style.color = '#000';
+            stepLabel.style.fontWeight = '500';
+        } else {
+            // Upcoming step
+            stepCircle.style.backgroundColor = '#e9ecef';
+            stepCircle.style.color = '#6c757d';
+            stepLabel.style.color = '#6c757d';
+        }
+    }
+}
+
+// Initialize with current step
+document.addEventListener('DOMContentLoaded', function() {
+    // Determine which page we're on and set the current step
+    const path = window.location.pathname;
+    let currentStep = 1; // Default to step 1
+    
+    if (path.includes('select-hazards')) {
+        currentStep = 2;
+    } else if (path.includes('results')) {
+        currentStep = 3;
+    } else if (path.includes('sensitivity-parameters')) {
+        currentStep = 4;
+    } else if (path.includes('sensitivity-results')) {
+        currentStep = 5;
+    }
+    
+    updateStepProgress(currentStep);
+});
 </script>
 {% endblock %}
