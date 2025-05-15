@@ -94,6 +94,50 @@
     .column-selector .fw-bold {
         font-weight: bold !important;
     }
+
+    /* Group Header Styles */
+    .group-header th {
+        background-color: #f1f1f1;
+        font-weight: bold;
+        text-align: center;
+        border: 1px solid #ddd;
+        padding: 8px;
+        color: #333;
+    }
+
+    /* Add different background colors for each hazard type */
+
+    .group-header th:nth-child(1) {
+        background-color: #e9ecef; /* Facility Info */
+    }
+
+    .group-header th:nth-child(2) {
+        background-color: #d1ecf1; /* Flood - light blue */
+    }
+
+    .group-header th:nth-child(3) {
+        background-color: #fff3cd; /* Water Stress - light yellow */
+    }
+
+    .group-header th:nth-child(4) {
+        background-color: #d1e7dd; /* Sea Level Rise - light green */
+    }
+
+    .group-header th:nth-child(5) {
+        background-color: #f8d7da; /* Tropical Cyclone - light red */
+    }
+
+    .group-header th:nth-child(6) {
+        background-color: #ffe5d0; /* Heat - light orange */
+    }
+
+    .group-header th:nth-child(7) {
+        background-color: #cff4fc; /* Storm Surge - light cyan */
+    }
+
+    .group-header th:nth-child(8) {
+        background-color: #e2e3e5; /* Rainfall-Induced Landslide - light gray */
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -257,7 +301,7 @@
                                             <tr class="group-header">
                                                 {% for group, count in groups.items %}
                                                     {% if count > 0 %}
-                                                        <th colspan="{{ count }}">{{ group }}</th>
+                                                        <th colspan="{{ count }}" class="text-center">{{ group }}</th>
                                                     {% endif %}
                                                 {% endfor %}
                                             </tr>
@@ -586,6 +630,9 @@ $(document).ready(function() {
                 { targets: [1, 2], visible: false }  // Hide Lat and Long columns
             ]
         });
+
+        // Make sure the header row with groups is not sorted
+        orderCellsTop: true
         
         // Apply initial column visibility (all should be visible)
         setTimeout(updateColumnVisibility, 100); // Delay to ensure table is fully initialized
@@ -639,61 +686,61 @@ $(document).ready(function() {
         }
         
         try {
-            // Get column names from actual DataTable API
+            // Get column names from DataTable
             const tableColumns = [];
             dataTable.columns().every(function(index) {
                 const headerText = $(this.header()).text().trim();
                 tableColumns.push({ index: index, text: headerText });
-                console.log(`DataTable column [${index}]: "${headerText}"`);
             });
             
-            // Create a mapping of column names to column indices
+            // Create mapping of column names to indices
             const columnMap = {};
             tableColumns.forEach(col => {
                 columnMap[col.text] = col.index;
             });
             
-            console.log("Column map:", columnMap);
-            
-            // Always show the base columns (first 3)
+            // Always show Facility column, hide Lat/Long
             dataTable.column(0).visible(true);
             dataTable.column(1).visible(false);
             dataTable.column(2).visible(false);
             
-            // Process each hazard column checkbox
+            // Track which groups have visible columns
+            const groupVisibility = {
+                'Facility Information': true,
+                'Flood': false,
+                'Water Stress': false,
+                'Sea Level Rise': false,
+                'Tropical Cyclone': false,
+                'Heat': false,
+                'Storm Surge': false,
+                'Rainfall-Induced Landslide': false
+            };
+            
+            // Process each checkbox
             $('.hazard-column').each(function() {
                 const columnName = $(this).data('column');
                 const isVisible = $(this).prop('checked');
-                const checkboxId = $(this).attr('id');
+                const hazardType = $(this).closest('.mb-3').find('.fw-bold').text().trim();
                 
-                console.log(`Processing checkbox ${checkboxId} for column "${columnName}" - checked: ${isVisible}`);
-                
-                // Try to find an exact match first
+                // Set column visibility
                 if (columnName in columnMap) {
                     dataTable.column(columnMap[columnName]).visible(isVisible);
-                    console.log(`  Set column "${columnName}" visibility to ${isVisible}`);
-                } else {
-                    // Try to find a partial match if exact match fails
-                    let found = false;
-                    for (const [headerText, colIndex] of Object.entries(columnMap)) {
-                        // Skip the first 3 columns (base columns)
-                        if (colIndex < 3) continue;
-                        
-                        if (headerText.includes(columnName) || columnName.includes(headerText)) {
-                            dataTable.column(colIndex).visible(isVisible);
-                            console.log(`  Partial match: Set column "${headerText}" visibility to ${isVisible}`);
-                            found = true;
-                            break;
-                        }
-                    }
                     
-                    if (!found) {
-                        console.warn(`  No match found for column "${columnName}"`);
+                    // Update group visibility tracking
+                    if (isVisible) {
+                        // Mark the corresponding group as having visible columns
+                        if (hazardType === 'Flood') groupVisibility['Flood'] = true;
+                        else if (hazardType === 'Water Stress') groupVisibility['Water Stress'] = true;
+                        else if (hazardType === 'Sea Level Rise') groupVisibility['Sea Level Rise'] = true;
+                        else if (hazardType === 'Tropical Cyclone') groupVisibility['Tropical Cyclone'] = true;
+                        else if (hazardType === 'Heat') groupVisibility['Heat'] = true;
+                        else if (hazardType === 'Storm Surge') groupVisibility['Storm Surge'] = true;
+                        else if (hazardType === 'Rainfall Induced Landslide') groupVisibility['Rainfall-Induced Landslide'] = true;
                     }
                 }
             });
             
-            // Adjust column widths
+            // Adjust column widths and redraw
             dataTable.columns.adjust().draw();
             
         } catch (error) {

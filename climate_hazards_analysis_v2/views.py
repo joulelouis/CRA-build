@@ -244,12 +244,37 @@ def show_results(request):
         data = df.to_dict(orient="records")
         columns = df.columns.tolist()
         
-        # Create groups for column headers (optional)
-        # This is a simplified version, you may want to enhance this
-        groups = {
-            'Facility Info': 3,  # First 3 columns (Facility, Lat, Long)
-            'Climate Hazards': len(columns) - 3  # Rest of the columns
+        # Create detailed column groups for the table header
+        groups = {}
+        # Base group - Facility Information
+        facility_cols = ['Facility', 'Lat', 'Long']
+        facility_count = sum(1 for col in facility_cols if col in columns)
+        if facility_count > 0:
+            groups['Facility Information'] = facility_count
+        
+        # Create a mapping for each hazard type and its columns
+        hazard_columns = {
+            'Flood': ['Flood Depth (meters)'],
+            'Water Stress': ['Water Stress Exposure (%)'],
+            'Sea Level Rise': ['Elevation (meter above sea level)', 
+                            '2030 Sea Level Rise (in meters)', 
+                            '2040 Sea Level Rise (in meters)', 
+                            '2050 Sea Level Rise (in meters)', 
+                            '2060 Sea Level Rise (in meters)'],
+            'Tropical Cyclone': ['Extreme Windspeed 10 year Return Period (km/h)', 
+                                'Extreme Windspeed 20 year Return Period (km/h)', 
+                                'Extreme Windspeed 50 year Return Period (km/h)', 
+                                'Extreme Windspeed 100 year Return Period (km/h)'],
+            'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius'],
+            'Storm Surge': ['Storm Surge Hazard Rating'],
+            'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Hazard Rating']
         }
+        
+        # Add column groups for each hazard type that has columns in the data
+        for hazard, cols in hazard_columns.items():
+            count = sum(1 for col in cols if col in columns)
+            if count > 0:
+                groups[hazard] = count  
         
         # Get the paths to any generated plots
         plot_path = result.get('plot_path')
