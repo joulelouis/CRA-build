@@ -70,9 +70,48 @@
         font-size: 14px;
         margin-top: 5px;
     }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .loading-container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .loading-text {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        margin-top: 10px;
+    }
 </style>
 
 <div class="container-fluid mt-4">
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-container">
+            <div class="spinner-border text-warning mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="progress mb-3" style="width: 300px; height: 20px;">
+                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <div id="loading-text" class="loading-text">Generating asset exposure data...</div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-6 d-flex flex-column">
             <!-- Rounded Icon Container with Margin -->
@@ -166,7 +205,7 @@
                 <div class="card-body">
                     <p class="mb-4">You have {{ facility_count }} facilities loaded. Select the climate/weather hazards you want to analyze:</p>
                     
-                    <form id="hazard-form" method="POST" action="{% url 'climate_hazards_analysis_v2:select_hazards' %}">
+                    <form id="hazard-form" method="POST" action="{% url 'climate_hazards_analysis_v2:select_hazards' %}" onsubmit="showLoading()">
                         {% csrf_token %}
                         
                         <div class="row">
@@ -224,7 +263,7 @@
                             <a href="{% url 'climate_hazards_analysis_v2:view_map' %}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i> Back to Upload Facility Location
                             </a>
-                            <button type="submit" class="btn btn-warning">
+                            <button type="submit" id="generate-btn" class="btn btn-warning">
                                 <strong>Generate Asset Exposure</strong>
                                 <i class="fas fa-arrow-right ms-2"></i>
                             </button>
@@ -297,5 +336,72 @@
         
         updateStepProgress(currentStep);
     });
+
+    // Function to show loading overlay with simulated progress
+    function showLoading() {
+        // Get the number of selected hazards to estimate processing time
+        const selectedHazards = document.querySelectorAll('input[name="hazards"]:checked').length;
+        if (selectedHazards === 0) {
+            alert('Please select at least one hazard type.');
+            return false;
+        }
+        
+        // Disable the submit button to prevent double submission
+        document.getElementById('generate-btn').disabled = true;
+        
+        // Show the loading overlay
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.style.display = 'flex';
+        
+        // Set up progress bar simulation
+        const progressBar = document.getElementById('progress-bar');
+        const loadingText = document.getElementById('loading-text');
+        
+        // Start with 0%
+        let progress = 0;
+        
+        // Calculate total estimated time based on number of selected hazards
+        // For each hazard, we estimate ~10 seconds of processing time
+        const totalSteps = 100;
+        const stepTime = selectedHazards * 100; // milliseconds per step (adjust based on your actual processing time)
+        
+        // Update progress bar periodically
+        const progressInterval = setInterval(() => {
+            if (progress >= 99) {
+                clearInterval(progressInterval);
+                return;
+            }
+            
+            // Calculate next progress step (slow down as it gets closer to 100%)
+            if (progress < 30) {
+                progress += 2; // Faster at start
+            } else if (progress < 60) {
+                progress += 1; // Medium speed
+            } else if (progress < 90) {
+                progress += 0.5; // Slower
+            } else {
+                progress += 0.1; // Very slow approaching 100%
+            }
+            
+            // Update progress bar
+            progressBar.style.width = `${progress}%`;
+            progressBar.setAttribute('aria-valuenow', progress);
+            progressBar.textContent = `${Math.round(progress)}%`;
+            
+            // Update loading text based on progress
+            if (progress < 25) {
+                loadingText.textContent = "Preparing hazard data...";
+            } else if (progress < 50) {
+                loadingText.textContent = "Analyzing facility locations...";
+            } else if (progress < 75) {
+                loadingText.textContent = "Computing exposure levels...";
+            } else {
+                loadingText.textContent = "Finalizing results...";
+            }
+        }, stepTime);
+        
+        // Allow the form to submit after showing the loading overlay
+        return true;
+    }
 </script>
 {% endblock %}
