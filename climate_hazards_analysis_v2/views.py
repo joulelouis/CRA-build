@@ -323,21 +323,38 @@ def generate_report(request):
     """
     Django view that generates the PDF report and returns it as an HTTP response.
     """
-    # Get selected hazards from the v2 module's session key
+    # Get selected hazards and facility data
     selected_fields = request.session.get('climate_hazards_v2_selected_hazards', [])
+    facility_data = request.session.get('climate_hazards_v2_facility_data', [])
     
-    # If no hazards are selected, try to get from results
-    if not selected_fields:
-        # Try to get from results data if available
-        results = request.session.get('climate_hazards_v2_results', {})
-        if results and 'selected_hazards' in results:
-            selected_fields = results.get('selected_hazards', [])
+    # Try to get results data if available
+    results_data = request.session.get('climate_hazards_v2_results', {})
+    if not selected_fields and results_data:
+        selected_fields = results_data.get('selected_hazards', [])
+    
+    # Get the analysis data needed for high-risk asset identification
+    analysis_data = []
+    if results_data and 'data' in results_data:
+        analysis_data = results_data.get('data', [])
+    elif 'combined_csv_path' in request.session:
+        # Load from CSV if available
+        csv_path = request.session.get('combined_csv_path')
+        if csv_path and os.path.exists(csv_path):
+            try:
+                import pandas as pd
+                df = pd.read_csv(csv_path)
+                analysis_data = df.to_dict(orient='records')
+            except Exception as e:
+                print(f"Error loading data for report: {e}")
+    
+    # Identify high-risk assets for each hazard type
+    high_risk_assets = identify_high_risk_assets(analysis_data, selected_fields)
     
     # Initialize a BytesIO buffer for the PDF
     buffer = BytesIO()
     
-    # Generate the PDF report
-    generate_climate_hazards_report_pdf(buffer, selected_fields)
+    # Generate the PDF report with dynamic high-risk assets
+    generate_climate_hazards_report_pdf(buffer, selected_fields, high_risk_assets)
     
     # Get the PDF content
     pdf = buffer.getvalue()
@@ -347,3 +364,96 @@ def generate_report(request):
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="Climate_Hazard_Exposure_Report_V2.pdf"'
     return response
+
+def identify_high_risk_assets(data, selected_hazards):
+    """
+    Identify assets with high risk ratings for each hazard type.
+    
+    Args:
+        data (list): List of dictionaries containing facility data with hazard ratings
+        selected_hazards (list): List of selected hazard types
+        
+    Returns:
+        dict: Dictionary mapping hazard types to lists of high-risk assets
+    """
+    high_risk_assets = {}
+    
+    # Define thresholds for high risk by hazard type
+    thresholds = {
+        'Flood': {
+            'column': 'Flood Depth (meters)',
+            'criteria': lambda v: v == 'Greater than 1.5'
+        },
+        'Water Stress': {
+            'column': 'Water Stress Exposure (%)',
+            'criteria': lambda v: isinstance(v, (int, float)) and v > 30
+        },
+        'Heat': {
+            'columns': {
+                'Days over 30° Celsius': lambda v: isinstance(v, (int, float)) and v >= 300,
+                'Days over 33° Celsius': lambda v: isinstance(v, (int, float)) and v >= 100,
+                'Days over 35° Celsius': lambda v: isinstance(v, (int, float)) and v >= 30
+            },
+            'criteria': lambda row, cols: any(cols[col](row.get(col)) for col in cols if col in row)
+        },
+        'Sea Level Rise': {
+            'column': '2050 Sea Level Rise (in meters)',
+            'criteria': lambda v: v != 'Little to no effect' and isinstance(v, (int, float)) and v > 0.5
+        },
+        'Tropical Cyclones': {
+            'column': 'Extreme Windspeed 100 year Return Period (km/h)',
+            'criteria': lambda v: v != 'Data not available' and isinstance(v, (int, float)) and v >= 178
+        },
+        'Storm Surge': {
+            'column': 'Storm Surge Hazard Rating',
+            'criteria': lambda v: isinstance(v, (int, float)) and v >= 1.5
+        },
+        'Rainfall Induced Landslide': {
+            'column': 'Rainfall Induced Landslide Hazard Rating',
+            'criteria': lambda v: isinstance(v, (int, float)) and v < 1
+        }
+    }
+    
+    # Process each selected hazard
+    for hazard in selected_hazards:
+        if hazard not in thresholds:
+            continue
+        
+        high_risk_assets[hazard] = []
+        threshold = thresholds[hazard]
+        
+        for asset in data:
+            facility_name = asset.get('Facility', 'Unknown')
+            
+            # Special case for Heat which has multiple columns
+            if hazard == 'Heat' and 'columns' in threshold:
+                if threshold['criteria'](asset, threshold['columns']):
+                    high_risk_assets[hazard].append({
+                        'name': facility_name,
+                        'lat': asset.get('Lat'),
+                        'lng': asset.get('Long')
+                    })
+                continue
+            
+            # Standard case with single column
+            column = threshold.get('column')
+            if column in asset:
+                value = asset[column]
+                try:
+                    # Try to convert string values to numbers if possible
+                    if isinstance(value, str) and value not in ['N/A', 'Little to no effect', 'Data not available']:
+                        try:
+                            value = float(value)
+                        except ValueError:
+                            pass
+                    
+                    if threshold['criteria'](value):
+                        high_risk_assets[hazard].append({
+                            'name': facility_name,
+                            'lat': asset.get('Lat'),
+                            'lng': asset.get('Long')
+                        })
+                except (TypeError, ValueError):
+                    continue
+    
+    return high_risk_assets

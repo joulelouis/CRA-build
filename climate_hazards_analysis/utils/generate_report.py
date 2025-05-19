@@ -13,15 +13,17 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether, Image
 from reportlab.lib import colors
+from PIL import Image as PILImage
 
 
-def generate_climate_hazards_report_pdf(buffer, selected_fields):
+def generate_climate_hazards_report_pdf(buffer, selected_fields, high_risk_assets=None):
     """
     Generate a PDF report of climate hazard exposure analysis with each hazard on a separate page.
     
     Args:
         buffer (BytesIO): Buffer to write the PDF content into
         selected_fields (list): List of selected climate hazard fields
+        high_risk_assets (dict, optional): Dictionary mapping hazard types to lists of high-risk assets
     """
     # Create the document template
     doc = SimpleDocTemplate(buffer, pagesize=A4,
@@ -77,7 +79,7 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
         ('BOTTOMPADDING', (0,0), (-1,-1), 0),
     ]))
     
-    # ---- FIRST PAGE ELEMENTS ----
+    # Initialize elements list for the document
     elements = []
     
     # Insert the header table at the very top
@@ -90,6 +92,7 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
     elements.append(download_info)
     elements.append(Spacer(1, 24))
 
+    # Define styles for tables and sections
     table_title_style = ParagraphStyle(
         'tableTitle',
         parent=styles["Normal"],
@@ -122,55 +125,84 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
 
     # For each hazard, check if it is in selected_fields before appending its row.
     if "Heat" in selected_fields:
+        # Check if we have any high-risk assets for this hazard
+        heat_risk_count = len(high_risk_assets.get("Heat", [])) if high_risk_assets else 0
+        
         overview_data.append([
             Paragraph("Heat", wrap_style),
-            Paragraph("Days over 30°C: <strong><font color='red'>High</font></strong>, <br/>Days over 33°C: <strong><font color='red'>High</font></strong>, <br/>Days over 35°C: <strong><font color='orange'>Medium</font></strong>", wrap_style),
-            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Heat Exposure Analysis", wrap_style)
+            Paragraph(f"Days over 30°C: <strong><font color='red'>High</font></strong> ({heat_risk_count} assets at risk), <br/>"
+                     f"Days over 33°C: <strong><font color='red'>High</font></strong>, <br/>"
+                     f"Days over 35°C: <strong><font color='orange'>Medium</font></strong>", wrap_style),
+            Paragraph("Lorem Ipsum with a long explanation for Heat.", wrap_style)
         ])
 
     if "Flood" in selected_fields:
+        # Check if we have any high-risk assets for this hazard
+        flood_risk_count = len(high_risk_assets.get("Flood", [])) if high_risk_assets else 0
+        risk_level = "<strong><font color='red'>High</font></strong>" if flood_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
+        
         overview_data.append([
             Paragraph("Flood", wrap_style),
-            Paragraph("<strong><font color='green'>Low</font></strong>", wrap_style),
-            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Flood Exposure Analysis", wrap_style)
+            Paragraph(f"{risk_level} ({flood_risk_count} assets at risk)", wrap_style),
+            Paragraph("Lorem Ipsum with a long explanation for Flood.", wrap_style)
         ])
 
     if "Water Stress" in selected_fields:
+        # Check if we have any high-risk assets for this hazard
+        ws_risk_count = len(high_risk_assets.get("Water Stress", [])) if high_risk_assets else 0
+        risk_level = "<strong><font color='red'>High</font></strong>" if ws_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
+        
         overview_data.append([
             Paragraph("Water Stress", wrap_style),
-            Paragraph("Low, Medium, or High", wrap_style),
-            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Water Stress Exposure Analysis", wrap_style)
+            Paragraph(f"{risk_level} ({ws_risk_count} assets at risk)", wrap_style),
+            Paragraph("Lorem Ipsum with a long explanation for Water Stress.", wrap_style)
         ])
 
     if "Sea Level Rise" in selected_fields:
+        # Check if we have any high-risk assets for this hazard
+        slr_risk_count = len(high_risk_assets.get("Sea Level Rise", [])) if high_risk_assets else 0
+        risk_level = "<strong><font color='red'>High</font></strong>" if slr_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
+        
         overview_data.append([
             Paragraph("Sea Level Rise", wrap_style),
-            Paragraph("Elevation (m above sea level): <strong>value</strong>, <br/>2030 Sea Level Rise (m): <strong>value</strong>, <br/>2040 Sea Level Rise (m): <strong>value</strong>, <br/>2050 Sea Level Rise (m): <strong>value</strong>, <br/>2060 Sea Level Rise (m): <strong>value</strong>", wrap_style),
-            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Sea Level Rise Exposure Analysis", wrap_style)
+            Paragraph(f"{risk_level} ({slr_risk_count} assets at risk)", wrap_style),
+            Paragraph("Lorem Ipsum with a long explanation for Sea Level Rise.", wrap_style)
         ])
 
     if "Tropical Cyclones" in selected_fields:
+        # Check if we have any high-risk assets for this hazard
+        tc_risk_count = len(high_risk_assets.get("Tropical Cyclones", [])) if high_risk_assets else 0
+        risk_level = "<strong><font color='red'>High</font></strong>" if tc_risk_count > 0 else "<strong><font color='orange'>Medium</font></strong>"
+        
         overview_data.append([
             Paragraph("Tropical Cyclone", wrap_style),
-            Paragraph("1-min Maximum Sustain Windspeed 10 yr RP: <strong><font color='orange'>Medium</font></strong>, <br/>1-min Maximum Sustain Windspeed 20 yr RP: <strong><font color='orange'>Medium</font></strong>, <br/>1-min Maximum Sustain Windspeed 50 yr RP: <strong><font color='orange'>Medium</font></strong>, <br/>1-min Maximum Sustain Windspeed 100 yr RP: <strong><font color='orange'>Medium</font></strong>", wrap_style),
-            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Tropical Cyclone Exposure Analysis", wrap_style)
+            Paragraph(f"{risk_level} ({tc_risk_count} assets at high risk)", wrap_style),
+            Paragraph("Lorem Ipsum with a long explanation for Tropical Cyclone.", wrap_style)
         ])
 
     if "Storm Surge" in selected_fields:
+        # Check if we have any high-risk assets for this hazard
+        ss_risk_count = len(high_risk_assets.get("Storm Surge", [])) if high_risk_assets else 0
+        risk_level = "<strong><font color='red'>High</font></strong>" if ss_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
+        
         overview_data.append([
             Paragraph("Storm Surge", wrap_style),
-            Paragraph("Low, Medium, or High", wrap_style),
-            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Storm Surge", wrap_style)
+            Paragraph(f"{risk_level} ({ss_risk_count} assets at risk)", wrap_style),
+            Paragraph("Lorem Ipsum with a long explanation for Storm Surge.", wrap_style)
         ])
 
     if "Rainfall Induced Landslide" in selected_fields:
+        # Check if we have any high-risk assets for this hazard
+        ril_risk_count = len(high_risk_assets.get("Rainfall Induced Landslide", [])) if high_risk_assets else 0
+        risk_level = "<strong><font color='red'>High</font></strong>" if ril_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
+        
         overview_data.append([
             Paragraph("Rainfall Induced Landslide", wrap_style),
-            Paragraph("Low, Medium, High, or Generally Stable", wrap_style),
-            Paragraph("Lorem Ipsum Dolor with a very long explanation for the Rainfall Induced Landslide", wrap_style)
+            Paragraph(f"{risk_level} ({ril_risk_count} assets at risk)", wrap_style),
+            Paragraph("Lorem Ipsum with a long explanation for Rainfall-Induced Landslide.", wrap_style)
         ])
 
-    # Create your overview table with your data and styling
+    # Create overview table with proper styling
     available_width = doc.width
     # Define relative column widths: column 3 will be wider (50% of available width)
     col_widths = [available_width * 0.25, available_width * 0.25, available_width * 0.5]
@@ -186,7 +218,7 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
         ("RIGHTPADDING", (0, 0), (-1, -1), 10),
     ]))
 
-    # Wrap the table in a container table to provide overall margins.
+    # Wrap the table in a container table to provide overall margins
     container = Table([[overview_table]], colWidths=[doc.width])
     container.setStyle(TableStyle([
         ("LEFTPADDING", (0, 0), (-1, -1), 8),   # adjust margin (in points)
@@ -197,11 +229,11 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
     ]))
 
-    # Append the container instead of the table directly.
+    # Append the container instead of the table directly
     elements.append(container)
     elements.append(Spacer(1, 24))
     
-    # ----- Helper function to safely create resized images -----
+    # Helper function to safely create resized images
     def create_safe_image(image_path, max_width, max_height):
         try:
             if os.path.exists(image_path):
@@ -238,7 +270,7 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
             # Return error message if something goes wrong
             return Paragraph(f"Error loading image: {str(e)}", styles["Normal"])
     
-    # ----- Helper function to create a hazard section -----
+    # Helper function to create a hazard section
     def create_hazard_section(hazard_name, map_paths, assets_list):
         """Creates a hazard section with maps on the left and assets on the right."""
         section_elements = []
@@ -249,7 +281,7 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
             right_column_width = doc.width * 0.35  # 35% for asset list
             
             # Calculate available height for maps based on number of maps
-            available_height_per_map = (doc.height - 200) / len(map_paths)
+            available_height_per_map = (doc.height - 200) / len(map_paths) if map_paths else 0
             
             # Create maps column elements
             maps_col = []
@@ -311,7 +343,7 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
         
         return section_elements
     
-    # ----- Helper function to create a page for a hazard -----
+    # Helper function to create a page for a hazard
     def add_hazard_page(hazard_name, map_paths, assets_list):
         """Creates a complete page for a hazard with header, title, and content."""
         # Start with a page break
@@ -322,7 +354,11 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
         elements.append(Spacer(1, 12))
         
         # Add "Assets with High Hazard Rating" title
-        high_hazard_title = Paragraph("Assets with High Hazard Rating", table_title_style)
+        page_title = "Assets with High Hazard Rating" 
+        if assets_list == ["No high-risk assets identified for this hazard"]:
+            page_title = "Hazard Assessment"  # Alternative title when no high-risk assets
+        
+        high_hazard_title = Paragraph(page_title, table_title_style)
         elements.append(high_hazard_title)
         elements.append(Spacer(1, 20))
         
@@ -339,51 +375,32 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields):
     luzon_map_path = os.path.join(settings.BASE_DIR, "climate_hazards_analysis", "static", "images", "luzon.png")
     mindanao_map_path = os.path.join(settings.BASE_DIR, "climate_hazards_analysis", "static", "images", "mindanao.png")
     
-    # Add a page for Heat if selected
-    if "Heat" in selected_fields:
-        # Heat assets
-        heat_assets = [
-            "SM Manila Shakeys Branch",
-            "Commissary in Paranaque",
-            "Coconut Processing Plant in Gen San",
-            "Tuna Processing Plant in Gen San"
-        ]
+    # Add hazard pages with dynamic high-risk assets
+    for hazard_name in selected_fields:
+        # Get high-risk assets for this hazard (or use empty list if not available)
+        assets_list = []
+        if high_risk_assets and hazard_name in high_risk_assets:
+            assets_list = [asset['name'] for asset in high_risk_assets[hazard_name]]
         
-        # Add Heat page
-        add_hazard_page(
-            "Heat",
-            [luzon_map_path, mindanao_map_path], # Both Luzon and Mindanao maps
-            heat_assets
-        )
-    
-    # Add a page for Water Stress if selected
-    if "Water Stress" in selected_fields:
-        # Water Stress assets
-        water_stress_assets = [
-            "SM Manila Shakeys Branch",
-            "Commissary in Paranaque"
-        ]
+        # Show "No high-risk assets identified" if the list is empty
+        if not assets_list:
+            assets_list = ["No high-risk assets identified for this hazard"]
         
-        # Add Water Stress page
-        add_hazard_page(
-            "Water Stress",
-            [luzon_map_path],  # Only Luzon map
-            water_stress_assets
-        )
-    
-    # Add a page for Storm Surge if selected
-    if "Storm Surge" in selected_fields:
-        # Storm Surge assets
-        storm_surge_assets = [
-            "SM Manila Shakeys Branch"
-        ]
+        # Get appropriate map paths
+        map_paths = []
+        if hazard_name == 'Heat':
+            map_paths = [luzon_map_path, mindanao_map_path]
+        elif hazard_name in ['Water Stress', 'Storm Surge', 'Rainfall Induced Landslide']:
+            map_paths = [luzon_map_path]
+        elif hazard_name in ['Sea Level Rise', 'Flood']:
+            map_paths = [luzon_map_path, mindanao_map_path]
+        elif hazard_name == 'Tropical Cyclones':
+            map_paths = [luzon_map_path]
+        else:
+            map_paths = [luzon_map_path]  # Default to Luzon map
         
-        # Add Storm Surge page
-        add_hazard_page(
-            "Storm Surge",
-            [luzon_map_path],  # Only Luzon map
-            storm_surge_assets
-        )
+        # Add the hazard page with the dynamic assets list
+        add_hazard_page(hazard_name, map_paths, assets_list)
     
     # Build the document
     doc.build(elements)
