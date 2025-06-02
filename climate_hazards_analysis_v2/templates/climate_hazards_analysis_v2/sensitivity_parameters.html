@@ -528,18 +528,40 @@ Set Sensitivity Parameters
                 <div class="parameter-card">
                     <div class="parameter-title">Wind Speed Thresholds</div>
                     <div class="parameter-description">Set tropical cyclone wind speed risk thresholds</div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="parameter-control">
-                                <label for="windSpeedMedium" class="form-label">Medium Risk (km/h): <span class="range-value" id="windSpeedMediumValue">119</span></label>
-                                <input type="range" class="form-range" id="windSpeedMedium" name="wind_speed_medium" min="80" max="150" value="119" oninput="updateRangeValue('windSpeedMedium', this.value)">
+                    
+                    <!-- Low Risk -->
+                    <div class="wind-speed-threshold-item">
+                        <div class="parameter-control">
+                            <label for="windSpeedLow" class="form-label">Low Risk Threshold (km/h): <span class="range-value" id="windSpeedLowValue">80</span></label>
+                            <div class="threshold-description">Less than</div>
+                            <input type="range" class="form-range" id="windSpeedLow" name="wind_speed_low" min="0" max="150" step="1" value="80" oninput="updateRangeValue('windSpeedLow', this.value)">
+                        </div>
+                    </div>
+                    
+                    <!-- Medium Risk -->
+                    <div class="wind-speed-threshold-item">
+                        <div class="parameter-control">
+                            <label class="form-label">Medium Risk Threshold (km/h)</label>
+                            <div class="threshold-description">From <span class="range-value" id="windSpeedMediumLowerValue">119</span> To <span class="range-value" id="windSpeedMediumUpperValue">177</span></div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="windSpeedMediumLower" class="form-label small">From (lower range)</label>
+                                    <input type="range" class="form-range" id="windSpeedMediumLower" name="wind_speed_medium_lower" min="100" max="200" step="1" value="119" oninput="updateRangeValue('windSpeedMediumLower', this.value)">
+                                </div>
+                                <div class="col-6">
+                                    <label for="windSpeedMediumUpper" class="form-label small">To (upper range)</label>
+                                    <input type="range" class="form-range" id="windSpeedMediumUpper" name="wind_speed_medium_upper" min="100" max="200" step="1" value="177" oninput="updateRangeValue('windSpeedMediumUpper', this.value)">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="parameter-control">
-                                <label for="windSpeedHigh" class="form-label">High Risk (km/h): <span class="range-value" id="windSpeedHighValue">178</span></label>
-                                <input type="range" class="form-range" id="windSpeedHigh" name="wind_speed_high" min="150" max="250" value="178" oninput="updateRangeValue('windSpeedHigh', this.value)">
-                            </div>
+                    </div>
+                    
+                    <!-- High Risk -->
+                    <div class="wind-speed-threshold-item">
+                        <div class="parameter-control">
+                            <label for="windSpeedHigh" class="form-label">High Risk Threshold (km/h): <span class="range-value" id="windSpeedHighValue">178</span></label>
+                            <div class="threshold-description">Greater than or equal</div>
+                            <input type="range" class="form-range" id="windSpeedHigh" name="wind_speed_high" min="150" max="300" step="1" value="178" oninput="updateRangeValue('windSpeedHigh', this.value)">
                         </div>
                     </div>
                 </div>
@@ -593,11 +615,14 @@ Set Sensitivity Parameters
             water_stress_medium_lower: document.getElementById('waterStressMediumLower').value,
             water_stress_medium_upper: document.getElementById('waterStressMediumUpper').value,
             water_stress_high: document.getElementById('waterStressHigh').value,
-            // Other parameters
+            // Heat parameters
             heat_30_threshold: document.getElementById('heat30Threshold').value,
             heat_33_threshold: document.getElementById('heat33Threshold').value,
             heat_35_threshold: document.getElementById('heat35Threshold').value,
-            wind_speed_medium: document.getElementById('windSpeedMedium').value,
+            // Updated wind speed parameters
+            wind_speed_low: document.getElementById('windSpeedLow').value,
+            wind_speed_medium_lower: document.getElementById('windSpeedMediumLower').value,
+            wind_speed_medium_upper: document.getElementById('windSpeedMediumUpper').value,
             wind_speed_high: document.getElementById('windSpeedHigh').value
         };
     }
@@ -620,11 +645,15 @@ Set Sensitivity Parameters
         document.getElementById('waterStressMediumUpper').value = params.water_stress_medium_upper;
         document.getElementById('waterStressHigh').value = params.water_stress_high;
 
-        // Other range inputs
+        // Heat parameters
         document.getElementById('heat30Threshold').value = params.heat_30_threshold;
         document.getElementById('heat33Threshold').value = params.heat_33_threshold;
         document.getElementById('heat35Threshold').value = params.heat_35_threshold;
-        document.getElementById('windSpeedMedium').value = params.wind_speed_medium;
+        
+        // Updated wind speed parameters
+        document.getElementById('windSpeedLow').value = params.wind_speed_low;
+        document.getElementById('windSpeedMediumLower').value = params.wind_speed_medium_lower;
+        document.getElementById('windSpeedMediumUpper').value = params.wind_speed_medium_upper;
         document.getElementById('windSpeedHigh').value = params.wind_speed_high;
 
         // Update all display values
@@ -647,11 +676,15 @@ Set Sensitivity Parameters
         updateRangeValue('waterStressMediumUpper', document.getElementById('waterStressMediumUpper').value);
         updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
 
-        // Other display values
+        // Heat display values
         updateRangeValue('heat30', document.getElementById('heat30Threshold').value);
         updateRangeValue('heat33', document.getElementById('heat33Threshold').value);
         updateRangeValue('heat35', document.getElementById('heat35Threshold').value);
-        updateRangeValue('windSpeedMedium', document.getElementById('windSpeedMedium').value);
+        
+        // Updated wind speed display values
+        updateRangeValue('windSpeedLow', document.getElementById('windSpeedLow').value);
+        updateRangeValue('windSpeedMediumLower', document.getElementById('windSpeedMediumLower').value);
+        updateRangeValue('windSpeedMediumUpper', document.getElementById('windSpeedMediumUpper').value);
         updateRangeValue('windSpeedHigh', document.getElementById('windSpeedHigh').value);
     }
 
