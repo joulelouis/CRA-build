@@ -51,33 +51,44 @@ Set Sensitivity Parameters
     font-size: 12px;
 }
 
-/* Flood threshold specific styles */
-.flood-threshold-item {
-    background-color: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.flood-threshold-item:last-child {
-    margin-bottom: 0;
-}
-
-.threshold-description {
-    font-size: 13px;
-    color: #6c757d;
-    font-style: italic;
-    margin-bottom: 10px;
-}
-
-/* Asset Archetype Component Styles */
+/* Asset Archetype Component Styles - MADE STICKY */
 .archetype-card {
     background-color: #F8F9FA;
     border-radius: 8px;
     border: 2px solid #dee2e6;
     transition: all 0.3s ease;
     height: fit-content;
+    position: sticky;
+    top: 20px; /* Distance from top when sticky */
+    z-index: 100; /* Ensure it stays above other content */
+    max-height: calc(100vh - 40px); /* Prevent it from going beyond viewport */
+    overflow-y: auto; /* Add scroll if content is too long */
+}
+
+/* Add smooth scrolling to the archetype list if it becomes too long */
+.archetype-list {
+    padding: 20px;
+    max-height: calc(100vh - 200px); /* Reserve space for header and some margin */
+    overflow-y: auto;
+}
+
+/* Ensure the archetype list scrollbar is styled nicely */
+.archetype-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.archetype-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.archetype-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.archetype-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 .archetype-card:hover {
@@ -92,10 +103,9 @@ Set Sensitivity Parameters
     padding: 15px 20px;
     border-radius: 6px 6px 0 0;
     margin: -2px -2px 0 -2px;
-}
-
-.archetype-list {
-    padding: 20px;
+    position: sticky;
+    top: -2px; /* Stick to the top of the card */
+    z-index: 101; /* Above the card itself */
 }
 
 .archetype-item {
@@ -217,7 +227,34 @@ Set Sensitivity Parameters
     box-shadow: 0 0 0 0.25rem rgba(241, 213, 0, 0.25);
 }
 
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .archetype-card {
+        position: relative; /* Disable sticky on mobile */
+        top: auto;
+        max-height: none;
+    }
+    
+    .archetype-list {
+        max-height: none;
+    }
+    
+    .archetype-header {
+        position: relative;
+        top: auto;
+    }
+}
+
+/* Ensure main content area has enough margin on larger screens */
+@media (min-width: 769px) {
+    .sensitivity-parameters-content {
+        min-height: 150vh; /* Ensure there's enough content to scroll */
+    }
+}
+
 </style>
+
+<!-- Rest of your HTML content remains exactly the same -->
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-6 d-flex flex-column">
@@ -226,10 +263,10 @@ Set Sensitivity Parameters
                 <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
             </div>
 
-            <!-- Heading below the icon with Margin -->
-<h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
-
+             <!-- Heading below the icon with Margin -->
+    <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
 </div>
+
 </div>
 <!-- Step by Step Procedure UI -->
 <div class="row mt-4 mb-4">
@@ -241,52 +278,52 @@ Set Sensitivity Parameters
                     <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
 
                     <!-- Active Progress (80% for step 4 completion) -->
-            <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 80%; z-index: 2; transition: width 0.5s ease;"></div>
-            
-            <!-- Step 1 (completed) -->
-            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                    1
+                <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 80%; z-index: 2; transition: width 0.5s ease;"></div>
+                
+                <!-- Step 1 (completed) -->
+                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                        1
+                    </div>
+                    <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
                 </div>
-                <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
-            </div>
-            
-            <!-- Step 2 (completed) -->
-            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                    2
+                
+                <!-- Step 2 (completed) -->
+                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                        2
+                    </div>
+                    <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
                 </div>
-                <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
-            </div>
-            
-            <!-- Step 3 (completed) -->
-            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                    3
+                
+                <!-- Step 3 (completed) -->
+                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                        3
+                    </div>
+                    <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
                 </div>
-                <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
-            </div>
-            
-            <!-- Step 4 (active) -->
-            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                    4
+                
+                <!-- Step 4 (active) -->
+                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                        4
+                    </div>
+                    <div class="step-label text-center" style="font-weight: 500;">Set Sensitivity Parameters</div>
                 </div>
-                <div class="step-label text-center" style="font-weight: 500;">Set Sensitivity Parameters</div>
-            </div>
-            
-            <!-- Step 5 (upcoming) -->
-            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
-                    5
+                
+                <!-- Step 5 (upcoming) -->
+                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                        5
+                    </div>
+                    <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
                 </div>
-                <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
             </div>
         </div>
     </div>
 </div>
 
-</div>
 </div>
 <!-- Alert Messages -->
 {% if error %}
@@ -302,8 +339,8 @@ Set Sensitivity Parameters
 </div>
 {% endif %}
 <!-- Main Content: Asset Archetype + Sensitivity Parameters -->
-<div class="row mt-4">
-    <!-- Left Column: Asset Archetype Component -->
+<div class="row mt-4 sensitivity-parameters-content">
+    <!-- Left Column: Asset Archetype Component (NOW STICKY) -->
     <div class="col-md-4">
         <div class="archetype-card">
             <div class="archetype-header">
