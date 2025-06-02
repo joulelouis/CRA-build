@@ -457,3 +457,83 @@ def identify_high_risk_assets(data, selected_hazards):
                     continue
     
     return high_risk_assets
+
+def sensitivity_parameters(request):
+    """
+    View for setting sensitivity parameters for climate hazard analysis.
+    This is the fourth step in the climate hazard analysis workflow.
+    """
+    # Get facility data and selected hazards from session
+    facility_data = request.session.get('climate_hazards_v2_facility_data', [])
+    selected_hazards = request.session.get('climate_hazards_v2_selected_hazards', [])
+    # Check if we have the necessary data from previous steps
+    if not facility_data or not selected_hazards:
+        return redirect('climate_hazards_analysis_v2:select_hazards')
+
+    context = {
+        'facility_count': len(facility_data),
+        'selected_hazards': selected_hazards,
+    }
+
+    # Handle form submission
+    if request.method == 'POST':
+        try:
+            # Extract sensitivity parameters from the form
+            sensitivity_params = {
+                'risk_tolerance': request.POST.get('risk_tolerance', 'medium'),
+                'time_horizon': request.POST.get('time_horizon', '2050'),
+                'confidence_level': int(request.POST.get('confidence_level', 95)),
+                
+                # Flood thresholds
+                'flood_low_threshold': float(request.POST.get('flood_low_threshold', 0.5)),
+                'flood_high_threshold': float(request.POST.get('flood_high_threshold', 1.5)),
+                
+                # Water stress thresholds
+                'water_stress_low': int(request.POST.get('water_stress_low', 10)),
+                'water_stress_high': int(request.POST.get('water_stress_high', 30)),
+                
+                # Heat thresholds
+                'heat_30_threshold': int(request.POST.get('heat_30_threshold', 300)),
+                'heat_33_threshold': int(request.POST.get('heat_33_threshold', 100)),
+                'heat_35_threshold': int(request.POST.get('heat_35_threshold', 30)),
+                
+                # Wind speed thresholds
+                'wind_speed_medium': int(request.POST.get('wind_speed_medium', 119)),
+                'wind_speed_high': int(request.POST.get('wind_speed_high', 178)),
+                
+                # Weighting factors
+                'flood_weight': int(request.POST.get('flood_weight', 25)),
+                'water_stress_weight': int(request.POST.get('water_stress_weight', 20)),
+                'heat_weight': int(request.POST.get('heat_weight', 20)),
+                'sea_level_weight': int(request.POST.get('sea_level_weight', 15)),
+                'cyclone_weight': int(request.POST.get('cyclone_weight', 15)),
+                'other_weight': int(request.POST.get('other_weight', 5)),
+                
+                # Advanced options
+                'enable_monte_carlo': request.POST.get('enable_monte_carlo') == 'on',
+                'enable_scenario': request.POST.get('enable_scenario') == 'on',
+                'enable_correlation': request.POST.get('enable_correlation') == 'on',
+                'iterations': int(request.POST.get('iterations', 1000)),
+            }
+            
+            # Store sensitivity parameters in session
+            request.session['climate_hazards_v2_sensitivity_params'] = sensitivity_params
+            
+            logger.info(f"Sensitivity parameters saved: {sensitivity_params}")
+            
+            # TODO: Implement sensitivity analysis processing
+            # For now, redirect to a placeholder or show success message
+            context['success_message'] = "Sensitivity parameters have been saved successfully!"
+            
+            # Eventually this should redirect to sensitivity results page
+            # return redirect('climate_hazards_analysis_v2:sensitivity_results')
+            
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error processing sensitivity parameters: {e}")
+            context['error'] = f"Error processing parameters: {str(e)}"
+        except Exception as e:
+            logger.exception(f"Unexpected error in sensitivity parameters: {e}")
+            context['error'] = "An unexpected error occurred while processing parameters."
+
+    # For GET requests or if there was an error, show the form
+    return render(request, 'climate_hazards_analysis_v2/sensitivity_parameters.html', context)

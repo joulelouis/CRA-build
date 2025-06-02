@@ -1,0 +1,598 @@
+<artifacts>
+<artifact identifier="sensitivity_parameters_html" type="application/vnd.ant.code" language="html" title="climate_hazards_analysis_v2/templates/climate_hazards_analysis_v2/sensitivity_parameters.html">
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+Set Sensitivity Parameters
+{% endblock %}
+{% block content %}
+<style>
+    /* Parameter card styles */
+    .parameter-card {
+        background-color: #F8F9FA;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .parameter-card:hover {
+        border-color: #F1D500;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .parameter-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .parameter-description {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+    
+    .parameter-control {
+        margin-bottom: 15px;
+    }
+    
+    .parameter-control label {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .range-value {
+        font-weight: bold;
+        color: #F1D500;
+        background-color: #333;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    /* Step Progress Styles */
+    .steps-container {
+        padding: 0 30px;
+    }
+    
+    .step-item {
+        transition: all 0.3s ease;
+    }
+    
+    .step-circle {
+        transition: background-color 0.3s ease, color 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .step-label {
+        transition: color 0.3s ease;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    /* Accordion styles */
+    .accordion-button {
+        background-color: #f8f9fa;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: #F1D500;
+        color: #000;
+        box-shadow: none;
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: #F1D500;
+    }
+    
+    /* Custom checkbox styles */
+    .form-check-input:checked {
+        background-color: #F1D500;
+        border-color: #F1D500;
+    }
+    
+    .form-check-input:focus {
+        border-color: #F1D500;
+        box-shadow: 0 0 0 0.25rem rgba(241, 213, 0, 0.25);
+    }
+</style>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-6 d-flex flex-column">
+            <!-- Rounded Icon Container with Margin -->
+            <div class="icon-container">
+                <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
+            </div>
+
+            <!-- Heading below the icon with Margin -->
+        <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
+    </div>
+</div>
+
+<!-- Step by Step Procedure UI -->
+<div class="row mt-4 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="steps-container d-flex justify-content-between position-relative">
+                    <!-- Progress Line -->
+                    <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
+                    
+                    <!-- Active Progress (80% for step 4 completion) -->
+                    <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 80%; z-index: 2; transition: width 0.5s ease;"></div>
+                    
+                    <!-- Step 1 (completed) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                            1
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+                    </div>
+                    
+                    <!-- Step 2 (completed) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                            2
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
+                    </div>
+                    
+                    <!-- Step 3 (completed) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                            3
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+                    </div>
+                    
+                    <!-- Step 4 (active) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                            4
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500;">Set Sensitivity Parameters</div>
+                    </div>
+                    
+                    <!-- Step 5 (upcoming) -->
+                    <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                        <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                            5
+                        </div>
+                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Messages -->
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+{% if success_message %}
+<div class="alert alert-success alert-dismissible fade show alert-fade" role="alert">
+    {{ success_message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<!-- Sensitivity Parameters Content -->
+<div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card custom-card">
+            <div class="card-header no-border">
+                <strong>Set Sensitivity Parameters</strong>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Configure sensitivity parameters to customize the risk assessment thresholds and weightings for your climate hazard analysis.</p>
+                
+                <form id="sensitivity-form" method="POST" action="{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Risk Assessment Parameters -->
+                    <div class="accordion" id="sensitivityAccordion">
+                        
+                        <!-- General Risk Parameters -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="generalParamsHeader">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#generalParams" aria-expanded="true" aria-controls="generalParams">
+                                    General Risk Parameters
+                                </button>
+                            </h2>
+                            <div id="generalParams" class="accordion-collapse collapse show" aria-labelledby="generalParamsHeader" data-bs-parent="#sensitivityAccordion">
+                                <div class="accordion-body">
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Risk Tolerance Level</div>
+                                        <div class="parameter-description">Set the overall risk tolerance for your organization</div>
+                                        <div class="parameter-control">
+                                            <label for="riskTolerance" class="form-label">Risk Tolerance: <span class="range-value" id="riskToleranceValue">Medium</span></label>
+                                            <select class="form-select" id="riskTolerance" name="risk_tolerance">
+                                                <option value="low">Conservative (Low Risk)</option>
+                                                <option value="medium" selected>Moderate (Medium Risk)</option>
+                                                <option value="high">Aggressive (High Risk)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Time Horizon</div>
+                                        <div class="parameter-description">Select the planning time horizon for risk assessment</div>
+                                        <div class="parameter-control">
+                                            <label for="timeHorizon" class="form-label">Time Horizon: <span class="range-value" id="timeHorizonValue">2050</span></label>
+                                            <select class="form-select" id="timeHorizon" name="time_horizon">
+                                                <option value="2030">Short-term (2030)</option>
+                                                <option value="2040">Medium-term (2040)</option>
+                                                <option value="2050" selected>Long-term (2050)</option>
+                                                <option value="2060">Extended (2060)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Confidence Level</div>
+                                        <div class="parameter-description">Set the statistical confidence level for projections</div>
+                                        <div class="parameter-control">
+                                            <label for="confidenceLevel" class="form-label">Confidence Level: <span class="range-value" id="confidenceLevelValue">95%</span></label>
+                                            <input type="range" class="form-range" id="confidenceLevel" name="confidence_level" min="80" max="99" value="95" oninput="updateRangeValue('confidenceLevel', this.value + '%')">
+                                            <div class="d-flex justify-content-between">
+                                                <small>80%</small>
+                                                <small>99%</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hazard-Specific Thresholds -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hazardThresholdsHeader">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#hazardThresholds" aria-expanded="false" aria-controls="hazardThresholds">
+                                    Hazard-Specific Thresholds
+                                </button>
+                            </h2>
+                            <div id="hazardThresholds" class="accordion-collapse collapse" aria-labelledby="hazardThresholdsHeader" data-bs-parent="#sensitivityAccordion">
+                                <div class="accordion-body">
+                                    <!-- Flood Thresholds -->
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Flood Depth Thresholds</div>
+                                        <div class="parameter-description">Define flood depth categories for risk classification</div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="floodLowThreshold" class="form-label">Low Risk Threshold (meters): <span class="range-value" id="floodLowValue">0.5</span></label>
+                                                    <input type="range" class="form-range" id="floodLowThreshold" name="flood_low_threshold" min="0.1" max="2.0" step="0.1" value="0.5" oninput="updateRangeValue('floodLow', this.value)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="floodHighThreshold" class="form-label">High Risk Threshold (meters): <span class="range-value" id="floodHighValue">1.5</span></label>
+                                                    <input type="range" class="form-range" id="floodHighThreshold" name="flood_high_threshold" min="0.5" max="3.0" step="0.1" value="1.5" oninput="updateRangeValue('floodHigh', this.value)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Water Stress Thresholds -->
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Water Stress Thresholds</div>
+                                        <div class="parameter-description">Set water stress percentage thresholds for risk levels</div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
+                                                    <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="5" max="50" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">30</span></label>
+                                                    <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="20" max="80" value="30" oninput="updateRangeValue('waterStressHigh', this.value)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Heat Exposure Thresholds -->
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Heat Exposure Thresholds</div>
+                                        <div class="parameter-description">Define thresholds for extreme heat days</div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="parameter-control">
+                                                    <label for="heat30Threshold" class="form-label">Days >30°C High Risk: <span class="range-value" id="heat30Value">300</span></label>
+                                                    <input type="range" class="form-range" id="heat30Threshold" name="heat_30_threshold" min="200" max="365" value="300" oninput="updateRangeValue('heat30', this.value)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="parameter-control">
+                                                    <label for="heat33Threshold" class="form-label">Days >33°C High Risk: <span class="range-value" id="heat33Value">100</span></label>
+                                                    <input type="range" class="form-range" id="heat33Threshold" name="heat_33_threshold" min="50" max="250" value="100" oninput="updateRangeValue('heat33', this.value)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="parameter-control">
+                                                    <label for="heat35Threshold" class="form-label">Days >35°C High Risk: <span class="range-value" id="heat35Value">30</span></label>
+                                                    <input type="range" class="form-range" id="heat35Threshold" name="heat_35_threshold" min="10" max="100" value="30" oninput="updateRangeValue('heat35', this.value)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Wind Speed Thresholds -->
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Wind Speed Thresholds</div>
+                                        <div class="parameter-description">Set tropical cyclone wind speed risk thresholds</div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="windSpeedMedium" class="form-label">Medium Risk (km/h): <span class="range-value" id="windSpeedMediumValue">119</span></label>
+                                                    <input type="range" class="form-range" id="windSpeedMedium" name="wind_speed_medium" min="80" max="150" value="119" oninput="updateRangeValue('windSpeedMedium', this.value)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="windSpeedHigh" class="form-label">High Risk (km/h): <span class="range-value" id="windSpeedHighValue">178</span></label>
+                                                    <input type="range" class="form-range" id="windSpeedHigh" name="wind_speed_high" min="150" max="250" value="178" oninput="updateRangeValue('windSpeedHigh', this.value)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Weighting Factors -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="weightingHeader">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#weighting" aria-expanded="false" aria-controls="weighting">
+                                    Hazard Weighting Factors
+                                </button>
+                            </h2>
+                            <div id="weighting" class="accordion-collapse collapse" aria-labelledby="weightingHeader" data-bs-parent="#sensitivityAccordion">
+                                <div class="accordion-body">
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Hazard Importance Weighting</div>
+                                        <div class="parameter-description">Assign relative importance weights to different hazard types</div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="floodWeight" class="form-label">Flood Weight: <span class="range-value" id="floodWeightValue">25%</span></label>
+                                                    <input type="range" class="form-range" id="floodWeight" name="flood_weight" min="0" max="50" value="25" oninput="updateWeights()">
+                                                </div>
+                                                <div class="parameter-control">
+                                                    <label for="waterStressWeight" class="form-label">Water Stress Weight: <span class="range-value" id="waterStressWeightValue">20%</span></label>
+                                                    <input type="range" class="form-range" id="waterStressWeight" name="water_stress_weight" min="0" max="50" value="20" oninput="updateWeights()">
+                                                </div>
+                                                <div class="parameter-control">
+                                                    <label for="heatWeight" class="form-label">Heat Weight: <span class="range-value" id="heatWeightValue">20%</span></label>
+                                                    <input type="range" class="form-range" id="heatWeight" name="heat_weight" min="0" max="50" value="20" oninput="updateWeights()">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="parameter-control">
+                                                    <label for="seaLevelWeight" class="form-label">Sea Level Rise Weight: <span class="range-value" id="seaLevelWeightValue">15%</span></label>
+                                                    <input type="range" class="form-range" id="seaLevelWeight" name="sea_level_weight" min="0" max="50" value="15" oninput="updateWeights()">
+                                                </div>
+                                                <div class="parameter-control">
+                                                    <label for="cycloneWeight" class="form-label">Tropical Cyclone Weight: <span class="range-value" id="cycloneWeightValue">15%</span></label>
+                                                    <input type="range" class="form-range" id="cycloneWeight" name="cyclone_weight" min="0" max="50" value="15" oninput="updateWeights()">
+                                                </div>
+                                                <div class="parameter-control">
+                                                    <label for="otherWeight" class="form-label">Other Hazards Weight: <span class="range-value" id="otherWeightValue">5%</span></label>
+                                                    <input type="range" class="form-range" id="otherWeight" name="other_weight" min="0" max="50" value="5" oninput="updateWeights()">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <strong>Total Weight: <span id="totalWeight" class="range-value">100%</span></strong>
+                                            <div class="progress mt-2">
+                                                <div id="weightProgress" class="progress-bar bg-warning" role="progressbar" style="width: 100%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Options -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="advancedHeader">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advanced" aria-expanded="false" aria-controls="advanced">
+                                    Advanced Options
+                                </button>
+                            </h2>
+                            <div id="advanced" class="accordion-collapse collapse" aria-labelledby="advancedHeader" data-bs-parent="#sensitivityAccordion">
+                                <div class="accordion-body">
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Sensitivity Analysis Options</div>
+                                        <div class="parameter-description">Configure additional sensitivity analysis parameters</div>
+                                        
+                                        <div class="parameter-control">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="enableMonteCarlo" name="enable_monte_carlo" checked>
+                                                <label class="form-check-label" for="enableMonteCarlo">
+                                                    Enable Monte Carlo Analysis
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="parameter-control">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="enableScenario" name="enable_scenario" checked>
+                                                <label class="form-check-label" for="enableScenario">
+                                                    Include Scenario Analysis
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="parameter-control">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="enableCorrelation" name="enable_correlation">
+                                                <label class="form-check-label" for="enableCorrelation">
+                                                    Consider Hazard Correlations
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="parameter-control">
+                                            <label for="iterations" class="form-label">Monte Carlo Iterations: <span class="range-value" id="iterationsValue">1000</span></label>
+                                            <input type="range" class="form-range" id="iterations" name="iterations" min="100" max="10000" step="100" value="1000" oninput="updateRangeValue('iterations', this.value)">
+                                            <div class="d-flex justify-content-between">
+                                                <small>100</small>
+                                                <small>10,000</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'climate_hazards_analysis_v2:show_results' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Asset Exposure Results
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
+                                <i class="fas fa-undo me-2"></i> Reset to Defaults
+                            </button>
+                        </div>
+                        <button type="submit" id="apply-parameters-btn" class="btn btn-warning btn-lg">
+                            <strong>Apply Parameters & Generate Sensitivity Results</strong>
+                            <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+<script>
+    // Function to update range value displays
+    function updateRangeValue(prefix, value) {
+        document.getElementById(prefix + 'Value').textContent = value;
+    }
+    
+    // Function to update weighting factors and ensure they sum to 100%
+    function updateWeights() {
+        const weights = [
+            'floodWeight',
+            'waterStressWeight', 
+            'heatWeight',
+            'seaLevelWeight',
+            'cycloneWeight',
+            'otherWeight'
+        ];
+        
+        let total = 0;
+        weights.forEach(weight => {
+            const value = parseInt(document.getElementById(weight).value);
+            total += value;
+            document.getElementById(weight + 'Value').textContent = value + '%';
+        });
+        
+        // Update total weight display
+        document.getElementById('totalWeight').textContent = total + '%';
+        
+        // Update progress bar
+        const progressBar = document.getElementById('weightProgress');
+        progressBar.style.width = Math.min(total, 100) + '%';
+        
+        // Change color based on total
+        if (total === 100) {
+            progressBar.className = 'progress-bar bg-success';
+        } else if (total > 100) {
+            progressBar.className = 'progress-bar bg-danger';
+        } else {
+            progressBar.className = 'progress-bar bg-warning';
+        }
+    }
+    
+    // Function to reset all parameters to defaults
+    function resetToDefaults() {
+        if (confirm('Are you sure you want to reset all parameters to their default values?')) {
+            // Reset all form elements to their default values
+            document.getElementById('sensitivity-form').reset();
+            
+            // Update all displayed values
+            updateRangeValue('confidenceLevel', '95%');
+            updateRangeValue('floodLow', '0.5');
+            updateRangeValue('floodHigh', '1.5');
+            updateRangeValue('waterStressLow', '10');
+            updateRangeValue('waterStressHigh', '30');
+            updateRangeValue('heat30', '300');
+            updateRangeValue('heat33', '100');
+            updateRangeValue('heat35', '30');
+            updateRangeValue('windSpeedMedium', '119');
+            updateRangeValue('windSpeedHigh', '178');
+            updateRangeValue('iterations', '1000');
+            
+            // Reset weights
+            document.getElementById('floodWeight').value = 25;
+            document.getElementById('waterStressWeight').value = 20;
+            document.getElementById('heatWeight').value = 20;
+            document.getElementById('seaLevelWeight').value = 15;
+            document.getElementById('cycloneWeight').value = 15;
+            document.getElementById('otherWeight').value = 5;
+            
+            updateWeights();
+        }
+    }
+    
+    // Initialize weight calculation on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateWeights();
+    });
+    
+    // Function to update the steps progress
+    function updateStepProgress(currentStep) {
+        const totalSteps = 5;
+        const progressPercentage = (currentStep / totalSteps) * 100;
+        
+        // Update progress bar width
+        document.querySelector('.active-progress').style.width = progressPercentage + '%';
+        
+        // Update step circles and labels
+        for (let i = 1; i <= totalSteps; i++) {
+            const stepItem = document.querySelectorAll('.step-item')[i-1];
+            const stepCircle = stepItem.querySelector('.step-circle');
+            const stepLabel = stepItem.querySelector('.step-label');
+            
+            if (i <= currentStep) {
+                // Completed or current step
+                stepCircle.style.backgroundColor = '#F1D500';
+                stepCircle.style.color = '#000';
+                stepLabel.style.color = '#000';
+                stepLabel.style.fontWeight = '500';
+            } else {
+                // Upcoming step
+                stepCircle.style.backgroundColor = '#e9ecef';
+                stepCircle.style.color = '#6c757d';
+                stepLabel.style.color = '#6c757d';
+            }
+        }
+    }
+    
+    // Initialize with current step (4)
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStepProgress(4);
+    });
+</script>
+{% endblock %}
+</artifact>
+</artifacts>

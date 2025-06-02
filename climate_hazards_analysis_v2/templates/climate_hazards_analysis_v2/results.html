@@ -642,8 +642,9 @@
     </div>
 
     <!-- Navigation buttons -->
-    <div class="row mt-4 mb-5">
-        <div class="col-12 d-flex justify-content-between">
+<div class="row mt-4 mb-5">
+    <div class="col-12 d-flex justify-content-between">
+        <div class="d-flex gap-2">
             <a href="{% url 'climate_hazards_analysis_v2:select_hazards' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-2"></i> Back to Select Climate/Weather Hazards
             </a>
@@ -651,7 +652,15 @@
                 <i class="fas fa-arrow-left me-2"></i> Return to Upload Facility Location
             </a>
         </div>
+        <div>
+            <a href="#" class="btn btn-warning btn-lg" onclick="proceedToSensitivityParameters()">
+                <strong>Proceed to Set Sensitivity Parameters</strong>
+                <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
     </div>
+</div>
+
 </div>
 
 <!-- Include DataTables CSS & JS -->
@@ -919,5 +928,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     updateStepProgress(currentStep);
 });
+
+function proceedToSensitivityParameters() {
+    // Update the progress steps to step 4s
+    updateStepProgress(4);
+// For now, show an alert since the functionality isn't implemented yet
+alert("Proceeding to Set Sensitivity Parameters...\n\nThis feature will be implemented in the next phase of development.");
+
+// TODO: Implement navigation to sensitivity parameters page
+window.location.href = "{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}";
+}
 </script>
 {% endblock %}
