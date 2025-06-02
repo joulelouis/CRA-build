@@ -266,8 +266,8 @@ def show_results(request):
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
                                 'Extreme Windspeed 100 year Return Period (km/h)'],
             'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius'],
-            'Storm Surge': ['Storm Surge Hazard Rating'],
-            'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Hazard Rating']
+            'Storm Surge': ['Storm Surge Flood Depth (meters)'],
+            'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
         }
         
         # Add column groups for each hazard type that has columns in the data

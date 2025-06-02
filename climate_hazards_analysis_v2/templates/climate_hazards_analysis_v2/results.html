@@ -523,7 +523,7 @@
                                                                     {{ value }}
                                                                 {% endif %}
 
-                                                            {% elif key == "Storm Surge Hazard Rating" %}
+                                                            {% elif key == "Storm Surge Flood Depth (meters)" %}
                                                                 {% if value == "Data not available" %}
                                                                     <span style="color:black">{{ value }}</span>
                                                                 {% elif value == "N/A" %}
@@ -542,7 +542,7 @@
                                                                     {% endwith %}
                                                                 {% endif %}
 
-                                                            {% elif key == "Rainfall Induced Landslide Hazard Rating" %}
+                                                            {% elif key == "Rainfall Induced Landslide Factor of Safety" %}
                                                                 {% if value == "Data not available" %}
                                                                     <span style="color:black">{{ value }}</span>
                                                                 {% elif value == "N/A" %}
