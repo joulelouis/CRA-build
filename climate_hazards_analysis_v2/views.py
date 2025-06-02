@@ -462,6 +462,7 @@ def sensitivity_parameters(request):
     """
     View for setting sensitivity parameters for climate hazard analysis.
     This is the fourth step in the climate hazard analysis workflow.
+    Now supports archetype-specific parameter configuration.
     """
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
@@ -524,6 +525,9 @@ def sensitivity_parameters(request):
     # Handle form submission
     if request.method == 'POST':
         try:
+            # Get the selected archetype (if any)
+            selected_archetype = request.POST.get('selected_archetype', '').strip()
+            
             # Extract sensitivity parameters from the form
             sensitivity_params = {
                 # Analysis parameters
@@ -564,41 +568,54 @@ def sensitivity_parameters(request):
                 'iterations': int(request.POST.get('iterations', 1000)),
             }
             
-            # Store sensitivity parameters in session
-            request.session['climate_hazards_v2_sensitivity_params'] = sensitivity_params
-            
-            logger.info(f"Sensitivity parameters saved: {sensitivity_params}")
-            
-            if facility_csv_path and os.path.exists(facility_csv_path):
-                # Re-run the analysis with new buffer size
-                buffer_size = sensitivity_params['buffer_size']
+            # Handle archetype-specific parameters
+            if selected_archetype:
+                # Get existing archetype parameters from session
+                archetype_params = request.session.get('climate_hazards_v2_archetype_params', {})
                 
-                # Import the analysis function
-                from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
+                # Store parameters for this specific archetype
+                archetype_params[selected_archetype] = sensitivity_params
+                request.session['climate_hazards_v2_archetype_params'] = archetype_params
                 
-                # Run sensitivity analysis with custom buffer size
-                result = generate_climate_hazards_analysis(
-                    facility_csv_path=facility_csv_path,
-                    selected_fields=selected_hazards,
-                    buffer_size=buffer_size
-                )
+                logger.info(f"Sensitivity parameters saved for archetype '{selected_archetype}': {sensitivity_params}")
                 
-                if result and 'error' not in result:
-                    # Store sensitivity results in session
-                    request.session['climate_hazards_v2_sensitivity_results'] = {
-                        'combined_csv_path': result.get('combined_csv_path'),
-                        'plot_path': result.get('plot_path'),
-                        'all_plots': result.get('all_plots', []),
-                        'buffer_size': buffer_size,
-                        'parameters': sensitivity_params
-                    }
-                    
-                    buffer_meters = int(buffer_size * 111000)
-                    context['success_message'] = f"Sensitivity analysis completed with {buffer_meters}m buffer size! Parameters have been applied successfully."
-                else:
-                    context['error'] = f"Error in sensitivity analysis: {result.get('error', 'Unknown error')}"
+                context['success_message'] = f"Parameters saved for '{selected_archetype}' archetype! You can now select another archetype or apply all parameters."
             else:
-                context['error'] = "Facility CSV file not found. Please restart the analysis."
+                # Store general sensitivity parameters in session
+                request.session['climate_hazards_v2_sensitivity_params'] = sensitivity_params
+                
+                logger.info(f"General sensitivity parameters saved: {sensitivity_params}")
+                
+                if facility_csv_path and os.path.exists(facility_csv_path):
+                    # Re-run the analysis with new buffer size
+                    buffer_size = sensitivity_params['buffer_size']
+                    
+                    # Import the analysis function
+                    from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
+                    
+                    # Run sensitivity analysis with custom buffer size
+                    result = generate_climate_hazards_analysis(
+                        facility_csv_path=facility_csv_path,
+                        selected_fields=selected_hazards,
+                        buffer_size=buffer_size
+                    )
+                    
+                    if result and 'error' not in result:
+                        # Store sensitivity results in session
+                        request.session['climate_hazards_v2_sensitivity_results'] = {
+                            'combined_csv_path': result.get('combined_csv_path'),
+                            'plot_path': result.get('plot_path'),
+                            'all_plots': result.get('all_plots', []),
+                            'buffer_size': buffer_size,
+                            'parameters': sensitivity_params
+                        }
+                        
+                        buffer_meters = int(buffer_size * 111000)
+                        context['success_message'] = f"Sensitivity analysis completed with {buffer_meters}m buffer size! Parameters have been applied successfully."
+                    else:
+                        context['error'] = f"Error in sensitivity analysis: {result.get('error', 'Unknown error')}"
+                else:
+                    context['error'] = "Facility CSV file not found. Please restart the analysis."
             
         except (ValueError, TypeError) as e:
             logger.error(f"Error processing sensitivity parameters: {e}")
