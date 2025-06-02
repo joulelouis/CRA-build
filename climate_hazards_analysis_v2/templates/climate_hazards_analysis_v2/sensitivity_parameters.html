@@ -51,6 +51,26 @@ Set Sensitivity Parameters
     font-size: 12px;
 }
 
+/* Flood threshold specific styles */
+.flood-threshold-item {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.flood-threshold-item:last-child {
+    margin-bottom: 0;
+}
+
+.threshold-description {
+    font-size: 13px;
+    color: #6c757d;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
 /* Asset Archetype Component Styles */
 .archetype-card {
     background-color: #F8F9FA;
@@ -206,10 +226,10 @@ Set Sensitivity Parameters
                 <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
             </div>
 
-             <!-- Heading below the icon with Margin -->
-    <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
-</div>
+            <!-- Heading below the icon with Margin -->
+<h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
 
+</div>
 </div>
 <!-- Step by Step Procedure UI -->
 <div class="row mt-4 mb-4">
@@ -221,52 +241,52 @@ Set Sensitivity Parameters
                     <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
 
                     <!-- Active Progress (80% for step 4 completion) -->
-                <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 80%; z-index: 2; transition: width 0.5s ease;"></div>
-                
-                <!-- Step 1 (completed) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        1
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+            <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 80%; z-index: 2; transition: width 0.5s ease;"></div>
+            
+            <!-- Step 1 (completed) -->
+            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                    1
                 </div>
-                
-                <!-- Step 2 (completed) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        2
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
+                <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+            </div>
+            
+            <!-- Step 2 (completed) -->
+            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                    2
                 </div>
-                
-                <!-- Step 3 (completed) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        3
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+                <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
+            </div>
+            
+            <!-- Step 3 (completed) -->
+            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                    3
                 </div>
-                
-                <!-- Step 4 (active) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        4
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Set Sensitivity Parameters</div>
+                <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+            </div>
+            
+            <!-- Step 4 (active) -->
+            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
+                    4
                 </div>
-                
-                <!-- Step 5 (upcoming) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
-                        5
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
+                <div class="step-label text-center" style="font-weight: 500;">Set Sensitivity Parameters</div>
+            </div>
+            
+            <!-- Step 5 (upcoming) -->
+            <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
+                    5
                 </div>
+                <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
             </div>
         </div>
     </div>
 </div>
 
+</div>
 </div>
 <!-- Alert Messages -->
 {% if error %}
@@ -311,7 +331,8 @@ Set Sensitivity Parameters
     </div>
 
     <!-- Right Column: Set Sensitivity Parameters -->
-<div class="col-md-8">
+
+    <div class="col-md-8">
     <div class="card custom-card">
         <div class="card-header no-border">
             <strong>Set Sensitivity Parameters</strong>
@@ -322,134 +343,174 @@ Set Sensitivity Parameters
                 <i class="fas fa-building me-2"></i>
                 Configuring parameters for: <span id="selected-archetype-name">None Selected</span>
             </div>
-            
+
             <div id="default-instructions" class="archetype-instructions">
-                <i class="fas fa-arrow-left me-2"></i>
-                Please select an asset archetype from the left panel to configure its specific sensitivity parameters, or use the default parameters below for all archetypes.
+            <i class="fas fa-arrow-left me-2"></i>
+            Please select an asset archetype from the left panel to configure its specific sensitivity parameters, or use the default parameters below for all archetypes.
+        </div>
+        
+        <form id="sensitivity-form" method="POST" action="{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}">
+            {% csrf_token %}
+            
+            <!-- Hidden field to store selected archetype -->
+            <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
+            
+            <!-- Hazard-Specific Thresholds (No Accordion) -->
+            <div class="hazard-thresholds-section">
+                <h4 class="mb-3">Hazard-Specific Thresholds</h4>
+                
+                <!-- Flood Thresholds -->
+                <div class="parameter-card">
+                    <div class="parameter-title">Flood Depth Thresholds</div>
+                    <div class="parameter-description">Define flood depth categories for risk classification</div>
+                    
+                    <!-- Little to None -->
+                    <div class="flood-threshold-item">
+                        <div class="parameter-control">
+                            <label for="floodLittleThreshold" class="form-label">Little to None (meters): <span class="range-value" id="floodLittleValue">0.3</span></label>
+                            <div class="threshold-description">Less than or equal to</div>
+                            <input type="range" class="form-range" id="floodLittleThreshold" name="flood_little_threshold" min="0.1" max="0.5" step="0.1" value="0.3" oninput="updateRangeValue('floodLittle', this.value)">
+                        </div>
+                    </div>
+                    
+                    <!-- Low Risk -->
+                    <div class="flood-threshold-item">
+                        <div class="parameter-control">
+                            <label class="form-label">Low Risk Threshold (meters)</label>
+                            <div class="threshold-description">From <span class="range-value" id="floodLowLowerValue">0.4</span> To <span class="range-value" id="floodLowUpperValue">1.0</span></div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="floodLowLower" class="form-label small">From (lower range)</label>
+                                    <input type="range" class="form-range" id="floodLowLower" name="flood_low_lower" min="0.1" max="2.0" step="0.1" value="0.4" oninput="updateRangeValue('floodLowLower', this.value)">
+                                </div>
+                                <div class="col-6">
+                                    <label for="floodLowUpper" class="form-label small">To (upper range)</label>
+                                    <input type="range" class="form-range" id="floodLowUpper" name="flood_low_upper" min="0.1" max="2.0" step="0.1" value="1.0" oninput="updateRangeValue('floodLowUpper', this.value)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Medium Risk -->
+                    <div class="flood-threshold-item">
+                        <div class="parameter-control">
+                            <label class="form-label">Medium Risk Threshold (meters)</label>
+                            <div class="threshold-description">From <span class="range-value" id="floodMediumLowerValue">1.1</span> To <span class="range-value" id="floodMediumUpperValue">1.5</span></div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="floodMediumLower" class="form-label small">From (lower range)</label>
+                                    <input type="range" class="form-range" id="floodMediumLower" name="flood_medium_lower" min="0.1" max="2.5" step="0.1" value="1.1" oninput="updateRangeValue('floodMediumLower', this.value)">
+                                </div>
+                                <div class="col-6">
+                                    <label for="floodMediumUpper" class="form-label small">To (upper range)</label>
+                                    <input type="range" class="form-range" id="floodMediumUpper" name="flood_medium_upper" min="0.1" max="2.5" step="0.1" value="1.5" oninput="updateRangeValue('floodMediumUpper', this.value)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- High Risk -->
+                    <div class="flood-threshold-item">
+                        <div class="parameter-control">
+                            <label for="floodHighThreshold" class="form-label">High Risk Threshold (meters): <span class="range-value" id="floodHighValue">1.6</span></label>
+                            <div class="threshold-description">Greater than or equal to</div>
+                            <input type="range" class="form-range" id="floodHighThreshold" name="flood_high_threshold" min="0.5" max="3.0" step="0.1" value="1.6" oninput="updateRangeValue('floodHigh', this.value)">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Water Stress Thresholds -->
+                <div class="parameter-card">
+                    <div class="parameter-title">Water Stress Thresholds</div>
+                    <div class="parameter-description">Set water stress percentage thresholds for risk levels</div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="parameter-control">
+                                <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
+                                <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="5" max="50" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="parameter-control">
+                                <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">30</span></label>
+                                <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="20" max="80" value="30" oninput="updateRangeValue('waterStressHigh', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Heat Exposure Thresholds -->
+                <div class="parameter-card">
+                    <div class="parameter-title">Heat Exposure Thresholds</div>
+                    <div class="parameter-description">Define thresholds for extreme heat days</div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="parameter-control">
+                                <label for="heat30Threshold" class="form-label">Days >30°C High Risk: <span class="range-value" id="heat30Value">300</span></label>
+                                <input type="range" class="form-range" id="heat30Threshold" name="heat_30_threshold" min="200" max="365" value="300" oninput="updateRangeValue('heat30', this.value)">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="parameter-control">
+                                <label for="heat33Threshold" class="form-label">Days >33°C High Risk: <span class="range-value" id="heat33Value">100</span></label>
+                                <input type="range" class="form-range" id="heat33Threshold" name="heat_33_threshold" min="50" max="250" value="100" oninput="updateRangeValue('heat33', this.value)">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="parameter-control">
+                                <label for="heat35Threshold" class="form-label">Days >35°C High Risk: <span class="range-value" id="heat35Value">30</span></label>
+                                <input type="range" class="form-range" id="heat35Threshold" name="heat_35_threshold" min="10" max="100" value="30" oninput="updateRangeValue('heat35', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Wind Speed Thresholds -->
+                <div class="parameter-card">
+                    <div class="parameter-title">Wind Speed Thresholds</div>
+                    <div class="parameter-description">Set tropical cyclone wind speed risk thresholds</div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="parameter-control">
+                                <label for="windSpeedMedium" class="form-label">Medium Risk (km/h): <span class="range-value" id="windSpeedMediumValue">119</span></label>
+                                <input type="range" class="form-range" id="windSpeedMedium" name="wind_speed_medium" min="80" max="150" value="119" oninput="updateRangeValue('windSpeedMedium', this.value)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="parameter-control">
+                                <label for="windSpeedHigh" class="form-label">High Risk (km/h): <span class="range-value" id="windSpeedHighValue">178</span></label>
+                                <input type="range" class="form-range" id="windSpeedHigh" name="wind_speed_high" min="150" max="250" value="178" oninput="updateRangeValue('windSpeedHigh', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <form id="sensitivity-form" method="POST" action="{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}">
-                {% csrf_token %}
-                
-                <!-- Hidden field to store selected archetype -->
-                <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
-                
-                <!-- Hazard-Specific Thresholds (No Accordion) -->
-                <div class="hazard-thresholds-section">
-                    <h4 class="mb-3">Hazard-Specific Thresholds</h4>
-                    
-                    <!-- Flood Thresholds -->
-                    <div class="parameter-card">
-                        <div class="parameter-title">Flood Depth Thresholds</div>
-                        <div class="parameter-description">Define flood depth categories for risk classification</div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="parameter-control">
-                                    <label for="floodLowThreshold" class="form-label">Low Risk Threshold (meters): <span class="range-value" id="floodLowValue">0.5</span></label>
-                                    <input type="range" class="form-range" id="floodLowThreshold" name="flood_low_threshold" min="0.1" max="2.0" step="0.1" value="0.5" oninput="updateRangeValue('floodLow', this.value)">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="parameter-control">
-                                    <label for="floodHighThreshold" class="form-label">High Risk Threshold (meters): <span class="range-value" id="floodHighValue">1.5</span></label>
-                                    <input type="range" class="form-range" id="floodHighThreshold" name="flood_high_threshold" min="0.5" max="3.0" step="0.1" value="1.5" oninput="updateRangeValue('floodHigh', this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Water Stress Thresholds -->
-                    <div class="parameter-card">
-                        <div class="parameter-title">Water Stress Thresholds</div>
-                        <div class="parameter-description">Set water stress percentage thresholds for risk levels</div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="parameter-control">
-                                    <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
-                                    <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="5" max="50" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="parameter-control">
-                                    <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">30</span></label>
-                                    <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="20" max="80" value="30" oninput="updateRangeValue('waterStressHigh', this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Heat Exposure Thresholds -->
-                    <div class="parameter-card">
-                        <div class="parameter-title">Heat Exposure Thresholds</div>
-                        <div class="parameter-description">Define thresholds for extreme heat days</div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="parameter-control">
-                                    <label for="heat30Threshold" class="form-label">Days >30°C High Risk: <span class="range-value" id="heat30Value">300</span></label>
-                                    <input type="range" class="form-range" id="heat30Threshold" name="heat_30_threshold" min="200" max="365" value="300" oninput="updateRangeValue('heat30', this.value)">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="parameter-control">
-                                    <label for="heat33Threshold" class="form-label">Days >33°C High Risk: <span class="range-value" id="heat33Value">100</span></label>
-                                    <input type="range" class="form-range" id="heat33Threshold" name="heat_33_threshold" min="50" max="250" value="100" oninput="updateRangeValue('heat33', this.value)">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="parameter-control">
-                                    <label for="heat35Threshold" class="form-label">Days >35°C High Risk: <span class="range-value" id="heat35Value">30</span></label>
-                                    <input type="range" class="form-range" id="heat35Threshold" name="heat_35_threshold" min="10" max="100" value="30" oninput="updateRangeValue('heat35', this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Wind Speed Thresholds -->
-                    <div class="parameter-card">
-                        <div class="parameter-title">Wind Speed Thresholds</div>
-                        <div class="parameter-description">Set tropical cyclone wind speed risk thresholds</div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="parameter-control">
-                                    <label for="windSpeedMedium" class="form-label">Medium Risk (km/h): <span class="range-value" id="windSpeedMediumValue">119</span></label>
-                                    <input type="range" class="form-range" id="windSpeedMedium" name="wind_speed_medium" min="80" max="150" value="119" oninput="updateRangeValue('windSpeedMedium', this.value)">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="parameter-control">
-                                    <label for="windSpeedHigh" class="form-label">High Risk (km/h): <span class="range-value" id="windSpeedHighValue">178</span></label>
-                                    <input type="range" class="form-range" id="windSpeedHigh" name="wind_speed_high" min="150" max="250" value="178" oninput="updateRangeValue('windSpeedHigh', this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between mt-4">
+                <div class="d-flex gap-2">
+                    <a href="{% url 'climate_hazards_analysis_v2:show_results' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Asset Exposure Results
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
+                        <i class="fas fa-undo me-2"></i> Reset to Defaults
+                    </button>
                 </div>
-                
-                <!-- Action Buttons -->
-                <div class="d-flex justify-content-between mt-4">
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'climate_hazards_analysis_v2:show_results' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i> Back to Asset Exposure Results
-                        </a>
-                        <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
-                            <i class="fas fa-undo me-2"></i> Reset to Defaults
-                        </button>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-info" onclick="saveArchetypeParameters()" id="save-archetype-btn" style="display: none;">
-                            <i class="fas fa-save me-2"></i> Save Parameters for This Archetype
-                        </button>
-                        <button type="submit" id="apply-parameters-btn" class="btn btn-warning btn-lg">
-                            <strong>Apply Parameters & Generate Sensitivity Results</strong>
-                            <i class="fas fa-arrow-right ms-2"></i>
-                        </button>
-                    </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-info" onclick="saveArchetypeParameters()" id="save-archetype-btn" style="display: none;">
+                        <i class="fas fa-save me-2"></i> Save Parameters for This Archetype
+                    </button>
+                    <button type="submit" id="apply-parameters-btn" class="btn btn-warning btn-lg">
+                        <strong>Apply Parameters & Generate Sensitivity Results</strong>
+                        <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
+</div>
 </div>
 </div>
 <script>
@@ -459,178 +520,194 @@ Set Sensitivity Parameters
     let defaultParameters = null;
 
     // Function to capture current form state as parameters
-function getCurrentParameters() {
-    return {
-        flood_low_threshold: document.getElementById('floodLowThreshold').value,
-        flood_high_threshold: document.getElementById('floodHighThreshold').value,
-        water_stress_low: document.getElementById('waterStressLow').value,
-        water_stress_high: document.getElementById('waterStressHigh').value,
-        heat_30_threshold: document.getElementById('heat30Threshold').value,
-        heat_33_threshold: document.getElementById('heat33Threshold').value,
-        heat_35_threshold: document.getElementById('heat35Threshold').value,
-        wind_speed_medium: document.getElementById('windSpeedMedium').value,
-        wind_speed_high: document.getElementById('windSpeedHigh').value
-    };
-}
 
+    function getCurrentParameters() {
+return {
+// Updated flood parameters
+flood_little_threshold: document.getElementById('floodLittleThreshold').value,
+flood_low_lower: document.getElementById('floodLowLower').value,
+flood_low_upper: document.getElementById('floodLowUpper').value,
+flood_medium_lower: document.getElementById('floodMediumLower').value,
+flood_medium_upper: document.getElementById('floodMediumUpper').value,
+flood_high_threshold: document.getElementById('floodHighThreshold').value,
+// Other parameters
+    water_stress_low: document.getElementById('waterStressLow').value,
+    water_stress_high: document.getElementById('waterStressHigh').value,
+    heat_30_threshold: document.getElementById('heat30Threshold').value,
+    heat_33_threshold: document.getElementById('heat33Threshold').value,
+    heat_35_threshold: document.getElementById('heat35Threshold').value,
+    wind_speed_medium: document.getElementById('windSpeedMedium').value,
+    wind_speed_high: document.getElementById('windSpeedHigh').value
+};
+}
 // Function to apply parameters to form
 function applyParameters(params) {
-    if (!params) return;
-    
-    // Range inputs
-    document.getElementById('floodLowThreshold').value = params.flood_low_threshold;
-    document.getElementById('floodHighThreshold').value = params.flood_high_threshold;
-    document.getElementById('waterStressLow').value = params.water_stress_low;
-    document.getElementById('waterStressHigh').value = params.water_stress_high;
-    document.getElementById('heat30Threshold').value = params.heat_30_threshold;
-    document.getElementById('heat33Threshold').value = params.heat_33_threshold;
-    document.getElementById('heat35Threshold').value = params.heat_35_threshold;
-    document.getElementById('windSpeedMedium').value = params.wind_speed_medium;
-    document.getElementById('windSpeedHigh').value = params.wind_speed_high;
-    
-    // Update all display values
-    updateAllDisplayValues();
-}
+if (!params) return;
 
+// Updated flood parameters
+document.getElementById('floodLittleThreshold').value = params.flood_little_threshold;
+document.getElementById('floodLowLower').value = params.flood_low_lower;
+document.getElementById('floodLowUpper').value = params.flood_low_upper;
+document.getElementById('floodMediumLower').value = params.flood_medium_lower;
+document.getElementById('floodMediumUpper').value = params.flood_medium_upper;
+document.getElementById('floodHighThreshold').value = params.flood_high_threshold;
+
+// Other range inputs
+document.getElementById('waterStressLow').value = params.water_stress_low;
+document.getElementById('waterStressHigh').value = params.water_stress_high;
+document.getElementById('heat30Threshold').value = params.heat_30_threshold;
+document.getElementById('heat33Threshold').value = params.heat_33_threshold;
+document.getElementById('heat35Threshold').value = params.heat_35_threshold;
+document.getElementById('windSpeedMedium').value = params.wind_speed_medium;
+document.getElementById('windSpeedHigh').value = params.wind_speed_high;
+
+// Update all display values
+updateAllDisplayValues();
+
+}
 // Function to update all range value displays
 function updateAllDisplayValues() {
-    updateRangeValue('floodLow', document.getElementById('floodLowThreshold').value);
-    updateRangeValue('floodHigh', document.getElementById('floodHighThreshold').value);
-    updateRangeValue('waterStressLow', document.getElementById('waterStressLow').value);
-    updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
-    updateRangeValue('heat30', document.getElementById('heat30Threshold').value);
-    updateRangeValue('heat33', document.getElementById('heat33Threshold').value);
-    updateRangeValue('heat35', document.getElementById('heat35Threshold').value);
-    updateRangeValue('windSpeedMedium', document.getElementById('windSpeedMedium').value);
-    updateRangeValue('windSpeedHigh', document.getElementById('windSpeedHigh').value);
-}
+// Updated flood display values
+updateRangeValue('floodLittle', document.getElementById('floodLittleThreshold').value);
+updateRangeValue('floodLowLower', document.getElementById('floodLowLower').value);
+updateRangeValue('floodLowUpper', document.getElementById('floodLowUpper').value);
+updateRangeValue('floodMediumLower', document.getElementById('floodMediumLower').value);
+updateRangeValue('floodMediumUpper', document.getElementById('floodMediumUpper').value);
+updateRangeValue('floodHigh', document.getElementById('floodHighThreshold').value);
 
+// Other display values
+updateRangeValue('waterStressLow', document.getElementById('waterStressLow').value);
+updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
+updateRangeValue('heat30', document.getElementById('heat30Threshold').value);
+updateRangeValue('heat33', document.getElementById('heat33Threshold').value);
+updateRangeValue('heat35', document.getElementById('heat35Threshold').value);
+updateRangeValue('windSpeedMedium', document.getElementById('windSpeedMedium').value);
+updateRangeValue('windSpeedHigh', document.getElementById('windSpeedHigh').value);
+
+}
 // Function to select an archetype
 function selectArchetype(archetypeName, archetypeNumber) {
-    // Save current parameters if an archetype was previously selected
-    if (currentSelectedArchetype) {
-        archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
-    } else if (!defaultParameters) {
-        // Save default parameters on first selection
-        defaultParameters = getCurrentParameters();
-    }
+// Save current parameters if an archetype was previously selected
+if (currentSelectedArchetype) {
+archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
+} else if (!defaultParameters) {
+// Save default parameters on first selection
+defaultParameters = getCurrentParameters();
+}
+
+// Update UI
+document.querySelectorAll('.archetype-item').forEach(item => {
+    item.classList.remove('selected');
+});
+
+event.currentTarget.classList.add('selected');
+
+// Show selected archetype indicator
+document.getElementById('selected-archetype-indicator').style.display = 'block';
+document.getElementById('selected-archetype-name').textContent = archetypeName;
+document.getElementById('default-instructions').style.display = 'none';
+document.getElementById('save-archetype-btn').style.display = 'block';
+
+// Update hidden form field
+document.getElementById('selected-archetype-input').value = archetypeName;
+
+// Load parameters for this archetype (or default if not set)
+const paramsToLoad = archetypeParameters[archetypeName] || defaultParameters;
+if (paramsToLoad) {
+    applyParameters(paramsToLoad);
+}
+
+currentSelectedArchetype = archetypeName;
+
+}
+// Function to save parameters for current archetype
+function saveArchetypeParameters() {
+if (currentSelectedArchetype) {
+archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
+
+// Show success feedback
+    const saveBtn = document.getElementById('save-archetype-btn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-check me-2"></i> Saved!';
+    saveBtn.classList.add('btn-success');
+    saveBtn.classList.remove('btn-info');
     
-    // Update UI
+    setTimeout(() => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.classList.remove('btn-success');
+        saveBtn.classList.add('btn-info');
+    }, 2000);
+}
+
+}
+// Function to update range value displays
+function updateRangeValue(prefix, value) {
+document.getElementById(prefix + 'Value').textContent = value;
+}
+// Function to reset all parameters to defaults
+function resetToDefaults() {
+if (confirm('Are you sure you want to reset all parameters to their default values?')) {
+// Reset all form elements to their default values
+document.getElementById('sensitivity-form').reset();
+
+// Update all displayed values
+    updateAllDisplayValues();
+    
+    // Clear archetype-specific parameters
+    archetypeParameters = {};
+    currentSelectedArchetype = null;
+    defaultParameters = null;
+    
+    // Reset UI
     document.querySelectorAll('.archetype-item').forEach(item => {
         item.classList.remove('selected');
     });
     
-    event.currentTarget.classList.add('selected');
-    
-    // Show selected archetype indicator
-    document.getElementById('selected-archetype-indicator').style.display = 'block';
-    document.getElementById('selected-archetype-name').textContent = archetypeName;
-    document.getElementById('default-instructions').style.display = 'none';
-    document.getElementById('save-archetype-btn').style.display = 'block';
-    
-    // Update hidden form field
-    document.getElementById('selected-archetype-input').value = archetypeName;
-    
-    // Load parameters for this archetype (or default if not set)
-    const paramsToLoad = archetypeParameters[archetypeName] || defaultParameters;
-    if (paramsToLoad) {
-        applyParameters(paramsToLoad);
-    }
-    
-    currentSelectedArchetype = archetypeName;
+    document.getElementById('selected-archetype-indicator').style.display = 'none';
+    document.getElementById('default-instructions').style.display = 'block';
+    document.getElementById('save-archetype-btn').style.display = 'none';
+    document.getElementById('selected-archetype-input').value = '';
 }
 
-// Function to save parameters for current archetype
-function saveArchetypeParameters() {
-    if (currentSelectedArchetype) {
-        archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
-        
-        // Show success feedback
-        const saveBtn = document.getElementById('save-archetype-btn');
-        const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<i class="fas fa-check me-2"></i> Saved!';
-        saveBtn.classList.add('btn-success');
-        saveBtn.classList.remove('btn-info');
-        
-        setTimeout(() => {
-            saveBtn.innerHTML = originalText;
-            saveBtn.classList.remove('btn-success');
-            saveBtn.classList.add('btn-info');
-        }, 2000);
-    }
 }
-
-// Function to update range value displays
-function updateRangeValue(prefix, value) {
-    document.getElementById(prefix + 'Value').textContent = value;
-}
-
-// Function to reset all parameters to defaults
-function resetToDefaults() {
-    if (confirm('Are you sure you want to reset all parameters to their default values?')) {
-        // Reset all form elements to their default values
-        document.getElementById('sensitivity-form').reset();
-        
-        // Update all displayed values
-        updateAllDisplayValues();
-        
-        // Clear archetype-specific parameters
-        archetypeParameters = {};
-        currentSelectedArchetype = null;
-        defaultParameters = null;
-        
-        // Reset UI
-        document.querySelectorAll('.archetype-item').forEach(item => {
-            item.classList.remove('selected');
-        });
-        
-        document.getElementById('selected-archetype-indicator').style.display = 'none';
-        document.getElementById('default-instructions').style.display = 'block';
-        document.getElementById('save-archetype-btn').style.display = 'none';
-        document.getElementById('selected-archetype-input').value = '';
-    }
-}
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Capture default parameters
-    defaultParameters = getCurrentParameters();
-    updateAllDisplayValues();
+// Capture default parameters
+defaultParameters = getCurrentParameters();
+updateAllDisplayValues();
 });
-
 // Function to update the steps progress
 function updateStepProgress(currentStep) {
-    const totalSteps = 5;
-    const progressPercentage = (currentStep / totalSteps) * 100;
+const totalSteps = 5;
+const progressPercentage = (currentStep / totalSteps) * 100;
+
+// Update progress bar width
+document.querySelector('.active-progress').style.width = progressPercentage + '%';
+
+// Update step circles and labels
+for (let i = 1; i <= totalSteps; i++) {
+    const stepItem = document.querySelectorAll('.step-item')[i-1];
+    const stepCircle = stepItem.querySelector('.step-circle');
+    const stepLabel = stepItem.querySelector('.step-label');
     
-    // Update progress bar width
-    document.querySelector('.active-progress').style.width = progressPercentage + '%';
-    
-    // Update step circles and labels
-    for (let i = 1; i <= totalSteps; i++) {
-        const stepItem = document.querySelectorAll('.step-item')[i-1];
-        const stepCircle = stepItem.querySelector('.step-circle');
-        const stepLabel = stepItem.querySelector('.step-label');
-        
-        if (i <= currentStep) {
-            // Completed or current step
-            stepCircle.style.backgroundColor = '#F1D500';
-            stepCircle.style.color = '#000';
-            stepLabel.style.color = '#000';
-            stepLabel.style.fontWeight = '500';
-        } else {
-            // Upcoming step
-            stepCircle.style.backgroundColor = '#e9ecef';
-            stepCircle.style.color = '#6c757d';
-            stepLabel.style.color = '#6c757d';
-        }
+    if (i <= currentStep) {
+        // Completed or current step
+        stepCircle.style.backgroundColor = '#F1D500';
+        stepCircle.style.color = '#000';
+        stepLabel.style.color = '#000';
+        stepLabel.style.fontWeight = '500';
+    } else {
+        // Upcoming step
+        stepCircle.style.backgroundColor = '#e9ecef';
+        stepCircle.style.color = '#6c757d';
+        stepLabel.style.color = '#6c757d';
     }
 }
 
+}
 // Initialize with current step (4)
 document.addEventListener('DOMContentLoaded', function() {
-    updateStepProgress(4);
+updateStepProgress(4);
 });
-
 </script>
 {% endblock %}

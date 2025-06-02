@@ -240,7 +240,21 @@ def show_results(request):
             })
         
         # Load the combined CSV file
-        df = pd.read_csv(combined_csv_path)
+        # Load the combined CSV file with explicit UTF-8 encoding
+        try:
+            df = pd.read_csv(combined_csv_path, encoding='utf-8')
+        except UnicodeDecodeError:
+            # Try with different encodings if UTF-8 fails
+            try:
+                df = pd.read_csv(combined_csv_path, encoding='latin-1')
+                logger.warning(f"CSV file {combined_csv_path} read with latin-1 encoding")
+            except UnicodeDecodeError:
+                try:
+                    df = pd.read_csv(combined_csv_path, encoding='cp1252')
+                    logger.warning(f"CSV file {combined_csv_path} read with cp1252 encoding")
+                except UnicodeDecodeError:
+                    logger.error(f"Could not read CSV file {combined_csv_path} with any encoding")
+                    raise
         data = df.to_dict(orient="records")
         columns = df.columns.tolist()
         
@@ -479,7 +493,13 @@ def sensitivity_parameters(request):
     if facility_csv_path and os.path.exists(facility_csv_path):
         try:
             # Read the CSV file to get asset archetypes
-            df = pd.read_csv(facility_csv_path)
+            try:
+                df = pd.read_csv(facility_csv_path, encoding='utf-8')
+            except UnicodeDecodeError:
+                try:
+                    df = pd.read_csv(facility_csv_path, encoding='latin-1')
+                except UnicodeDecodeError:
+                    df = pd.read_csv(facility_csv_path, encoding='cp1252')
             
             # Look for Asset Archetype column with various naming conventions
             archetype_column = None

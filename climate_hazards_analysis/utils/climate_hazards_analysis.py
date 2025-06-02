@@ -79,13 +79,14 @@ def standardize_facility_dataframe(df):
     return df
 
 
-def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_size=0.0045):
+def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_size=0.0045, flood_thresholds=None):
     """
     Process flood exposure analysis if selected.
     Args:
         facility_csv_path (str): Path to facility CSV
         selected_fields (list): List of selected hazard types
         buffer_size (float): Buffer size for analysis
+        flood_thresholds (dict): Custom flood threshold parameters
         
     Returns:
         tuple: (DataFrame with flood values, list of plot paths)
@@ -94,10 +95,12 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_s
         return None, []
         
     logger.info(f"Integrating Flood Exposure Analysis with buffer size: {buffer_size}")
+    if flood_thresholds:
+        logger.info(f"Using custom flood thresholds: {flood_thresholds}")
     plot_paths = []
 
     try:
-        flood_res = generate_flood_exposure_analysis(facility_csv_path, buffer_size)
+        flood_res = generate_flood_exposure_analysis(facility_csv_path, buffer_size, flood_thresholds)
         
         if 'error' in flood_res:
             logger.warning(f"Warning in Flood Exposure Analysis: {flood_res['error']}")
@@ -106,8 +109,11 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_s
         if not flood_res.get('combined_csv_paths'):
             return None, plot_paths
             
-        # Read the flood analysis CSV
-        df_flood = pd.read_csv(flood_res['combined_csv_paths'][0])
+        # Read the flood analysis CSV with proper encoding handling
+        try:
+            df_flood = pd.read_csv(flood_res['combined_csv_paths'][0], encoding='utf-8')
+        except UnicodeDecodeError:
+            df_flood = pd.read_csv(flood_res['combined_csv_paths'][0], encoding='latin-1')
         
         # Standardize column names
         rename_map = {'Site': 'Facility', 'latitude': 'Lat', 'longitude': 'Long'}
@@ -163,8 +169,11 @@ def process_water_stress_analysis(facility_csv_path, selected_fields, buffer_siz
         if not ws_res.get('combined_csv_paths'):
             return None, plot_paths
             
-        # Read the water stress analysis CSV
-        df_ws = pd.read_csv(ws_res['combined_csv_paths'][0])
+        # Read the water stress analysis CSV with proper encoding handling
+        try:
+            df_ws = pd.read_csv(ws_res['combined_csv_paths'][0], encoding='utf-8')
+        except UnicodeDecodeError:
+            df_ws = pd.read_csv(ws_res['combined_csv_paths'][0], encoding='latin-1')
         
         # Standardize column names
         rename_map = {'Site': 'Facility', 'latitude': 'Lat', 'longitude': 'Long'}
@@ -220,8 +229,11 @@ def process_sea_level_rise_analysis(facility_csv_path, selected_fields):
         if not slr_res.get('combined_csv_paths'):
             return None, plot_paths
             
-        # Read the SLR analysis CSV
-        df_slr = pd.read_csv(slr_res['combined_csv_paths'][0])
+        # Read the SLR analysis CSV with proper encoding handling
+        try:
+            df_slr = pd.read_csv(slr_res['combined_csv_paths'][0], encoding='utf-8')
+        except UnicodeDecodeError:
+            df_slr = pd.read_csv(slr_res['combined_csv_paths'][0], encoding='latin-1')
         
         # Standardize column names
         rename_map = {'Site': 'Facility', 'Lon': 'Long'}
@@ -291,8 +303,11 @@ def process_tropical_cyclone_analysis(facility_csv_path, selected_fields):
         if not tc_res.get('combined_csv_paths'):
             return None, plot_paths
             
-        # Read the TC analysis CSV
-        df_tc = pd.read_csv(tc_res['combined_csv_paths'][0])
+        # Read the TC analysis CSV with proper encoding handling
+        try:
+            df_tc = pd.read_csv(tc_res['combined_csv_paths'][0], encoding='utf-8')
+        except UnicodeDecodeError:
+            df_tc = pd.read_csv(tc_res['combined_csv_paths'][0], encoding='latin-1')
         
         # Standardize column names
         rename_map = {
@@ -366,8 +381,11 @@ def process_heat_exposure_analysis(facility_csv_path, selected_fields):
         if not heat_res.get('combined_csv_paths'):
             return None, plot_paths
             
-        # Read the heat analysis CSV
-        df_heat = pd.read_csv(heat_res['combined_csv_paths'][0])
+        # Read the heat analysis CSV with proper encoding handling
+        try:
+            df_heat = pd.read_csv(heat_res['combined_csv_paths'][0], encoding='utf-8')
+        except UnicodeDecodeError:
+            df_heat = pd.read_csv(heat_res['combined_csv_paths'][0], encoding='latin-1')
         logger.info(f"Heat exposure columns: {df_heat.columns.tolist()}")
         
         # Standardize column names
@@ -524,7 +542,7 @@ def process_nan_values(df):
     return df
 
 
-def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=None, buffer_size=0.0045):
+def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=None, buffer_size=0.0045, sensitivity_params=None):
     """
     Integrates multiple climate hazard analyses into a single output.
 
@@ -532,6 +550,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
     facility_csv_path: Path to facility locations CSV (required)
     selected_fields: List of selected hazard types to include
     buffer_size: Buffer size for spatial analysis (default 0.0045)
+    sensitivity_params: Dictionary of sensitivity parameters including flood thresholds
     
     Returns:
         dict: Results dictionary with paths to combined output and plots
@@ -545,13 +564,24 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             selected_fields = []
             
         logger.info(f"Starting climate hazards analysis with buffer size: {buffer_size}")
+        if sensitivity_params:
+            logger.info(f"Using sensitivity parameters: {list(sensitivity_params.keys())}")
         
         # Define path for final combined output
         input_dir = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
         os.makedirs(input_dir, exist_ok=True)
         
-        # Load and standardize facility dataframe
-        df_fac = pd.read_csv(facility_csv_path)
+        # Load and standardize facility dataframe with proper encoding
+        try:
+            df_fac = pd.read_csv(facility_csv_path, encoding='utf-8')
+        except UnicodeDecodeError:
+            try:
+                df_fac = pd.read_csv(facility_csv_path, encoding='latin-1')
+                logger.warning(f"Facility CSV read with latin-1 encoding")
+            except UnicodeDecodeError:
+                df_fac = pd.read_csv(facility_csv_path, encoding='cp1252')
+                logger.warning(f"Facility CSV read with cp1252 encoding")
+        
         df_fac = standardize_facility_dataframe(df_fac)
         
         # Initialize combined DataFrame with base columns
@@ -560,11 +590,24 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         # Track plots for visualization
         all_plot_paths = []
         
-        # Process each hazard type with buffer_size parameter
+        # Extract flood thresholds from sensitivity parameters
+        flood_thresholds = None
+        if sensitivity_params:
+            flood_thresholds = {
+                'little': sensitivity_params.get('flood_little_threshold', 0.3),
+                'low_lower': sensitivity_params.get('flood_low_lower', 0.4),
+                'low_upper': sensitivity_params.get('flood_low_upper', 1.0),
+                'medium_lower': sensitivity_params.get('flood_medium_lower', 1.1),
+                'medium_upper': sensitivity_params.get('flood_medium_upper', 1.5),
+                'high': sensitivity_params.get('flood_high_threshold', 1.6)
+            }
+            logger.info(f"Using flood thresholds: {flood_thresholds}")
+        
+        # Process each hazard type with sensitivity parameters
         
         # 1. Flood Exposure Analysis
         flood_values, flood_plots = process_flood_exposure_analysis(
-            facility_csv_path, selected_fields, buffer_size
+            facility_csv_path, selected_fields, buffer_size, flood_thresholds
         )
         all_plot_paths.extend(flood_plots)
         
@@ -614,13 +657,32 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         # Process NaN values
         combined_df = process_nan_values(combined_df)
 
-        # Write combined output CSV with buffer size in filename if not default
-        if buffer_size != 0.0045:
+        # Write combined output CSV with parameters in filename if sensitivity analysis
+        if sensitivity_params and buffer_size != 0.0045:
+            out_csv = os.path.join(input_dir, f'combined_output_sensitivity_buffer_{buffer_size:.4f}.csv')
+        elif buffer_size != 0.0045:
             out_csv = os.path.join(input_dir, f'combined_output_buffer_{buffer_size:.4f}.csv')
         else:
             out_csv = os.path.join(input_dir, 'combined_output.csv')
             
-        combined_df.to_csv(out_csv, index=False)
+        # Add metadata to CSV if sensitivity parameters were used
+        metadata_lines = []
+        if sensitivity_params:
+            metadata_lines.append(f"# Sensitivity Analysis Results")
+            metadata_lines.append(f"# Buffer Size: {buffer_size} degrees (~{int(buffer_size * 111000)}m)")
+            
+            if flood_thresholds:
+                metadata_lines.append(f"# Flood Thresholds: Little to None <={flood_thresholds['little']}m, "
+                                    f"Low {flood_thresholds['low_lower']}-{flood_thresholds['low_upper']}m, "
+                                    f"Medium {flood_thresholds['medium_lower']}-{flood_thresholds['medium_upper']}m, "
+                                    f"High >={flood_thresholds['high']}m")
+        
+        # Write metadata and data with explicit UTF-8 encoding
+        with open(out_csv, 'w', encoding='utf-8', newline='') as f:
+            for line in metadata_lines:
+                f.write(line + '\n')
+            combined_df.to_csv(f, index=False)
+            
         logger.info(f"Saved combined output CSV: {out_csv}")
         
         # Select the main plot for display (prioritizing flood exposure if available)
@@ -637,7 +699,9 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'combined_csv_path': out_csv,
             'plot_path': main_plot,
             'all_plots': all_plot_paths,
-            'buffer_size': buffer_size
+            'buffer_size': buffer_size,
+            'sensitivity_params': sensitivity_params,
+            'flood_thresholds': flood_thresholds
         }
         
     except Exception as e:

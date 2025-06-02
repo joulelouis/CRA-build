@@ -60,7 +60,7 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
             buffer_meters = int(buffer_size * 111000)
             output_filename = f'water_stress_analysis_output_buffer_{buffer_size:.4f}.csv'
             output_csv = os.path.join(output_dir, output_filename)
-            df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False)
+            df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False, encoding='utf-8')
             output_csv_files.append(output_csv)
             
             # Create a simple plot
@@ -92,8 +92,14 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
                 "buffer_meters": buffer_meters
             }
         
-        # Load facility locations
-        df_fac = pd.read_csv(facility_csv_path)
+        # Load facility locations with proper encoding
+        try:
+            df_fac = pd.read_csv(facility_csv_path, encoding='utf-8')
+        except UnicodeDecodeError:
+            try:
+                df_fac = pd.read_csv(facility_csv_path, encoding='latin-1')
+            except UnicodeDecodeError:
+                df_fac = pd.read_csv(facility_csv_path, encoding='cp1252')
         
         # Ensure Facility, Lat, Long columns exist
         rename_map = {}
