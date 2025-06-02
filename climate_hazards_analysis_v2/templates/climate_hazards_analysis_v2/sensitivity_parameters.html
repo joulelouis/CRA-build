@@ -460,18 +460,40 @@ Set Sensitivity Parameters
                 <div class="parameter-card">
                     <div class="parameter-title">Water Stress Thresholds</div>
                     <div class="parameter-description">Set water stress percentage thresholds for risk levels</div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="parameter-control">
-                                <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
-                                <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="5" max="50" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
+                    
+                    <!-- Low Risk -->
+                    <div class="water-stress-threshold-item">
+                        <div class="parameter-control">
+                            <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
+                            <div class="threshold-description">Less than</div>
+                            <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="0" max="100" step="1" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
+                        </div>
+                    </div>
+                    
+                    <!-- Medium Risk -->
+                    <div class="water-stress-threshold-item">
+                        <div class="parameter-control">
+                            <label class="form-label">Medium Risk Threshold (%)</label>
+                            <div class="threshold-description">From <span class="range-value" id="waterStressMediumLowerValue">11</span> To <span class="range-value" id="waterStressMediumUpperValue">30</span></div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="waterStressMediumLower" class="form-label small">From (lower range)</label>
+                                    <input type="range" class="form-range" id="waterStressMediumLower" name="water_stress_medium_lower" min="0" max="100" step="1" value="11" oninput="updateRangeValue('waterStressMediumLower', this.value)">
+                                </div>
+                                <div class="col-6">
+                                    <label for="waterStressMediumUpper" class="form-label small">To (upper range)</label>
+                                    <input type="range" class="form-range" id="waterStressMediumUpper" name="water_stress_medium_upper" min="0" max="100" step="1" value="30" oninput="updateRangeValue('waterStressMediumUpper', this.value)">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="parameter-control">
-                                <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">30</span></label>
-                                <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="20" max="80" value="30" oninput="updateRangeValue('waterStressHigh', this.value)">
-                            </div>
+                    </div>
+                    
+                    <!-- High Risk -->
+                    <div class="water-stress-threshold-item">
+                        <div class="parameter-control">
+                            <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">31</span></label>
+                            <div class="threshold-description">Greater than</div>
+                            <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateRangeValue('waterStressHigh', this.value)">
                         </div>
                     </div>
                 </div>
@@ -557,194 +579,207 @@ Set Sensitivity Parameters
     let defaultParameters = null;
 
     // Function to capture current form state as parameters
-
     function getCurrentParameters() {
-return {
-// Updated flood parameters
-flood_little_threshold: document.getElementById('floodLittleThreshold').value,
-flood_low_lower: document.getElementById('floodLowLower').value,
-flood_low_upper: document.getElementById('floodLowUpper').value,
-flood_medium_lower: document.getElementById('floodMediumLower').value,
-flood_medium_upper: document.getElementById('floodMediumUpper').value,
-flood_high_threshold: document.getElementById('floodHighThreshold').value,
-// Other parameters
-    water_stress_low: document.getElementById('waterStressLow').value,
-    water_stress_high: document.getElementById('waterStressHigh').value,
-    heat_30_threshold: document.getElementById('heat30Threshold').value,
-    heat_33_threshold: document.getElementById('heat33Threshold').value,
-    heat_35_threshold: document.getElementById('heat35Threshold').value,
-    wind_speed_medium: document.getElementById('windSpeedMedium').value,
-    wind_speed_high: document.getElementById('windSpeedHigh').value
-};
-}
-// Function to apply parameters to form
-function applyParameters(params) {
-if (!params) return;
-
-// Updated flood parameters
-document.getElementById('floodLittleThreshold').value = params.flood_little_threshold;
-document.getElementById('floodLowLower').value = params.flood_low_lower;
-document.getElementById('floodLowUpper').value = params.flood_low_upper;
-document.getElementById('floodMediumLower').value = params.flood_medium_lower;
-document.getElementById('floodMediumUpper').value = params.flood_medium_upper;
-document.getElementById('floodHighThreshold').value = params.flood_high_threshold;
-
-// Other range inputs
-document.getElementById('waterStressLow').value = params.water_stress_low;
-document.getElementById('waterStressHigh').value = params.water_stress_high;
-document.getElementById('heat30Threshold').value = params.heat_30_threshold;
-document.getElementById('heat33Threshold').value = params.heat_33_threshold;
-document.getElementById('heat35Threshold').value = params.heat_35_threshold;
-document.getElementById('windSpeedMedium').value = params.wind_speed_medium;
-document.getElementById('windSpeedHigh').value = params.wind_speed_high;
-
-// Update all display values
-updateAllDisplayValues();
-
-}
-// Function to update all range value displays
-function updateAllDisplayValues() {
-// Updated flood display values
-updateRangeValue('floodLittle', document.getElementById('floodLittleThreshold').value);
-updateRangeValue('floodLowLower', document.getElementById('floodLowLower').value);
-updateRangeValue('floodLowUpper', document.getElementById('floodLowUpper').value);
-updateRangeValue('floodMediumLower', document.getElementById('floodMediumLower').value);
-updateRangeValue('floodMediumUpper', document.getElementById('floodMediumUpper').value);
-updateRangeValue('floodHigh', document.getElementById('floodHighThreshold').value);
-
-// Other display values
-updateRangeValue('waterStressLow', document.getElementById('waterStressLow').value);
-updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
-updateRangeValue('heat30', document.getElementById('heat30Threshold').value);
-updateRangeValue('heat33', document.getElementById('heat33Threshold').value);
-updateRangeValue('heat35', document.getElementById('heat35Threshold').value);
-updateRangeValue('windSpeedMedium', document.getElementById('windSpeedMedium').value);
-updateRangeValue('windSpeedHigh', document.getElementById('windSpeedHigh').value);
-
-}
-// Function to select an archetype
-function selectArchetype(archetypeName, archetypeNumber) {
-// Save current parameters if an archetype was previously selected
-if (currentSelectedArchetype) {
-archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
-} else if (!defaultParameters) {
-// Save default parameters on first selection
-defaultParameters = getCurrentParameters();
-}
-
-// Update UI
-document.querySelectorAll('.archetype-item').forEach(item => {
-    item.classList.remove('selected');
-});
-
-event.currentTarget.classList.add('selected');
-
-// Show selected archetype indicator
-document.getElementById('selected-archetype-indicator').style.display = 'block';
-document.getElementById('selected-archetype-name').textContent = archetypeName;
-document.getElementById('default-instructions').style.display = 'none';
-document.getElementById('save-archetype-btn').style.display = 'block';
-
-// Update hidden form field
-document.getElementById('selected-archetype-input').value = archetypeName;
-
-// Load parameters for this archetype (or default if not set)
-const paramsToLoad = archetypeParameters[archetypeName] || defaultParameters;
-if (paramsToLoad) {
-    applyParameters(paramsToLoad);
-}
-
-currentSelectedArchetype = archetypeName;
-
-}
-// Function to save parameters for current archetype
-function saveArchetypeParameters() {
-if (currentSelectedArchetype) {
-archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
-
-// Show success feedback
-    const saveBtn = document.getElementById('save-archetype-btn');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-check me-2"></i> Saved!';
-    saveBtn.classList.add('btn-success');
-    saveBtn.classList.remove('btn-info');
-    
-    setTimeout(() => {
-        saveBtn.innerHTML = originalText;
-        saveBtn.classList.remove('btn-success');
-        saveBtn.classList.add('btn-info');
-    }, 2000);
-}
-
-}
-// Function to update range value displays
-function updateRangeValue(prefix, value) {
-document.getElementById(prefix + 'Value').textContent = value;
-}
-// Function to reset all parameters to defaults
-function resetToDefaults() {
-if (confirm('Are you sure you want to reset all parameters to their default values?')) {
-// Reset all form elements to their default values
-document.getElementById('sensitivity-form').reset();
-
-// Update all displayed values
-    updateAllDisplayValues();
-    
-    // Clear archetype-specific parameters
-    archetypeParameters = {};
-    currentSelectedArchetype = null;
-    defaultParameters = null;
-    
-    // Reset UI
-    document.querySelectorAll('.archetype-item').forEach(item => {
-        item.classList.remove('selected');
-    });
-    
-    document.getElementById('selected-archetype-indicator').style.display = 'none';
-    document.getElementById('default-instructions').style.display = 'block';
-    document.getElementById('save-archetype-btn').style.display = 'none';
-    document.getElementById('selected-archetype-input').value = '';
-}
-
-}
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-// Capture default parameters
-defaultParameters = getCurrentParameters();
-updateAllDisplayValues();
-});
-// Function to update the steps progress
-function updateStepProgress(currentStep) {
-const totalSteps = 5;
-const progressPercentage = (currentStep / totalSteps) * 100;
-
-// Update progress bar width
-document.querySelector('.active-progress').style.width = progressPercentage + '%';
-
-// Update step circles and labels
-for (let i = 1; i <= totalSteps; i++) {
-    const stepItem = document.querySelectorAll('.step-item')[i-1];
-    const stepCircle = stepItem.querySelector('.step-circle');
-    const stepLabel = stepItem.querySelector('.step-label');
-    
-    if (i <= currentStep) {
-        // Completed or current step
-        stepCircle.style.backgroundColor = '#F1D500';
-        stepCircle.style.color = '#000';
-        stepLabel.style.color = '#000';
-        stepLabel.style.fontWeight = '500';
-    } else {
-        // Upcoming step
-        stepCircle.style.backgroundColor = '#e9ecef';
-        stepCircle.style.color = '#6c757d';
-        stepLabel.style.color = '#6c757d';
+        return {
+            // Updated flood parameters
+            flood_little_threshold: document.getElementById('floodLittleThreshold').value,
+            flood_low_lower: document.getElementById('floodLowLower').value,
+            flood_low_upper: document.getElementById('floodLowUpper').value,
+            flood_medium_lower: document.getElementById('floodMediumLower').value,
+            flood_medium_upper: document.getElementById('floodMediumUpper').value,
+            flood_high_threshold: document.getElementById('floodHighThreshold').value,
+            // Updated water stress parameters
+            water_stress_low: document.getElementById('waterStressLow').value,
+            water_stress_medium_lower: document.getElementById('waterStressMediumLower').value,
+            water_stress_medium_upper: document.getElementById('waterStressMediumUpper').value,
+            water_stress_high: document.getElementById('waterStressHigh').value,
+            // Other parameters
+            heat_30_threshold: document.getElementById('heat30Threshold').value,
+            heat_33_threshold: document.getElementById('heat33Threshold').value,
+            heat_35_threshold: document.getElementById('heat35Threshold').value,
+            wind_speed_medium: document.getElementById('windSpeedMedium').value,
+            wind_speed_high: document.getElementById('windSpeedHigh').value
+        };
     }
-}
 
-}
-// Initialize with current step (4)
-document.addEventListener('DOMContentLoaded', function() {
-updateStepProgress(4);
-});
+    // Function to apply parameters to form
+    function applyParameters(params) {
+        if (!params) return;
+
+        // Updated flood parameters
+        document.getElementById('floodLittleThreshold').value = params.flood_little_threshold;
+        document.getElementById('floodLowLower').value = params.flood_low_lower;
+        document.getElementById('floodLowUpper').value = params.flood_low_upper;
+        document.getElementById('floodMediumLower').value = params.flood_medium_lower;
+        document.getElementById('floodMediumUpper').value = params.flood_medium_upper;
+        document.getElementById('floodHighThreshold').value = params.flood_high_threshold;
+
+        // Updated water stress parameters
+        document.getElementById('waterStressLow').value = params.water_stress_low;
+        document.getElementById('waterStressMediumLower').value = params.water_stress_medium_lower;
+        document.getElementById('waterStressMediumUpper').value = params.water_stress_medium_upper;
+        document.getElementById('waterStressHigh').value = params.water_stress_high;
+
+        // Other range inputs
+        document.getElementById('heat30Threshold').value = params.heat_30_threshold;
+        document.getElementById('heat33Threshold').value = params.heat_33_threshold;
+        document.getElementById('heat35Threshold').value = params.heat_35_threshold;
+        document.getElementById('windSpeedMedium').value = params.wind_speed_medium;
+        document.getElementById('windSpeedHigh').value = params.wind_speed_high;
+
+        // Update all display values
+        updateAllDisplayValues();
+    }
+
+    // Function to update all range value displays
+    function updateAllDisplayValues() {
+        // Updated flood display values
+        updateRangeValue('floodLittle', document.getElementById('floodLittleThreshold').value);
+        updateRangeValue('floodLowLower', document.getElementById('floodLowLower').value);
+        updateRangeValue('floodLowUpper', document.getElementById('floodLowUpper').value);
+        updateRangeValue('floodMediumLower', document.getElementById('floodMediumLower').value);
+        updateRangeValue('floodMediumUpper', document.getElementById('floodMediumUpper').value);
+        updateRangeValue('floodHigh', document.getElementById('floodHighThreshold').value);
+
+        // Updated water stress display values
+        updateRangeValue('waterStressLow', document.getElementById('waterStressLow').value);
+        updateRangeValue('waterStressMediumLower', document.getElementById('waterStressMediumLower').value);
+        updateRangeValue('waterStressMediumUpper', document.getElementById('waterStressMediumUpper').value);
+        updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
+
+        // Other display values
+        updateRangeValue('heat30', document.getElementById('heat30Threshold').value);
+        updateRangeValue('heat33', document.getElementById('heat33Threshold').value);
+        updateRangeValue('heat35', document.getElementById('heat35Threshold').value);
+        updateRangeValue('windSpeedMedium', document.getElementById('windSpeedMedium').value);
+        updateRangeValue('windSpeedHigh', document.getElementById('windSpeedHigh').value);
+    }
+
+    // Function to select an archetype
+    function selectArchetype(archetypeName, archetypeNumber) {
+        // Save current parameters if an archetype was previously selected
+        if (currentSelectedArchetype) {
+            archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
+        } else if (!defaultParameters) {
+            // Save default parameters on first selection
+            defaultParameters = getCurrentParameters();
+        }
+
+        // Update UI
+        document.querySelectorAll('.archetype-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        event.currentTarget.classList.add('selected');
+
+        // Show selected archetype indicator
+        document.getElementById('selected-archetype-indicator').style.display = 'block';
+        document.getElementById('selected-archetype-name').textContent = archetypeName;
+        document.getElementById('default-instructions').style.display = 'none';
+        document.getElementById('save-archetype-btn').style.display = 'block';
+
+        // Update hidden form field
+        document.getElementById('selected-archetype-input').value = archetypeName;
+
+        // Load parameters for this archetype (or default if not set)
+        const paramsToLoad = archetypeParameters[archetypeName] || defaultParameters;
+        if (paramsToLoad) {
+            applyParameters(paramsToLoad);
+        }
+
+        currentSelectedArchetype = archetypeName;
+    }
+
+    // Function to save parameters for current archetype
+    function saveArchetypeParameters() {
+        if (currentSelectedArchetype) {
+            archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
+
+            // Show success feedback
+            const saveBtn = document.getElementById('save-archetype-btn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-check me-2"></i> Saved!';
+            saveBtn.classList.add('btn-success');
+            saveBtn.classList.remove('btn-info');
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.classList.remove('btn-success');
+                saveBtn.classList.add('btn-info');
+            }, 2000);
+        }
+    }
+
+    // Function to update range value displays
+    function updateRangeValue(prefix, value) {
+        document.getElementById(prefix + 'Value').textContent = value;
+    }
+
+    // Function to reset all parameters to defaults
+    function resetToDefaults() {
+        if (confirm('Are you sure you want to reset all parameters to their default values?')) {
+            // Reset all form elements to their default values
+            document.getElementById('sensitivity-form').reset();
+
+            // Update all displayed values
+            updateAllDisplayValues();
+            
+            // Clear archetype-specific parameters
+            archetypeParameters = {};
+            currentSelectedArchetype = null;
+            defaultParameters = null;
+            
+            // Reset UI
+            document.querySelectorAll('.archetype-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            document.getElementById('selected-archetype-indicator').style.display = 'none';
+            document.getElementById('default-instructions').style.display = 'block';
+            document.getElementById('save-archetype-btn').style.display = 'none';
+            document.getElementById('selected-archetype-input').value = '';
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Capture default parameters
+        defaultParameters = getCurrentParameters();
+        updateAllDisplayValues();
+    });
+
+    // Function to update the steps progress
+    function updateStepProgress(currentStep) {
+        const totalSteps = 5;
+        const progressPercentage = (currentStep / totalSteps) * 100;
+
+        // Update progress bar width
+        document.querySelector('.active-progress').style.width = progressPercentage + '%';
+
+        // Update step circles and labels
+        for (let i = 1; i <= totalSteps; i++) {
+            const stepItem = document.querySelectorAll('.step-item')[i-1];
+            const stepCircle = stepItem.querySelector('.step-circle');
+            const stepLabel = stepItem.querySelector('.step-label');
+            
+            if (i <= currentStep) {
+                // Completed or current step
+                stepCircle.style.backgroundColor = '#F1D500';
+                stepCircle.style.color = '#000';
+                stepLabel.style.color = '#000';
+                stepLabel.style.fontWeight = '500';
+            } else {
+                // Upcoming step
+                stepCircle.style.backgroundColor = '#e9ecef';
+                stepCircle.style.color = '#6c757d';
+                stepLabel.style.color = '#6c757d';
+            }
+        }
+    }
+
+    // Initialize with current step (4)
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStepProgress(4);
+    });
 </script>
 {% endblock %}
