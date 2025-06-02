@@ -8,13 +8,13 @@ from pyproj import CRS
 from rasterstats import zonal_stats
 from django.conf import settings
 
-def generate_flood_exposure_analysis(facility_csv_path):
+def generate_flood_exposure_analysis(facility_csv_path, buffer_size=0.0045):
     """
     Performs flood exposure analysis for facility locations.
-    
     Args:
-        facility_csv_path (str): Path to the facility CSV file with locations
-        
+    facility_csv_path (str): Path to the facility CSV file with locations
+    buffer_size (float): Buffer size for analysis (~250m = 0.0045, ~500m = 0.0090, ~750m = 0.0135)
+    
     Returns:
         dict: Dictionary containing file paths to generated outputs
     """
@@ -68,8 +68,11 @@ def generate_flood_exposure_analysis(facility_csv_path):
         if 'Facility' not in df_fac.columns:
             raise ValueError("Your facility CSV must include a 'Facility' column or equivalent header.")
         
-        # Set buffer size for analysis (~250 meters)
-        buffer = 0.0045
+        # Use the provided buffer size (default ~250 meters for 0.0045)
+        buffer = buffer_size
+        buffer_meters = int(buffer * 111000)  # Convert to approximate meters for labeling
+        
+        print(f"Using buffer size: {buffer} degrees (~{buffer_meters}m)")
         
         # Create polygons with buffer for flood analysis
         flood_polys = [
@@ -127,18 +130,20 @@ def generate_flood_exposure_analysis(facility_csv_path):
         # Simple plot with facility locations
         points_gdf.plot(ax=ax, color='blue', markersize=100)
         
-        ax.set_title('Flood Exposure for Facility Locations')
+        ax.set_title(f'Flood Exposure for Facility Locations (Buffer: ~{buffer_meters}m)')
         ax.set_xlabel('Longitude')
         ax.set_ylabel('Latitude')
         
-        # Save the plot to the climate_hazards_analysis input_files directory
-        plot_path = os.path.join(output_dir, 'flood_exposure_plot.png')
+        # Save the plot with buffer size in filename for sensitivity analysis
+        plot_filename = f'flood_exposure_plot_buffer_{buffer:.4f}.png'
+        plot_path = os.path.join(output_dir, plot_filename)
         plt.savefig(plot_path, format='png', dpi=300, bbox_inches='tight')
         plt.close(fig)
         output_png_files.append(plot_path)
         
-        # Save the results to CSV in the climate_hazards_analysis input_files directory
-        output_csv = os.path.join(output_dir, 'flood_exposure_analysis_output.csv')
+        # Save the results to CSV with buffer size in filename for sensitivity analysis
+        output_filename = f'flood_exposure_analysis_output_buffer_{buffer:.4f}.csv'
+        output_csv = os.path.join(output_dir, output_filename)
         
         # Only include relevant columns in the output
         flood_gdf[['Facility', 'Lat', 'Long', 'Flood Depth (meters)']].to_csv(
@@ -151,10 +156,12 @@ def generate_flood_exposure_analysis(facility_csv_path):
         # Return paths to the generated files
         return {
             "combined_csv_paths": output_csv_files,
-            "png_paths": output_png_files
+            "png_paths": output_png_files,
+            "buffer_size": buffer_size,
+            "buffer_meters": buffer_meters
         }
         
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return {"error": str(e)}
+        return {"error": str(e)}            

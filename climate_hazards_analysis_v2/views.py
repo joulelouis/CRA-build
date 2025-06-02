@@ -466,13 +466,59 @@ def sensitivity_parameters(request):
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
     selected_hazards = request.session.get('climate_hazards_v2_selected_hazards', [])
+
     # Check if we have the necessary data from previous steps
     if not facility_data or not selected_hazards:
         return redirect('climate_hazards_analysis_v2:select_hazards')
 
+    # Extract Asset Archetypes from the facility data
+    asset_archetypes = []
+    facility_csv_path = request.session.get('climate_hazards_v2_facility_csv_path')
+
+    if facility_csv_path and os.path.exists(facility_csv_path):
+        try:
+            # Read the CSV file to get asset archetypes
+            df = pd.read_csv(facility_csv_path)
+            
+            # Look for Asset Archetype column with various naming conventions
+            archetype_column = None
+            possible_names = [
+                'Asset Archetype', 'asset archetype', 'AssetArchetype', 'assetarchetype',
+                'Archetype', 'archetype', 'Asset Type', 'asset type', 'AssetType', 'assettype',
+                'Type', 'type', 'Category', 'category', 'Asset Category', 'asset category'
+            ]
+            
+            for col_name in possible_names:
+                if col_name in df.columns:
+                    archetype_column = col_name
+                    break
+            
+            if archetype_column:
+                # Get unique asset archetypes, removing NaN values and sorting
+                unique_archetypes = df[archetype_column].dropna().unique()
+                unique_archetypes = sorted([str(arch).strip() for arch in unique_archetypes if str(arch).strip()])
+                
+                # Create numbered list
+                asset_archetypes = [
+                    {'number': i + 1, 'name': archetype} 
+                    for i, archetype in enumerate(unique_archetypes)
+                ]
+                
+                logger.info(f"Found {len(asset_archetypes)} asset archetypes in column '{archetype_column}'")
+            else:
+                logger.warning("No Asset Archetype column found in the facility CSV")
+                asset_archetypes = [{'number': 1, 'name': 'No Asset Archetype data found'}]
+                
+        except Exception as e:
+            logger.exception(f"Error reading asset archetypes from CSV: {e}")
+            asset_archetypes = [{'number': 1, 'name': 'Error reading Asset Archetype data'}]
+    else:
+        asset_archetypes = [{'number': 1, 'name': 'Facility CSV file not found'}]
+
     context = {
         'facility_count': len(facility_data),
         'selected_hazards': selected_hazards,
+        'asset_archetypes': asset_archetypes,
     }
 
     # Handle form submission
@@ -480,6 +526,8 @@ def sensitivity_parameters(request):
         try:
             # Extract sensitivity parameters from the form
             sensitivity_params = {
+                # Analysis parameters
+                'buffer_size': float(request.POST.get('buffer_size', 0.0045)),
                 'risk_tolerance': request.POST.get('risk_tolerance', 'medium'),
                 'time_horizon': request.POST.get('time_horizon', '2050'),
                 'confidence_level': int(request.POST.get('confidence_level', 95)),
@@ -521,12 +569,36 @@ def sensitivity_parameters(request):
             
             logger.info(f"Sensitivity parameters saved: {sensitivity_params}")
             
-            # TODO: Implement sensitivity analysis processing
-            # For now, redirect to a placeholder or show success message
-            context['success_message'] = "Sensitivity parameters have been saved successfully!"
-            
-            # Eventually this should redirect to sensitivity results page
-            # return redirect('climate_hazards_analysis_v2:sensitivity_results')
+            if facility_csv_path and os.path.exists(facility_csv_path):
+                # Re-run the analysis with new buffer size
+                buffer_size = sensitivity_params['buffer_size']
+                
+                # Import the analysis function
+                from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
+                
+                # Run sensitivity analysis with custom buffer size
+                result = generate_climate_hazards_analysis(
+                    facility_csv_path=facility_csv_path,
+                    selected_fields=selected_hazards,
+                    buffer_size=buffer_size
+                )
+                
+                if result and 'error' not in result:
+                    # Store sensitivity results in session
+                    request.session['climate_hazards_v2_sensitivity_results'] = {
+                        'combined_csv_path': result.get('combined_csv_path'),
+                        'plot_path': result.get('plot_path'),
+                        'all_plots': result.get('all_plots', []),
+                        'buffer_size': buffer_size,
+                        'parameters': sensitivity_params
+                    }
+                    
+                    buffer_meters = int(buffer_size * 111000)
+                    context['success_message'] = f"Sensitivity analysis completed with {buffer_meters}m buffer size! Parameters have been applied successfully."
+                else:
+                    context['error'] = f"Error in sensitivity analysis: {result.get('error', 'Unknown error')}"
+            else:
+                context['error'] = "Facility CSV file not found. Please restart the analysis."
             
         except (ValueError, TypeError) as e:
             logger.error(f"Error processing sensitivity parameters: {e}")

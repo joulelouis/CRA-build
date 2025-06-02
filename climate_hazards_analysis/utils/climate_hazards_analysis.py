@@ -79,13 +79,13 @@ def standardize_facility_dataframe(df):
     return df
 
 
-def process_flood_exposure_analysis(facility_csv_path, selected_fields):
+def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_size=0.0045):
     """
     Process flood exposure analysis if selected.
-    
     Args:
         facility_csv_path (str): Path to facility CSV
         selected_fields (list): List of selected hazard types
+        buffer_size (float): Buffer size for analysis
         
     Returns:
         tuple: (DataFrame with flood values, list of plot paths)
@@ -93,11 +93,11 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields):
     if 'Flood' not in selected_fields:
         return None, []
         
-    logger.info("Integrating Flood Exposure Analysis")
+    logger.info(f"Integrating Flood Exposure Analysis with buffer size: {buffer_size}")
     plot_paths = []
-    
+
     try:
-        flood_res = generate_flood_exposure_analysis(facility_csv_path)
+        flood_res = generate_flood_exposure_analysis(facility_csv_path, buffer_size)
         
         if 'error' in flood_res:
             logger.warning(f"Warning in Flood Exposure Analysis: {flood_res['error']}")
@@ -136,25 +136,25 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields):
         return None, []
 
 
-def process_water_stress_analysis(facility_csv_path, selected_fields):
+def process_water_stress_analysis(facility_csv_path, selected_fields, buffer_size=0.0045):
     """
     Process water stress analysis if selected.
-    
     Args:
-        facility_csv_path (str): Path to facility CSV
-        selected_fields (list): List of selected hazard types
-        
+    facility_csv_path (str): Path to facility CSV
+    selected_fields (list): List of selected hazard types
+    buffer_size (float): Buffer size for analysis
+    
     Returns:
         tuple: (DataFrame with water stress values, list of plot paths)
     """
     if 'Water Stress' not in selected_fields:
         return None, []
         
-    logger.info("Integrating Water Stress Analysis")
+    logger.info(f"Integrating Water Stress Analysis with buffer size: {buffer_size}")
     plot_paths = []
-    
+
     try:
-        ws_res = generate_water_stress_analysis(facility_csv_path)
+        ws_res = generate_water_stress_analysis(facility_csv_path, buffer_size)
         
         if 'error' in ws_res:
             logger.warning(f"Warning in Water Stress Analysis: {ws_res['error']}")
@@ -524,14 +524,15 @@ def process_nan_values(df):
     return df
 
 
-def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=None):
+def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=None, buffer_size=0.0045):
     """
     Integrates multiple climate hazard analyses into a single output.
-    
+
     Args:
-        facility_csv_path: Path to facility locations CSV (required)
-        selected_fields: List of selected hazard types to include
-        
+    facility_csv_path: Path to facility locations CSV (required)
+    selected_fields: List of selected hazard types to include
+    buffer_size: Buffer size for spatial analysis (default 0.0045)
+    
     Returns:
         dict: Results dictionary with paths to combined output and plots
     """
@@ -543,6 +544,8 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         if selected_fields is None:
             selected_fields = []
             
+        logger.info(f"Starting climate hazards analysis with buffer size: {buffer_size}")
+        
         # Define path for final combined output
         input_dir = os.path.join(settings.BASE_DIR, 'climate_hazards_analysis', 'static', 'input_files')
         os.makedirs(input_dir, exist_ok=True)
@@ -557,39 +560,36 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         # Track plots for visualization
         all_plot_paths = []
         
-        # Process each hazard type
+        # Process each hazard type with buffer_size parameter
         
         # 1. Flood Exposure Analysis
         flood_values, flood_plots = process_flood_exposure_analysis(
-            facility_csv_path, selected_fields
+            facility_csv_path, selected_fields, buffer_size
         )
         all_plot_paths.extend(flood_plots)
         
         # 2. Water Stress Analysis
         water_stress_values, ws_plots = process_water_stress_analysis(
-            facility_csv_path, selected_fields
+            facility_csv_path, selected_fields, buffer_size
         )
         all_plot_paths.extend(ws_plots)
         
-        # 3. Sea Level Rise Analysis
+        # 3. Other analyses (no buffer size needed for these)
         slr_values, slr_plots = process_sea_level_rise_analysis(
             facility_csv_path, selected_fields
         )
         all_plot_paths.extend(slr_plots)
         
-        # 4. Tropical Cyclones Analysis
         tc_values, tc_plots = process_tropical_cyclone_analysis(
             facility_csv_path, selected_fields
         )
         all_plot_paths.extend(tc_plots)
         
-        # 5. Heat Exposure Analysis
         heat_values, heat_plots = process_heat_exposure_analysis(
             facility_csv_path, selected_fields
         )
         all_plot_paths.extend(heat_plots)
         
-        # 6-7. Storm Surge & Rainfall Induced Landslide
         ss_ril_values = process_storm_surge_landslide_analysis(
             df_fac, selected_fields
         )
@@ -614,9 +614,12 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         # Process NaN values
         combined_df = process_nan_values(combined_df)
 
-        # Write combined output CSV
-        logger.info("Writing combined output CSV")
-        out_csv = os.path.join(input_dir, 'combined_output.csv')
+        # Write combined output CSV with buffer size in filename if not default
+        if buffer_size != 0.0045:
+            out_csv = os.path.join(input_dir, f'combined_output_buffer_{buffer_size:.4f}.csv')
+        else:
+            out_csv = os.path.join(input_dir, 'combined_output.csv')
+            
         combined_df.to_csv(out_csv, index=False)
         logger.info(f"Saved combined output CSV: {out_csv}")
         
@@ -633,7 +636,8 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         return {
             'combined_csv_path': out_csv,
             'plot_path': main_plot,
-            'all_plots': all_plot_paths
+            'all_plots': all_plot_paths,
+            'buffer_size': buffer_size
         }
         
     except Exception as e:

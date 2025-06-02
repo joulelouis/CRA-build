@@ -1,5 +1,3 @@
-<artifacts>
-<artifact identifier="sensitivity_parameters_html" type="application/vnd.ant.code" language="html" title="climate_hazards_analysis_v2/templates/climate_hazards_analysis_v2/sensitivity_parameters.html">
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
@@ -53,6 +51,68 @@ Set Sensitivity Parameters
         font-size: 12px;
     }
     
+    /* Asset Archetype Component Styles */
+    .archetype-card {
+        background-color: #F8F9FA;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+        height: fit-content;
+    }
+    
+    .archetype-card:hover {
+        border-color: #F1D500;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .archetype-header {
+        background-color: #F1D500;
+        color: #000;
+        font-weight: 600;
+        padding: 15px 20px;
+        border-radius: 6px 6px 0 0;
+        margin: -2px -2px 0 -2px;
+    }
+    
+    .archetype-list {
+        padding: 20px;
+    }
+    
+    .archetype-item {
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 14px;
+        color: #333;
+    }
+    
+    .archetype-item:last-child {
+        border-bottom: none;
+    }
+    
+    .archetype-number {
+        font-weight: 600;
+        color: #F1D500;
+        background-color: #333;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        margin-right: 8px;
+        display: inline-block;
+        min-width: 20px;
+        text-align: center;
+    }
+    
+    .archetype-name {
+        color: #495057;
+    }
+    
+    .no-archetypes {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+    }
+    
     /* Step Progress Styles */
     .steps-container {
         padding: 0 30px;
@@ -100,6 +160,33 @@ Set Sensitivity Parameters
     .form-check-input:focus {
         border-color: #F1D500;
         box-shadow: 0 0 0 0.25rem rgba(241, 213, 0, 0.25);
+    }
+    
+    /* Buffer size radio buttons */
+    .buffer-option {
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .buffer-option:hover {
+        border-color: #F1D500;
+        background-color: #fff8c7;
+    }
+    
+    .buffer-option.selected {
+        border-color: #F1D500;
+        background-color: #fff8c7;
+    }
+    
+    .buffer-description {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
     }
 </style>
 <div class="container-fluid mt-4">
@@ -187,9 +274,33 @@ Set Sensitivity Parameters
 </div>
 {% endif %}
 
-<!-- Sensitivity Parameters Content -->
+<!-- Main Content: Asset Archetype + Sensitivity Parameters -->
 <div class="row mt-4">
-    <div class="col-md-8 mx-auto">
+    <!-- Left Column: Asset Archetype Component -->
+    <div class="col-md-4">
+        <div class="archetype-card">
+            <div class="archetype-header">
+                <strong>Asset Archetype</strong>
+            </div>
+            <div class="archetype-list">
+                {% if asset_archetypes %}
+                    {% for archetype in asset_archetypes %}
+                        <div class="archetype-item">
+                            <span class="archetype-number">{{ archetype.number }}</span>
+                            <span class="archetype-name">{{ archetype.name }}</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-archetypes">
+                        No asset archetypes found in the uploaded file
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Set Sensitivity Parameters -->
+    <div class="col-md-8">
         <div class="card custom-card">
             <div class="card-header no-border">
                 <strong>Set Sensitivity Parameters</strong>
@@ -203,15 +314,52 @@ Set Sensitivity Parameters
                     <!-- Risk Assessment Parameters -->
                     <div class="accordion" id="sensitivityAccordion">
                         
-                        <!-- General Risk Parameters -->
+                        <!-- Analysis Parameters -->
                         <div class="accordion-item">
-                            <h2 class="accordion-header" id="generalParamsHeader">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#generalParams" aria-expanded="true" aria-controls="generalParams">
-                                    General Risk Parameters
+                            <h2 class="accordion-header" id="analysisParamsHeader">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#analysisParams" aria-expanded="true" aria-controls="analysisParams">
+                                    Analysis Parameters
                                 </button>
                             </h2>
-                            <div id="generalParams" class="accordion-collapse collapse show" aria-labelledby="generalParamsHeader" data-bs-parent="#sensitivityAccordion">
+                            <div id="analysisParams" class="accordion-collapse collapse show" aria-labelledby="analysisParamsHeader" data-bs-parent="#sensitivityAccordion">
                                 <div class="accordion-body">
+                                    <!-- Buffer Size Selection -->
+                                    <div class="parameter-card">
+                                        <div class="parameter-title">Analysis Buffer Size</div>
+                                        <div class="parameter-description">Select the buffer size around each facility for hazard analysis. Larger buffers capture wider area impacts but may reduce precision.</div>
+                                        <div class="parameter-control">
+                                            <div class="buffer-option" onclick="selectBuffer(0.0045)">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="buffer_size" id="buffer_small" value="0.0045" checked>
+                                                    <label class="form-check-label fw-bold" for="buffer_small">
+                                                        Small Buffer (~250 meters)
+                                                    </label>
+                                                </div>
+                                                <div class="buffer-description">Precise local analysis - Best for individual facility assessment</div>
+                                            </div>
+                                            
+                                            <div class="buffer-option" onclick="selectBuffer(0.0090)">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="buffer_size" id="buffer_medium" value="0.0090">
+                                                    <label class="form-check-label fw-bold" for="buffer_medium">
+                                                        Medium Buffer (~500 meters)
+                                                    </label>
+                                                </div>
+                                                <div class="buffer-description">Balanced analysis - Captures immediate surrounding area</div>
+                                            </div>
+                                            
+                                            <div class="buffer-option" onclick="selectBuffer(0.0135)">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="buffer_size" id="buffer_large" value="0.0135">
+                                                    <label class="form-check-label fw-bold" for="buffer_large">
+                                                        Large Buffer (~750 meters)
+                                                    </label>
+                                                </div>
+                                                <div class="buffer-description">Regional analysis - Includes broader area impacts and regional effects</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="parameter-card">
                                         <div class="parameter-title">Risk Tolerance Level</div>
                                         <div class="parameter-description">Set the overall risk tolerance for your organization</div>
@@ -488,6 +636,20 @@ Set Sensitivity Parameters
         document.getElementById(prefix + 'Value').textContent = value;
     }
     
+    // Function to select buffer size
+    function selectBuffer(size) {
+        // Remove selected class from all buffer options
+        document.querySelectorAll('.buffer-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        event.currentTarget.classList.add('selected');
+        
+        // Check the corresponding radio button
+        document.querySelector(`input[value="${size}"]`).checked = true;
+    }
+    
     // Function to update weighting factors and ensure they sum to 100%
     function updateWeights() {
         const weights = [
@@ -529,6 +691,10 @@ Set Sensitivity Parameters
             // Reset all form elements to their default values
             document.getElementById('sensitivity-form').reset();
             
+            // Reset buffer selection to default (small)
+            document.getElementById('buffer_small').checked = true;
+            selectBuffer(0.0045);
+            
             // Update all displayed values
             updateRangeValue('confidenceLevel', '95%');
             updateRangeValue('floodLow', '0.5');
@@ -557,6 +723,9 @@ Set Sensitivity Parameters
     // Initialize weight calculation on page load
     document.addEventListener('DOMContentLoaded', function() {
         updateWeights();
+        
+        // Set initial buffer selection visual state
+        selectBuffer(0.0045);
     });
     
     // Function to update the steps progress
@@ -594,5 +763,3 @@ Set Sensitivity Parameters
     });
 </script>
 {% endblock %}
-</artifact>
-</artifacts>

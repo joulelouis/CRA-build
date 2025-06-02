@@ -7,13 +7,13 @@ from shapely.geometry import Point, box
 import math
 from django.conf import settings
 
-def generate_water_stress_analysis(facility_csv_path):
+def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
     """
     Performs water stress analysis for facility locations.
-    
     Args:
-        facility_csv_path (str): Path to the facility CSV file with locations
-        
+    facility_csv_path (str): Path to the facility CSV file with locations
+    buffer_size (float): Buffer size for analysis (~250m = 0.0045, ~500m = 0.0090, ~750m = 0.0135)
+    
     Returns:
         dict: Dictionary containing file paths to generated outputs
     """
@@ -57,7 +57,9 @@ def generate_water_stress_analysis(facility_csv_path):
             df_fac['Water Stress Exposure (%)'] = np.nan
             
             # Save as CSV to climate_hazards_analysis input_files directory
-            output_csv = os.path.join(output_dir, 'water_stress_analysis_output.csv')
+            buffer_meters = int(buffer_size * 111000)
+            output_filename = f'water_stress_analysis_output_buffer_{buffer_size:.4f}.csv'
+            output_csv = os.path.join(output_dir, output_filename)
             df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False)
             output_csv_files.append(output_csv)
             
@@ -71,11 +73,12 @@ def generate_water_stress_analysis(facility_csv_path):
             # Plot points
             gdf_points.plot(ax=ax, color='blue', markersize=100)
             
-            ax.set_title('Water Stress Analysis (Placeholder)')
+            ax.set_title(f'Water Stress Analysis (Placeholder) - Buffer: ~{buffer_meters}m')
             ax.set_xlabel('Longitude')
             ax.set_ylabel('Latitude')
             
-            plot_path = os.path.join(output_dir, 'water_stress_plot.png')
+            plot_filename = f'water_stress_plot_buffer_{buffer_size:.4f}.png'
+            plot_path = os.path.join(output_dir, plot_filename)
             plt.savefig(plot_path, format='png', dpi=300, bbox_inches='tight')
             plt.close(fig)
             output_png_files.append(plot_path)
@@ -84,7 +87,9 @@ def generate_water_stress_analysis(facility_csv_path):
             
             return {
                 "combined_csv_paths": output_csv_files,
-                "png_paths": output_png_files
+                "png_paths": output_png_files,
+                "buffer_size": buffer_size,
+                "buffer_meters": buffer_meters
             }
         
         # Load facility locations
@@ -134,8 +139,13 @@ def generate_water_stress_analysis(facility_csv_path):
         pts = [Point(x, y) for x, y in zip(df_fac['Long'], df_fac['Lat'])]
         facility_gdf = gpd.GeoDataFrame(df_fac, geometry=pts, crs="EPSG:4326")
         
+        # Use the provided buffer size (dynamic)
+        buf = buffer_size
+        buffer_meters = int(buffer_size * 111000)  # Convert to approximate meters for labeling
+        
+        print(f"Using buffer size: {buf} degrees (~{buffer_meters}m) for water stress analysis")
+        
         # Create buffer around points
-        buf = 0.0009  # ~100m
         facility_gdf['geometry'] = facility_gdf.geometry.apply(
             lambda p: box(p.x-buf, p.y-buf, p.x+buf, p.y+buf)
         )
@@ -160,8 +170,9 @@ def generate_water_stress_analysis(facility_csv_path):
         # Rename bws_06_raw to Water Stress Exposure (%)
         df_fac.rename(columns={'bws_06_raw': 'Water Stress Exposure (%)'}, inplace=True)
             
-        # Save the results to CSV in the climate_hazards_analysis input_files directory
-        output_csv = os.path.join(output_dir, 'water_stress_analysis_output.csv')
+        # Save the results to CSV with buffer size in filename for sensitivity analysis
+        output_filename = f'water_stress_analysis_output_buffer_{buffer_size:.4f}.csv'
+        output_csv = os.path.join(output_dir, output_filename)
         df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False)
         output_csv_files.append(output_csv)
         
@@ -170,11 +181,12 @@ def generate_water_stress_analysis(facility_csv_path):
         gdf.boundary.plot(ax=ax, linewidth=1, color='black')
         gdf.plot(column='bws_06_raw', ax=ax, legend=True, cmap='OrRd')
         facility_gdf.plot(ax=ax, color='blue', markersize=50, alpha=0.5)
-        ax.set_title('Water Stress and Facilities')
+        ax.set_title(f'Water Stress and Facilities (Buffer: ~{buffer_meters}m)')
         ax.set_axis_off()
         
-        # Save plot to the climate_hazards_analysis input_files directory
-        plot_path = os.path.join(output_dir, 'water_stress_plot.png')
+        # Save plot with buffer size in filename for sensitivity analysis
+        plot_filename = f'water_stress_plot_buffer_{buffer_size:.4f}.png'
+        plot_path = os.path.join(output_dir, plot_filename)
         plt.savefig(plot_path, format='png', dpi=300, bbox_inches='tight')
         plt.close(fig)
         output_png_files.append(plot_path)
@@ -184,7 +196,9 @@ def generate_water_stress_analysis(facility_csv_path):
         # Return paths to the generated files
         return {
             "combined_csv_paths": output_csv_files,
-            "png_paths": output_png_files
+            "png_paths": output_png_files,
+            "buffer_size": buffer_size,
+            "buffer_meters": buffer_meters
         }
         
     except Exception as e:
