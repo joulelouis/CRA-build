@@ -393,9 +393,18 @@ Climate Hazard Analysis Results
                                                                 {% endif %}
                                                             {% endwith %}
                                                         
-                                                        {# Updated Flood Depth styling for new categories #}
+                                                        {# Updated Flood Depth styling for simplified categories #}
                                                         {% elif key == "Flood Depth (meters)" %}
-                                                            {% if value == "Little to None" %}
+                                                            {% if value == "0.1 to 0.5" %}
+                                                                <span style="color: green;">{{ value }}</span>
+                                                            {% elif value == "0.5 to 1.5" %}
+                                                                <span style="color: orange;">{{ value }}</span>
+                                                            {% elif value == "Greater than 1.5" %}
+                                                                <span style="color: red;">{{ value }}</span>
+                                                            {% elif value == "Unknown" %}
+                                                                <span style="color: gray;">{{ value }}</span>
+                                                            {# Keep legacy categories for backward compatibility #}
+                                                            {% elif value == "Little to None" %}
                                                                 <span style="color: lightgreen;">{{ value }}</span>
                                                             {% elif value == "Low Risk" %}
                                                                 <span style="color: green;">{{ value }}</span>
@@ -575,10 +584,6 @@ Climate Hazard Analysis Results
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <!-- Legend on the left -->
                                 <ul class="legend d-flex" style="list-style: none; padding: 0; margin: 0;">
-                                    <li class="little-to-none" style="display: flex; align-items: center; margin-right: 15px;">
-                                        <span style="display: inline-block; width: 15px; height: 15px; background-color: lightgreen; margin-right: 8px;"></span>
-                                        Little to None
-                                    </li>
                                     <li class="low" style="display: flex; align-items: center; margin-right: 15px;">
                                         <span style="display: inline-block; width: 15px; height: 15px; background-color: green; margin-right: 8px;"></span>
                                         Low

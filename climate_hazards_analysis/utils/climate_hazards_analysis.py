@@ -79,32 +79,30 @@ def standardize_facility_dataframe(df):
     return df
 
 
-def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_size=0.0045, flood_thresholds=None):
+def process_flood_exposure_analysis(facility_csv_path, selected_fields):
     """
     Process flood exposure analysis if selected.
-    Enhanced version with better NaN handling and validation.
+    Simplified version that uses the basic flood analysis function.
     """
     if 'Flood' not in selected_fields:
         logger.info("Flood analysis not selected, skipping")
         return None, []
         
-    logger.info(f"Starting Flood Exposure Analysis with buffer size: {buffer_size}")
-    if flood_thresholds:
-        logger.info(f"Using custom flood thresholds: {flood_thresholds}")
+    logger.info("Starting Flood Exposure Analysis")
     plot_paths = []
 
     try:
-        # Import the fixed flood analysis function
+        # Import the simplified flood analysis function
         from flood_exposure_analysis.utils.flood_exposure_analysis import generate_flood_exposure_analysis
         
-        flood_res = generate_flood_exposure_analysis(facility_csv_path, buffer_size, flood_thresholds)
+        flood_res = generate_flood_exposure_analysis(facility_csv_path)
         
         if 'error' in flood_res:
             logger.warning(f"Warning in Flood Exposure Analysis: {flood_res['error']}")
             # Create placeholder flood data instead of returning None
             df_fac = pd.read_csv(facility_csv_path)
             df_fac = standardize_facility_dataframe(df_fac)
-            df_fac['Flood Depth (meters)'] = 'Little to None'  # Default instead of N/A
+            df_fac['Flood Depth (meters)'] = '0.1 to 0.5'  # Default to lowest risk category
             return df_fac[['Facility', 'Lat', 'Long', 'Flood Depth (meters)']], []
             
         if not flood_res.get('combined_csv_paths'):
@@ -112,7 +110,7 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_s
             # Create placeholder flood data
             df_fac = pd.read_csv(facility_csv_path)
             df_fac = standardize_facility_dataframe(df_fac)
-            df_fac['Flood Depth (meters)'] = 'Little to None'
+            df_fac['Flood Depth (meters)'] = '0.1 to 0.5'
             return df_fac[['Facility', 'Lat', 'Long', 'Flood Depth (meters)']], plot_paths
             
         # Read the flood analysis CSV with proper encoding handling
@@ -138,7 +136,7 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_s
             if old in df_flood.columns and new not in df_flood.columns:
                 df_flood.rename(columns={old: new}, inplace=True)
         
-        # Handle flood depth column variations - More comprehensive checking
+        # Handle flood depth column variations
         flood_column_found = False
         if 'Flood Depth (meters)' in df_flood.columns:
             logger.info("Found 'Flood Depth (meters)' column")
@@ -165,30 +163,30 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_s
             # Create placeholder data with the expected column
             df_fac = pd.read_csv(facility_csv_path)
             df_fac = standardize_facility_dataframe(df_fac)
-            df_fac['Flood Depth (meters)'] = 'Little to None'
+            df_fac['Flood Depth (meters)'] = '0.1 to 0.5'
             return df_fac[['Facility', 'Lat', 'Long', 'Flood Depth (meters)']], plot_paths
             
-        # CRITICAL: Clean any NaN values in the flood column specifically
+        # Clean any NaN values in the flood column specifically
         flood_nan_count = df_flood_values['Flood Depth (meters)'].isna().sum()
         if flood_nan_count > 0:
-            logger.warning(f"Found {flood_nan_count} NaN values in flood column, replacing with 'Little to None'")
-            df_flood_values['Flood Depth (meters)'].fillna('Little to None', inplace=True)
+            logger.warning(f"Found {flood_nan_count} NaN values in flood column, replacing with '0.1 to 0.5'")
+            df_flood_values['Flood Depth (meters)'].fillna('0.1 to 0.5', inplace=True)
         
-        # Ensure all values are valid categories
-        valid_categories = {'Little to None', 'Low Risk', 'Medium Risk', 'High Risk', 'N/A'}
+        # Ensure all values are valid categories (for simplified flood analysis)
+        valid_categories = {'0.1 to 0.5', '0.5 to 1.5', 'Greater than 1.5', 'Unknown'}
         invalid_mask = ~df_flood_values['Flood Depth (meters)'].isin(valid_categories)
         invalid_count = invalid_mask.sum()
         if invalid_count > 0:
-            logger.warning(f"Found {invalid_count} invalid flood category values, replacing with 'Little to None'")
+            logger.warning(f"Found {invalid_count} invalid flood category values, replacing with '0.1 to 0.5'")
             invalid_values = df_flood_values.loc[invalid_mask, 'Flood Depth (meters)'].unique()
             logger.warning(f"Invalid values were: {invalid_values}")
-            df_flood_values.loc[invalid_mask, 'Flood Depth (meters)'] = 'Little to None'
+            df_flood_values.loc[invalid_mask, 'Flood Depth (meters)'] = '0.1 to 0.5'
         
         # Final verification
         final_nan_count = df_flood_values['Flood Depth (meters)'].isna().sum()
         if final_nan_count > 0:
             logger.error(f"ERROR: Still have {final_nan_count} NaN values in flood column after cleaning!")
-            df_flood_values['Flood Depth (meters)'].fillna('Little to None', inplace=True)
+            df_flood_values['Flood Depth (meters)'].fillna('0.1 to 0.5', inplace=True)
         
         logger.info(f"Flood column value counts:")
         logger.info(df_flood_values['Flood Depth (meters)'].value_counts())
@@ -208,7 +206,7 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields, buffer_s
         try:
             df_fac = pd.read_csv(facility_csv_path)
             df_fac = standardize_facility_dataframe(df_fac)
-            df_fac['Flood Depth (meters)'] = 'Little to None'  # Default instead of N/A
+            df_fac['Flood Depth (meters)'] = '0.1 to 0.5'  # Default to lowest risk category
             return df_fac[['Facility', 'Lat', 'Long', 'Flood Depth (meters)']], []
         except Exception as e2:
             logger.exception(f"Error creating placeholder flood data: {e2}")
@@ -588,7 +586,7 @@ def process_storm_surge_landslide_analysis(df_fac, selected_fields):
 def process_nan_values(df):
     """
     Replace NaN values with appropriate text based on column type.
-    Enhanced version that handles all edge cases and ensures no NaN values remain.
+    Updated for simplified flood categories.
     
     Args:
         df (DataFrame): Combined dataframe with all hazard data
@@ -619,9 +617,9 @@ def process_nan_values(df):
                 lambda v: "Data not available" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
         elif 'Flood Depth' in col:
-            # Special handling for flood data
+            # Special handling for flood data - use simplified categories
             df[col] = df[col].apply(
-                lambda v: "Little to None" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
+                lambda v: "0.1 to 0.5" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
         elif 'Water Stress' in col:
             # Water stress should be numeric or N/A
@@ -655,13 +653,13 @@ def process_nan_values(df):
 def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=None, buffer_size=0.0045, sensitivity_params=None):
     """
     Integrates multiple climate hazard analyses into a single output.
-    Fixed version that ensures flood data is properly included.
+    Simplified version without flood threshold parameters.
 
     Args:
     facility_csv_path: Path to facility locations CSV (required)
     selected_fields: List of selected hazard types to include
     buffer_size: Buffer size for spatial analysis (default 0.0045)
-    sensitivity_params: Dictionary of sensitivity parameters including flood thresholds
+    sensitivity_params: Dictionary of sensitivity parameters (flood thresholds removed)
     
     Returns:
         dict: Results dictionary with paths to combined output and plots
@@ -704,25 +702,12 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         # Track plots for visualization
         all_plot_paths = []
         
-        # Extract flood thresholds from sensitivity parameters
-        flood_thresholds = None
-        if sensitivity_params:
-            flood_thresholds = {
-                'little': sensitivity_params.get('flood_little_threshold', 0.3),
-                'low_lower': sensitivity_params.get('flood_low_lower', 0.4),
-                'low_upper': sensitivity_params.get('flood_low_upper', 1.0),
-                'medium_lower': sensitivity_params.get('flood_medium_lower', 1.1),
-                'medium_upper': sensitivity_params.get('flood_medium_upper', 1.5),
-                'high': sensitivity_params.get('flood_high_threshold', 1.6)
-            }
-            logger.info(f"Using flood thresholds: {flood_thresholds}")
+        # Process each hazard type (simplified without flood thresholds)
         
-        # Process each hazard type with sensitivity parameters
-        
-        # 1. Flood Exposure Analysis - CRITICAL: Process this first and ensure it's included
+        # 1. Flood Exposure Analysis - Simplified version
         logger.info("=== PROCESSING FLOOD EXPOSURE ANALYSIS ===")
         flood_values, flood_plots = process_flood_exposure_analysis(
-            facility_csv_path, selected_fields, buffer_size, flood_thresholds
+            facility_csv_path, selected_fields
         )
         all_plot_paths.extend(flood_plots)
         
@@ -800,7 +785,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             logger.error("✗ Flood Depth (meters) column is MISSING!")
             # Add placeholder flood column if missing
             if 'Flood' in selected_fields:
-                combined_df['Flood Depth (meters)'] = 'N/A'
+                combined_df['Flood Depth (meters)'] = '0.1 to 0.5'
                 logger.info("Added placeholder Flood Depth (meters) column")
 
         # Process NaN values
@@ -819,12 +804,6 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         if sensitivity_params:
             metadata_lines.append(f"# Sensitivity Analysis Results")
             metadata_lines.append(f"# Buffer Size: {buffer_size} degrees (~{int(buffer_size * 111000)}m)")
-            
-            if flood_thresholds:
-                metadata_lines.append(f"# Flood Thresholds: Little to None <={flood_thresholds['little']}m, "
-                                    f"Low {flood_thresholds['low_lower']}-{flood_thresholds['low_upper']}m, "
-                                    f"Medium {flood_thresholds['medium_lower']}-{flood_thresholds['medium_upper']}m, "
-                                    f"High >={flood_thresholds['high']}m")
         
         # Write metadata and data with explicit UTF-8 encoding
         with open(out_csv, 'w', encoding='utf-8', newline='') as f:
@@ -850,8 +829,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'plot_path': main_plot,
             'all_plots': all_plot_paths,
             'buffer_size': buffer_size,
-            'sensitivity_params': sensitivity_params,
-            'flood_thresholds': flood_thresholds
+            'sensitivity_params': sensitivity_params
         }
         
     except Exception as e:
@@ -902,7 +880,7 @@ def validate_and_clean_dataframe(df, analysis_name=""):
                 logger.info(f"Cleaning {nan_count} NaN values in {col} for {analysis_name}")
                 # Apply appropriate default based on column type
                 if 'Flood' in col:
-                    df[col].fillna('Little to None', inplace=True)
+                    df[col].fillna('0.1 to 0.5', inplace=True)  # Use simplified category
                 elif 'Water Stress' in col:
                     df[col].fillna('N/A', inplace=True)
                 elif 'Sea Level' in col or 'Elevation' in col:

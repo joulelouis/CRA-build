@@ -180,7 +180,7 @@ def select_hazards(request):
 def show_results(request):
     """
     View to display climate hazard analysis results.
-    Fixed version that ensures flood data is properly processed.
+    Updated to work with simplified flood categories.
     """
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
@@ -269,7 +269,7 @@ def show_results(request):
         # CRITICAL: Verify flood column exists and add if missing
         if 'Flood' in selected_hazards and 'Flood Depth (meters)' not in df.columns:
             logger.warning("Flood was selected but Flood Depth (meters) column is missing!")
-            df['Flood Depth (meters)'] = 'N/A'  # Add placeholder
+            df['Flood Depth (meters)'] = '0.1 to 0.5'  # Add placeholder with simplified category
             logger.info("Added placeholder Flood Depth (meters) column")
         
         # Convert to dict for template
@@ -360,6 +360,7 @@ def show_results(request):
 def generate_report(request):
     """
     Django view that generates the PDF report and returns it as an HTTP response.
+    Updated to handle simplified flood categories.
     """
     # Get selected hazards and facility data
     selected_fields = request.session.get('climate_hazards_v2_selected_hazards', [])
@@ -406,6 +407,7 @@ def generate_report(request):
 def identify_high_risk_assets(data, selected_hazards):
     """
     Identify assets with high risk ratings for each hazard type.
+    Updated to handle simplified flood categories.
     
     Args:
         data (list): List of dictionaries containing facility data with hazard ratings
@@ -416,11 +418,11 @@ def identify_high_risk_assets(data, selected_hazards):
     """
     high_risk_assets = {}
     
-    # Define thresholds for high risk by hazard type
+    # Define thresholds for high risk by hazard type (updated for simplified flood categories)
     thresholds = {
         'Flood': {
             'column': 'Flood Depth (meters)',
-            'criteria': lambda v: v == 'Greater than 1.5'
+            'criteria': lambda v: v in ['Greater than 1.5', 'High Risk']  # Support both old and new categories
         },
         'Water Stress': {
             'column': 'Water Stress Exposure (%)',
@@ -443,11 +445,11 @@ def identify_high_risk_assets(data, selected_hazards):
             'criteria': lambda v: v != 'Data not available' and isinstance(v, (int, float)) and v >= 178
         },
         'Storm Surge': {
-            'column': 'Storm Surge Hazard Rating',
+            'column': 'Storm Surge Flood Depth (meters)',
             'criteria': lambda v: isinstance(v, (int, float)) and v >= 1.5
         },
         'Rainfall Induced Landslide': {
-            'column': 'Rainfall Induced Landslide Hazard Rating',
+            'column': 'Rainfall Induced Landslide Factor of Safety',
             'criteria': lambda v: isinstance(v, (int, float)) and v < 1
         }
     }
@@ -479,7 +481,8 @@ def identify_high_risk_assets(data, selected_hazards):
                 value = asset[column]
                 try:
                     # Try to convert string values to numbers if possible
-                    if isinstance(value, str) and value not in ['N/A', 'Little to no effect', 'Data not available']:
+                    if isinstance(value, str) and value not in ['N/A', 'Little to no effect', 'Data not available', 
+                                                               '0.1 to 0.5', '0.5 to 1.5', 'Greater than 1.5', 'Unknown']:
                         try:
                             value = float(value)
                         except ValueError:
@@ -572,17 +575,13 @@ def sensitivity_parameters(request):
             # Get the selected archetype (if any)
             selected_archetype = request.POST.get('selected_archetype', '').strip()
             
-            # Extract sensitivity parameters from the form
+            # Extract sensitivity parameters from the form (simplified - no flood thresholds)
             sensitivity_params = {
                 # Analysis parameters
                 'buffer_size': float(request.POST.get('buffer_size', 0.0045)),
                 'risk_tolerance': request.POST.get('risk_tolerance', 'medium'),
                 'time_horizon': request.POST.get('time_horizon', '2050'),
                 'confidence_level': int(request.POST.get('confidence_level', 95)),
-                
-                # Flood thresholds
-                'flood_low_threshold': float(request.POST.get('flood_low_threshold', 0.5)),
-                'flood_high_threshold': float(request.POST.get('flood_high_threshold', 1.5)),
                 
                 # Water stress thresholds
                 'water_stress_low': int(request.POST.get('water_stress_low', 10)),
@@ -631,13 +630,13 @@ def sensitivity_parameters(request):
                 logger.info(f"General sensitivity parameters saved: {sensitivity_params}")
                 
                 if facility_csv_path and os.path.exists(facility_csv_path):
-                    # Re-run the analysis with new buffer size
+                    # Re-run the analysis with new buffer size (simplified - no flood thresholds)
                     buffer_size = sensitivity_params['buffer_size']
                     
                     # Import the analysis function
                     from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
                     
-                    # Run sensitivity analysis with custom buffer size
+                    # Run sensitivity analysis with custom buffer size (simplified)
                     result = generate_climate_hazards_analysis(
                         facility_csv_path=facility_csv_path,
                         selected_fields=selected_hazards,
