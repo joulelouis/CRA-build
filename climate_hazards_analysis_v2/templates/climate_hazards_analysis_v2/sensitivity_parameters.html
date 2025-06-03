@@ -391,20 +391,6 @@ Set Sensitivity Parameters
             <!-- Hidden field to store selected archetype -->
             <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
             
-            <!-- Buffer Size Parameters -->
-            <div class="parameter-card">
-                <div class="parameter-title">Spatial Analysis Buffer Size</div>
-                <div class="parameter-description">Define the buffer size around facility locations for spatial analysis</div>
-                
-                <div class="parameter-control">
-                    <label for="bufferSizeSlider" class="form-label">Buffer Size: <span class="range-value" id="bufferSizeValue">0.0045</span> degrees (~<span id="bufferSizeMeters">500</span>m)</label>
-                    <input type="range" class="form-range" id="bufferSizeSlider" name="buffer_size" min="0.0009" max="0.0225" step="0.0009" value="0.0045" oninput="updateBufferSize(this.value)">
-                    <div class="d-flex justify-content-between">
-                        <small class="text-muted">100m</small>
-                        <small class="text-muted">2.5km</small>
-                    </div>
-                </div>
-            </div>
             
             <!-- Hazard-Specific Thresholds (SIMPLIFIED - NO FLOOD THRESHOLDS) -->
             <div class="hazard-thresholds-section">
