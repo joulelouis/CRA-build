@@ -180,7 +180,7 @@ def select_hazards(request):
 def show_results(request):
     """
     View to display climate hazard analysis results.
-    This is the third step in the climate hazard analysis workflow.
+    Fixed version that ensures flood data is properly processed.
     """
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
@@ -192,8 +192,25 @@ def show_results(request):
         return redirect('climate_hazards_analysis_v2:select_hazards')
     
     try:
+        logger.info(f"Starting results processing for {len(facility_data)} facilities")
+        logger.info(f"Selected hazards: {selected_hazards}")
+        logger.info(f"Facility CSV path: {facility_csv_path}")
+        
+        # Verify facility CSV file exists
+        if not facility_csv_path or not os.path.exists(facility_csv_path):
+            logger.error(f"Facility CSV file not found: {facility_csv_path}")
+            return render(request, 'climate_hazards_analysis_v2/select_hazards.html', {
+                'error': 'Facility CSV file not found. Please upload your facility data again.',
+                'facility_count': len(facility_data),
+                'hazard_types': [
+                    'Flood', 'Water Stress', 'Heat', 'Sea Level Rise', 
+                    'Tropical Cyclones', 'Storm Surge', 'Rainfall Induced Landslide'
+                ],
+                'selected_hazards': selected_hazards
+            })
+        
         # Re-use the generate_climate_hazards_analysis function from the original module
-        # This function processes the CSV file and generates hazard analysis results
+        logger.info("Calling generate_climate_hazards_analysis...")
         result = generate_climate_hazards_analysis(
             facility_csv_path=facility_csv_path,
             selected_fields=selected_hazards
@@ -208,13 +225,8 @@ def show_results(request):
                 'error': error_message,
                 'facility_count': len(facility_data),
                 'hazard_types': [
-                    'Flood',
-                    'Water Stress',
-                    'Heat',
-                    'Sea Level Rise', 
-                    'Tropical Cyclones',
-                    'Storm Surge',
-                    'Rainfall Induced Landslide'
+                    'Flood', 'Water Stress', 'Heat', 'Sea Level Rise', 
+                    'Tropical Cyclones', 'Storm Surge', 'Rainfall Induced Landslide'
                 ],
                 'selected_hazards': selected_hazards
             })
@@ -228,19 +240,14 @@ def show_results(request):
                 'error': 'Combined analysis output not found.',
                 'facility_count': len(facility_data),
                 'hazard_types': [
-                    'Flood',
-                    'Water Stress',
-                    'Heat',
-                    'Sea Level Rise', 
-                    'Tropical Cyclones',
-                    'Storm Surge',
-                    'Rainfall Induced Landslide'
+                    'Flood', 'Water Stress', 'Heat', 'Sea Level Rise', 
+                    'Tropical Cyclones', 'Storm Surge', 'Rainfall Induced Landslide'
                 ],
                 'selected_hazards': selected_hazards
             })
         
-        # Load the combined CSV file
         # Load the combined CSV file with explicit UTF-8 encoding
+        logger.info(f"Loading combined CSV from: {combined_csv_path}")
         try:
             df = pd.read_csv(combined_csv_path, encoding='utf-8')
         except UnicodeDecodeError:
@@ -255,8 +262,21 @@ def show_results(request):
                 except UnicodeDecodeError:
                     logger.error(f"Could not read CSV file {combined_csv_path} with any encoding")
                     raise
+        
+        logger.info(f"Loaded CSV with shape: {df.shape}")
+        logger.info(f"CSV columns: {df.columns.tolist()}")
+        
+        # CRITICAL: Verify flood column exists and add if missing
+        if 'Flood' in selected_hazards and 'Flood Depth (meters)' not in df.columns:
+            logger.warning("Flood was selected but Flood Depth (meters) column is missing!")
+            df['Flood Depth (meters)'] = 'N/A'  # Add placeholder
+            logger.info("Added placeholder Flood Depth (meters) column")
+        
+        # Convert to dict for template
         data = df.to_dict(orient="records")
         columns = df.columns.tolist()
+        
+        logger.info(f"Final data has {len(data)} rows and {len(columns)} columns")
         
         # Create detailed column groups for the table header
         groups = {}
@@ -288,7 +308,15 @@ def show_results(request):
         for hazard, cols in hazard_columns.items():
             count = sum(1 for col in cols if col in columns)
             if count > 0:
-                groups[hazard] = count  
+                groups[hazard] = count
+                logger.info(f"Added {hazard} group with {count} columns")
+        
+        # Verify flood group was added if flood was selected
+        if 'Flood' in selected_hazards:
+            if 'Flood' in groups:
+                logger.info(f"✓ Flood group successfully added to table headers")
+            else:
+                logger.error("✗ Flood group missing from table headers!")
         
         # Get the paths to any generated plots
         plot_path = result.get('plot_path')
@@ -313,6 +341,7 @@ def show_results(request):
             'success_message': f"Successfully analyzed {len(data)} facilities for {len(selected_hazards)} hazard types."
         }
         
+        logger.info("Rendering results template...")
         return render(request, 'climate_hazards_analysis_v2/results.html', context)
         
     except Exception as e:
@@ -322,13 +351,8 @@ def show_results(request):
             'error': f"Error in climate hazards analysis: {str(e)}",
             'facility_count': len(facility_data),
             'hazard_types': [
-                'Flood',
-                'Water Stress',
-                'Heat',
-                'Sea Level Rise', 
-                'Tropical Cyclones',
-                'Storm Surge',
-                'Rainfall Induced Landslide'
+                'Flood', 'Water Stress', 'Heat', 'Sea Level Rise', 
+                'Tropical Cyclones', 'Storm Surge', 'Rainfall Induced Landslide'
             ],
             'selected_hazards': selected_hazards
         })
