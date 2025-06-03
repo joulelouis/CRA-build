@@ -2,7 +2,7 @@
 {% load static %}
 {% load float_filters %}
 {% block title %}
-Sensitivity Results
+Water Stress Sensitivity Results
 {% endblock %}
 {% block content %}
 <style>
@@ -280,9 +280,9 @@ Sensitivity Results
         <div class="col-12">
             <div class="sensitivity-info">
                 <h5><i class="fas fa-cog me-2"></i>Water Stress Sensitivity Analysis Results</h5>
-                <p class="mb-2">The results below show Water Stress risk levels calculated using archetype-specific sensitivity parameters.</p>
+                <p class="mb-2">The <strong>Water Stress Exposure (%)</strong> values below use custom color coding based on archetype-specific sensitivity parameters.</p>
                 <div class="archetype-params">
-                    <strong>Applied Parameters:</strong>
+                    <strong>Applied Custom Thresholds:</strong>
                     {% for archetype, params in archetype_params.items %}
                         <span class="badge bg-secondary me-2">
                             {{ archetype }}: Low&lt;{{ params.water_stress_low }}%, High&gt;{{ params.water_stress_high }}%
@@ -331,31 +331,24 @@ Sensitivity Results
                                         <tr class="custom-table-row">
                                             {% for key, value in row.items %}
                                                 <td>
-                                                    {# Water Stress Exposure - Use standard default coloring since we have the Risk Level column #}
+                                                    {# Water Stress Exposure with CUSTOM coloring based on archetype thresholds #}
                                                     {% if key == "Water Stress Exposure (%)" and value != "N/A" %}
-                                                        {% with val=value|to_float %}
-                                                            {% if val < 10 %}
-                                                                <span style="color: green;">{{ value }}</span>
-                                                            {% elif val >= 10 and val <= 30 %}
-                                                                <span style="color: orange;">{{ value }}</span>
-                                                            {% elif val > 30 %}
-                                                                <span style="color: red;">{{ value }}</span>
+                                                        {% with val=value|to_float low_threshold=row.WS_Low_Threshold|default:10 high_threshold=row.WS_High_Threshold|default:31 %}
+                                                            {% comment %}
+                                                            Debug info: Value={{ val }}, Low={{ low_threshold }}, High={{ high_threshold }}
+                                                            Logic: val < low_threshold = {{ val }} < {{ low_threshold }} = {{ val|floatformat:0 }} < {{ low_threshold }}
+                                                                   val > high_threshold = {{ val }} > {{ high_threshold }} = {{ val|floatformat:0 }} > {{ high_threshold }}
+                                                            {% endcomment %}
+                                                            {% if val < low_threshold %}
+                                                                <span style="color: green; font-weight: bold;" title="Low Risk: {{ val }}% < {{ low_threshold }}%">{{ value }}</span>
+                                                            {% elif val > high_threshold %}
+                                                                <span style="color: red; font-weight: bold;" title="High Risk: {{ val }}% > {{ high_threshold }}%">{{ value }}</span>
                                                             {% else %}
-                                                                {{ value }}
+                                                                <span style="color: orange; font-weight: bold;" title="Medium Risk: {{ low_threshold }}% ≤ {{ val }}% ≤ {{ high_threshold }}%">{{ value }}</span>
                                                             {% endif %}
                                                         {% endwith %}
                                                     
-                                                    {# Water Stress Risk Level - New column showing archetype-specific risk classification #}
-                                                    {% elif key == "Water Stress Risk Level" %}
-                                                        {% if value == "Low" %}
-                                                            <span style="color: green; font-weight: bold;">{{ value }}</span>
-                                                        {% elif value == "Medium" %}
-                                                            <span style="color: orange; font-weight: bold;">{{ value }}</span>
-                                                        {% elif value == "High" %}
-                                                            <span style="color: red; font-weight: bold;">{{ value }}</span>
-                                                        {% else %}
-                                                            <span style="color: gray;">{{ value }}</span>
-                                                        {% endif %}
+                                                    {# Remove the separate Water Stress Risk Level column styling #}
                                                     
                                                     {# Asset Archetype - Show which archetype was used #}
                                                     {% elif key == "Asset Archetype" %}
@@ -633,14 +626,14 @@ Sensitivity Results
                     }
                 ],
                 fixedColumns: {
-                    leftColumns: 1
+                    leftColumns: 2  // Keep both Facility and Asset Archetype columns fixed
                 },
                 columnDefs: [
-                    // Hide Lat/Long by default
-                    { targets: [1, 2], visible: false },
+                    // No need to hide Lat/Long since they're removed entirely
                     // Column proportions
-                    { width: '15%', targets: 0 }, // Facility name
-                    { width: '8%', targets: '_all' }, // Other columns
+                    { width: '20%', targets: 0 }, // Facility name (wider since no lat/long)
+                    { width: '15%', targets: 1 }, // Asset Archetype 
+                    { width: '10%', targets: '_all' }, // Other columns
                     // Improve wrapping behavior 
                     { className: "dt-head-center dt-body-center", targets: "_all" }
                 ],

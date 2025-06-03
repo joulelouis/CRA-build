@@ -14,23 +14,15 @@
                         <label class="form-check-label" for="col-facility">Facility</label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input base-column" id="col-lat" checked disabled>
-                        <label class="form-check-label" for="col-lat">Latitude</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input base-column" id="col-long" checked disabled>
-                        <label class="form-check-label" for="col-long">Longitude</label>
-                    </div>
-                    <div class="form-check">
                         <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-asset-archetype" checked data-column="Asset Archetype">
-                        <label class="form-check-label" for="col-asset-archetype">Asset Archetype</label>
+                        <label class="form-check-label" for="col-asset-archetype"><strong>Asset Archetype</strong></label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-ws-low-threshold" data-column="WS Low Threshold">
+                        <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-ws-low-threshold" data-column="WS_Low_Threshold">
                         <label class="form-check-label" for="col-ws-low-threshold">WS Low Threshold</label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-ws-high-threshold" data-column="WS High Threshold">
+                        <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-ws-high-threshold" data-column="WS_High_Threshold">
                         <label class="form-check-label" for="col-ws-high-threshold">WS High Threshold</label>
                     </div>
                 </div>
@@ -52,7 +44,7 @@
             </div>
             {% endif %}
             
-            <!-- Water Stress with Sensitivity Columns -->
+            <!-- Water Stress - Only Original Exposure Column with Custom Coloring -->
             {% if 'Water Stress' in selected_hazards %}
             <div class="mb-3">
                 <div class="form-check">
@@ -62,12 +54,8 @@
                 <div class="ms-4">
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input hazard-column water-stress" id="col-water-stress-exposure" checked data-column="Water Stress Exposure (%)">
-                        <label class="form-check-label" for="col-water-stress-exposure">Water Stress Exposure (%)</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column water-stress" id="col-water-stress-risk-level" checked data-column="Water Stress Risk Level">
-                        <label class="form-check-label" for="col-water-stress-risk-level">
-                            <strong>Water Stress Risk Level</strong> <span class="badge bg-warning text-dark">Sensitivity</span>
+                        <label class="form-check-label" for="col-water-stress-exposure">
+                            <strong>Water Stress Exposure (%)</strong> <span class="badge bg-warning text-dark">Custom Thresholds</span>
                         </label>
                     </div>
                 </div>

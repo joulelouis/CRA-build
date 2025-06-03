@@ -637,6 +637,7 @@ def sensitivity_parameters(request):
     # For GET requests or if there was an error, show the form
     return render(request, 'climate_hazards_analysis_v2/sensitivity_parameters.html', context)
 
+
 def sensitivity_results(request):
     """
     View to display climate hazard analysis results with archetype-specific Water Stress sensitivity parameters.
@@ -673,8 +674,21 @@ def sensitivity_results(request):
         
         # Create a copy of the original data for sensitivity analysis
         sensitivity_data = copy.deepcopy(original_results['data'])
-        columns = original_results['columns']
+        columns = original_results['columns'].copy()
         
+        # Remove Lat and Long columns from the sensitivity results
+        columns_to_remove = ['Lat', 'Long']
+        for col_to_remove in columns_to_remove:
+            if col_to_remove in columns:
+                columns.remove(col_to_remove)
+        
+        # Remove Lat and Long from each data row
+        for row in sensitivity_data:
+            for col_to_remove in columns_to_remove:
+                if col_to_remove in row:
+                    del row[col_to_remove]
+        
+        logger.info(f"Removed Lat/Long columns. Remaining columns: {columns}")
         logger.info(f"Loaded original data with {len(sensitivity_data)} rows")
         
         # Load the facility CSV to get archetype information
@@ -687,6 +701,8 @@ def sensitivity_results(request):
                     df = pd.read_csv(facility_csv_path, encoding='latin-1')
                 except UnicodeDecodeError:
                     df = pd.read_csv(facility_csv_path, encoding='cp1252')
+            
+            logger.info(f"Loaded CSV with columns: {df.columns.tolist()}")
             
             # Find archetype column
             archetype_column = None
@@ -702,20 +718,47 @@ def sensitivity_results(request):
                     break
             
             if archetype_column:
+                logger.info(f"Found archetype column: '{archetype_column}'")
                 # Create mapping from facility name to archetype
                 for _, row in df.iterrows():
-                    facility_name = str(row.get('Facility', row.get('Site', row.get('Name', '')))).strip()
+                    # Try multiple facility name columns
+                    facility_name = None
+                    for name_col in ['Facility', 'Site', 'Name', 'Asset Name']:
+                        if name_col in df.columns and pd.notna(row.get(name_col)):
+                            facility_name = str(row.get(name_col)).strip()
+                            break
+                    
                     archetype = str(row.get(archetype_column, '')).strip()
-                    if facility_name and archetype:
+                    if facility_name and archetype and archetype.lower() not in ['', 'nan', 'none']:
                         archetype_mapping[facility_name] = archetype
+                        logger.info(f"Mapped '{facility_name}' → '{archetype}'")
                 
                 logger.info(f"Created archetype mapping for {len(archetype_mapping)} facilities")
+                logger.info(f"Archetype mapping: {archetype_mapping}")
+            else:
+                logger.warning(f"No archetype column found. Available columns: {df.columns.tolist()}")
+        else:
+            logger.warning("Facility CSV file not found or doesn't exist")
         
         # Apply archetype-specific Water Stress sensitivity parameters
         if 'Water Stress' in selected_hazards and 'Water Stress Exposure (%)' in columns:
             for row in sensitivity_data:
                 facility_name = row.get('Facility', '')
-                archetype = archetype_mapping.get(facility_name, 'Default')
+                archetype = archetype_mapping.get(facility_name)
+                
+                if not archetype:
+                    # If no exact match, try to find a partial match
+                    for mapped_name, mapped_archetype in archetype_mapping.items():
+                        if facility_name.lower() in mapped_name.lower() or mapped_name.lower() in facility_name.lower():
+                            archetype = mapped_archetype
+                            logger.info(f"Used partial match: '{facility_name}' → '{mapped_name}' → '{archetype}'")
+                            break
+                
+                if not archetype:
+                    archetype = 'Default'
+                    logger.warning(f"No archetype found for facility '{facility_name}', using 'Default'")
+                else:
+                    logger.info(f"Assigned archetype '{archetype}' to facility '{facility_name}'")
                 
                 # Get parameters for this archetype (or default)
                 params = archetype_params.get(archetype, archetype_params.get('_default', {
@@ -725,39 +768,43 @@ def sensitivity_results(request):
                     'water_stress_high': 31
                 }))
                 
-                # Apply custom risk classification based on archetype parameters
-                water_stress_value = row.get('Water Stress Exposure (%)')
-                if water_stress_value and water_stress_value != 'N/A':
-                    try:
-                        value = float(water_stress_value)
-                        
-                        # Apply archetype-specific thresholds
-                        if value < params['water_stress_low']:
-                            row['Water Stress Risk Level'] = 'Low'
-                        elif params['water_stress_medium_lower'] <= value <= params['water_stress_medium_upper']:
-                            row['Water Stress Risk Level'] = 'Medium'
-                        elif value > params['water_stress_high']:
-                            row['Water Stress Risk Level'] = 'High'
-                        else:
-                            row['Water Stress Risk Level'] = 'Medium'  # Default case
-                        
-                        # Store the archetype and parameters used for this facility
-                        row['Asset Archetype'] = archetype
-                        row['WS Low Threshold'] = params['water_stress_low']
-                        row['WS High Threshold'] = params['water_stress_high']
-                        
-                    except (ValueError, TypeError):
-                        row['Water Stress Risk Level'] = 'Unknown'
-                        row['Asset Archetype'] = archetype
-                else:
-                    row['Water Stress Risk Level'] = 'N/A'
-                    row['Asset Archetype'] = archetype
+                # Store the archetype and parameters used for this facility (for template access)
+                row['Asset Archetype'] = archetype
+                row['WS_Low_Threshold'] = params['water_stress_low']
+                row['WS_High_Threshold'] = params['water_stress_high']
+                
+                logger.info(f"Applied thresholds for '{facility_name}' ({archetype}): Low<{params['water_stress_low']}%, High>{params['water_stress_high']}%")
         
-        # Add new columns to the columns list if they don't exist
-        new_columns = ['Water Stress Risk Level', 'Asset Archetype', 'WS Low Threshold', 'WS High Threshold']
-        for col in new_columns:
-            if col not in columns:
-                columns.append(col)
+        # Add new columns to the columns list and reorder to put Asset Archetype as 2nd column
+        new_columns = ['Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold']
+        
+        # Reorder columns to put Asset Archetype as 2nd column
+        if 'Asset Archetype' not in columns:
+            # Create new ordered columns list
+            ordered_columns = []
+            
+            # Add Facility first
+            if 'Facility' in columns:
+                ordered_columns.append('Facility')
+            
+            # Add Asset Archetype second
+            ordered_columns.append('Asset Archetype')
+            
+            # Add remaining columns (excluding the ones we're repositioning)
+            for col in columns:
+                if col not in ['Facility', 'Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold']:
+                    ordered_columns.append(col)
+            
+            # Add threshold columns at the end
+            if 'WS_Low_Threshold' not in columns:
+                ordered_columns.append('WS_Low_Threshold')
+            if 'WS_High_Threshold' not in columns:
+                ordered_columns.append('WS_High_Threshold')
+            
+            # Update the columns list
+            columns = ordered_columns
+            
+            logger.info(f"Reordered columns for sensitivity results: {columns}")
         
         logger.info(f"Applied sensitivity parameters to {len(sensitivity_data)} facilities")
         
@@ -769,10 +816,10 @@ def sensitivity_results(request):
         if facility_count > 0:
             groups['Facility Information'] = facility_count
         
-        # Create a mapping for each hazard type and its columns (including new sensitivity columns)
+        # Create a mapping for each hazard type and its columns (excluding separate risk level column)
         hazard_columns = {
             'Flood': ['Flood Depth (meters)'],
-            'Water Stress': ['Water Stress Exposure (%)', 'Water Stress Risk Level'],
+            'Water Stress': ['Water Stress Exposure (%)'],  # Only the original exposure column
             'Sea Level Rise': ['Elevation (meter above sea level)', 
                             '2030 Sea Level Rise (in meters)', 
                             '2040 Sea Level Rise (in meters)', 
@@ -809,7 +856,7 @@ def sensitivity_results(request):
             'selected_hazards': selected_hazards,
             'archetype_params': archetype_params,
             'is_sensitivity_results': True,  # Flag to indicate this is sensitivity results
-            'success_message': f"Successfully applied Water Stress sensitivity parameters to {len(sensitivity_data)} facilities using archetype-specific thresholds."
+            'success_message': f"Successfully applied Water Stress sensitivity parameters to {len(sensitivity_data)} facilities. Water Stress Exposure (%) values now use archetype-specific color coding."
         }
         
         logger.info("Rendering sensitivity results template...")
