@@ -16,245 +16,211 @@ Set Sensitivity Parameters
     }
 
     .parameter-card:hover {
-    border-color: #F1D500;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+        border-color: #F1D500;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-.parameter-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 10px;
-}
+    .parameter-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
 
-.parameter-description {
-    font-size: 14px;
-    color: #6c757d;
-    margin-bottom: 15px;
-}
+    .parameter-description {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
 
-.parameter-control {
-    margin-bottom: 15px;
-}
+    .parameter-control {
+        margin-bottom: 15px;
+    }
 
-.parameter-control label {
-    font-weight: 500;
-    margin-bottom: 5px;
-}
+    .parameter-control label {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
 
-.range-value {
-    font-weight: bold;
-    color: #F1D500;
-    background-color: #333;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-}
+    .range-value {
+        font-weight: bold;
+        color: #F1D500;
+        background-color: #333;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
 
-/* Asset Archetype Component Styles - MADE STICKY */
-.archetype-card {
-    background-color: #F8F9FA;
-    border-radius: 8px;
-    border: 2px solid #dee2e6;
-    transition: all 0.3s ease;
-    height: fit-content;
-    position: sticky;
-    top: 20px; /* Distance from top when sticky */
-    z-index: 100; /* Ensure it stays above other content */
-    max-height: calc(100vh - 40px); /* Prevent it from going beyond viewport */
-    overflow-y: auto; /* Add scroll if content is too long */
-}
-
-/* Add smooth scrolling to the archetype list if it becomes too long */
-.archetype-list {
-    padding: 20px;
-    max-height: calc(100vh - 200px); /* Reserve space for header and some margin */
-    overflow-y: auto;
-}
-
-/* Ensure the archetype list scrollbar is styled nicely */
-.archetype-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.archetype-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.archetype-list::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.archetype-list::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-.archetype-card:hover {
-    border-color: #F1D500;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.archetype-header {
-    background-color: #F1D500;
-    color: #000;
-    font-weight: 600;
-    padding: 15px 20px;
-    border-radius: 6px 6px 0 0;
-    margin: -2px -2px 0 -2px;
-    position: sticky;
-    top: -2px; /* Stick to the top of the card */
-    z-index: 101; /* Above the card itself */
-}
-
-.archetype-item {
-    padding: 12px 15px;
-    border-bottom: 1px solid #e9ecef;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-}
-
-.archetype-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.archetype-item:hover {
-    background-color: #fff8c7;
-    border-color: #F1D500;
-}
-
-.archetype-item.selected {
-    background-color: #F1D500;
-    color: #000;
-    font-weight: 600;
-    border: 2px solid #F1D500;
-    box-shadow: 0 2px 8px rgba(241, 213, 0, 0.3);
-}
-
-.archetype-item.selected .archetype-number {
-    background-color: #000;
-    color: #F1D500;
-}
-
-.archetype-number {
-    font-weight: 600;
-    color: #F1D500;
-    background-color: #333;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-right: 12px;
-    display: inline-block;
-    min-width: 24px;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.archetype-name {
-    color: #495057;
-    flex: 1;
-    transition: all 0.3s ease;
-}
-
-.archetype-item.selected .archetype-name {
-    color: #000;
-}
-
-.no-archetypes {
-    color: #6c757d;
-    font-style: italic;
-    text-align: center;
-    padding: 20px;
-}
-
-/* Selected Archetype Indicator */
-.selected-archetype-indicator {
-    background-color: #F1D500;
-    color: #000;
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    border: 2px solid #F1D500;
-}
-
-.archetype-instructions {
-    background-color: #e7f3ff;
-    border: 1px solid #b3d7ff;
-    border-radius: 6px;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    color: #0066cc;
-}
-
-/* Step Progress Styles */
-.steps-container {
-    padding: 0 30px;
-}
-
-.step-item {
-    transition: all 0.3s ease;
-}
-
-.step-circle {
-    transition: background-color 0.3s ease, color 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.step-label {
-    transition: color 0.3s ease;
-    font-size: 14px;
-    margin-top: 5px;
-}
-
-/* Custom checkbox styles */
-.form-check-input:checked {
-    background-color: #F1D500;
-    border-color: #F1D500;
-}
-
-.form-check-input:focus {
-    border-color: #F1D500;
-    box-shadow: 0 0 0 0.25rem rgba(241, 213, 0, 0.25);
-}
-
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
+    /* Asset Archetype Component Styles - MADE STICKY */
     .archetype-card {
-        position: relative; /* Disable sticky on mobile */
-        top: auto;
-        max-height: none;
+        background-color: #F8F9FA;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
     }
-    
-    .archetype-list {
-        max-height: none;
+
+    .archetype-card:hover {
+        border-color: #F1D500;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    
+
     .archetype-header {
-        position: relative;
-        top: auto;
+        background-color: #F1D500;
+        color: #000;
+        font-weight: 600;
+        padding: 15px 20px;
+        border-radius: 6px 6px 0 0;
+        margin: -2px -2px 0 -2px;
+        position: sticky;
+        top: -2px;
+        z-index: 101;
     }
-}
 
-/* Ensure main content area has enough margin on larger screens */
-@media (min-width: 769px) {
-    .sensitivity-parameters-content {
-        min-height: 150vh; /* Ensure there's enough content to scroll */
+    .archetype-list {
+        padding: 20px;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
     }
-}
 
+    .archetype-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .archetype-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .archetype-item:hover {
+        background-color: #fff8c7;
+        border-color: #F1D500;
+    }
+
+    .archetype-item.selected {
+        background-color: #F1D500;
+        color: #000;
+        font-weight: 600;
+        border: 2px solid #F1D500;
+        box-shadow: 0 2px 8px rgba(241, 213, 0, 0.3);
+    }
+
+    .archetype-item.selected .archetype-number {
+        background-color: #000;
+        color: #F1D500;
+    }
+
+    .archetype-number {
+        font-weight: 600;
+        color: #F1D500;
+        background-color: #333;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-right: 12px;
+        display: inline-block;
+        min-width: 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .archetype-name {
+        color: #495057;
+        flex: 1;
+        transition: all 0.3s ease;
+    }
+
+    .archetype-item.selected .archetype-name {
+        color: #000;
+    }
+
+    .no-archetypes {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* Selected Archetype Indicator */
+    .selected-archetype-indicator {
+        background-color: #F1D500;
+        color: #000;
+        padding: 8px 15px;
+        border-radius: 6px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        border: 2px solid #F1D500;
+    }
+
+    .archetype-instructions {
+        background-color: #e7f3ff;
+        border: 1px solid #b3d7ff;
+        border-radius: 6px;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #0066cc;
+    }
+
+    /* Step Progress Styles */
+    .steps-container {
+        padding: 0 30px;
+    }
+
+    .step-item {
+        transition: all 0.3s ease;
+    }
+
+    .step-circle {
+        transition: background-color 0.3s ease, color 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .step-label {
+        transition: color 0.3s ease;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .threshold-description {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 768px) {
+        .archetype-card {
+            position: relative;
+            top: auto;
+            max-height: none;
+        }
+        
+        .archetype-list {
+            max-height: none;
+        }
+        
+        .archetype-header {
+            position: relative;
+            top: auto;
+        }
+    }
 </style>
 
-<!-- Rest of your HTML content remains exactly the same -->
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-6 d-flex flex-column">
@@ -262,353 +228,225 @@ Set Sensitivity Parameters
             <div class="icon-container">
                 <img src="{% static 'images/sgv-logo.png' %}" alt="SGV Logo">
             </div>
+            <!-- Heading below the icon with Margin -->
+            <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
+        </div>
+    </div>
 
-             <!-- Heading below the icon with Margin -->
-    <h1 class="page-heading">Climate Hazard Exposure Analysis</h1>
-</div>
+    <!-- Step by Step Procedure UI -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-4">
+                    <div class="steps-container d-flex justify-content-between position-relative">
+                        <!-- Progress Line -->
+                        <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
+                        <!-- Active Progress (80% for step 4 completion) -->
+                        <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 80%; z-index: 2; transition: width 0.5s ease;"></div>
+                        
+                        <!-- Step 1 (completed) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">1</div>
+                            <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+                        </div>
+                        
+                        <!-- Step 2 (completed) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">2</div>
+                            <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
+                        </div>
+                        
+                        <!-- Step 3 (completed) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">3</div>
+                            <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+                        </div>
+                        
+                        <!-- Step 4 (active) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">4</div>
+                            <div class="step-label text-center" style="font-weight: 500;">Set Sensitivity Parameters</div>
+                        </div>
+                        
+                        <!-- Step 5 (upcoming) -->
+                        <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
+                            <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">5</div>
+                            <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</div>
-<!-- Step by Step Procedure UI -->
-<div class="row mt-4 mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body p-4">
-                <div class="steps-container d-flex justify-content-between position-relative">
-                    <!-- Progress Line -->
-                    <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
+    <!-- Alert Messages -->
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    
+    {% if success_message %}
+    <div class="alert alert-success alert-dismissible fade show alert-fade" role="alert">
+        {{ success_message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
 
-                    <!-- Active Progress (80% for step 4 completion) -->
-                <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 80%; z-index: 2; transition: width 0.5s ease;"></div>
-                
-                <!-- Step 1 (completed) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        1
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+    <!-- Main Content: Asset Archetype + Sensitivity Parameters -->
+    <div class="row mt-4 sensitivity-parameters-content">
+        <!-- Left Column: Asset Archetype Component (STICKY) -->
+        <div class="col-md-4">
+            <div class="archetype-card">
+                <div class="archetype-header">
+                    <strong>Asset Archetype</strong>
                 </div>
-                
-                <!-- Step 2 (completed) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        2
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
+                <div class="archetype-list">
+                    {% if asset_archetypes %}
+                        <div class="archetype-instructions">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Click on an asset archetype to configure its specific Water Stress sensitivity parameters
+                        </div>
+                        {% for archetype in asset_archetypes %}
+                            <div class="archetype-item" onclick="selectArchetype('{{ archetype.name|escapejs }}', {{ archetype.number }})" data-archetype="{{ archetype.name|escapejs }}">
+                                <span class="archetype-number">{{ archetype.number }}</span>
+                                <span class="archetype-name">{{ archetype.name }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-archetypes">
+                            No asset archetypes found in the uploaded file
+                        </div>
+                    {% endif %}
                 </div>
-                
-                <!-- Step 3 (completed) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        3
-                    </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+            </div>
+        </div>
+
+        <!-- Right Column: Set Water Stress Sensitivity Parameters -->
+        <div class="col-md-8">
+            <div class="card custom-card">
+                <div class="card-header no-border">
+                    <strong>Set Water Stress Sensitivity Parameters</strong>
                 </div>
-                
-                <!-- Step 4 (active) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
-                        4
+                <div class="card-body">
+                    <!-- Selected Archetype Indicator -->
+                    <div id="selected-archetype-indicator" class="selected-archetype-indicator" style="display: none;">
+                        <i class="fas fa-building me-2"></i>
+                        Configuring Water Stress parameters for: <span id="selected-archetype-name">None Selected</span>
                     </div>
-                    <div class="step-label text-center" style="font-weight: 500;">Set Sensitivity Parameters</div>
-                </div>
-                
-                <!-- Step 5 (upcoming) -->
-                <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
-                    <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
-                        5
+
+                    <div id="default-instructions" class="archetype-instructions">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Please select an asset archetype from the left panel to configure its Water Stress sensitivity parameters, or use the default parameters below for all archetypes.
                     </div>
-                    <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
+                    
+                    <form id="sensitivity-form" method="POST" action="{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Hidden field to store selected archetype -->
+                        <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
+                        
+                        <!-- Water Stress Thresholds Only -->
+                        <div class="parameter-card">
+                            <div class="parameter-title">Water Stress Thresholds</div>
+                            <div class="parameter-description">Set water stress percentage thresholds for risk levels for the selected asset archetype</div>
+                            
+                            <!-- Low Risk Threshold -->
+                            <div class="parameter-control">
+                                <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
+                                <div class="threshold-description">Values less than this percentage are considered low risk</div>
+                                <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="0" max="100" step="1" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
+                            </div>
+                            
+                            <!-- Medium Risk Threshold -->
+                            <div class="parameter-control">
+                                <label class="form-label">Medium Risk Threshold (%)</label>
+                                <div class="threshold-description">From <span class="range-value" id="waterStressMediumLowerValue">11</span> To <span class="range-value" id="waterStressMediumUpperValue">30</span></div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="waterStressMediumLower" class="form-label small">From (lower bound)</label>
+                                        <input type="range" class="form-range" id="waterStressMediumLower" name="water_stress_medium_lower" min="0" max="100" step="1" value="11" oninput="updateRangeValue('waterStressMediumLower', this.value)">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="waterStressMediumUpper" class="form-label small">To (upper bound)</label>
+                                        <input type="range" class="form-range" id="waterStressMediumUpper" name="water_stress_medium_upper" min="0" max="100" step="1" value="30" oninput="updateRangeValue('waterStressMediumUpper', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- High Risk Threshold -->
+                            <div class="parameter-control">
+                                <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">31</span></label>
+                                <div class="threshold-description">Values greater than this percentage are considered high risk</div>
+                                <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateRangeValue('waterStressHigh', this.value)">
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden field to track which button was clicked -->
+                        <input type="hidden" id="submit-type" name="submit_type" value="">
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'climate_hazards_analysis_v2:show_results' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i> Back to Asset Exposure Results
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
+                                    <i class="fas fa-undo me-2"></i> Reset to Defaults
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-info" onclick="saveArchetypeParameters()" id="save-archetype-btn" style="display: none;">
+                                    <i class="fas fa-save me-2"></i> Save Parameters for This Archetype
+                                </button>
+                                <button type="submit" id="apply-parameters-btn" class="btn btn-warning btn-lg" onclick="document.getElementById('submit-type').value='apply-parameters-btn';">
+                                    <strong>Apply Parameters & Generate Sensitivity Results</strong>
+                                    <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-</div>
-<!-- Alert Messages -->
-{% if error %}
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ error }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endif %}
-{% if success_message %}
-<div class="alert alert-success alert-dismissible fade show alert-fade" role="alert">
-    {{ success_message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endif %}
-<!-- Main Content: Asset Archetype + Sensitivity Parameters -->
-<div class="row mt-4 sensitivity-parameters-content">
-    <!-- Left Column: Asset Archetype Component (NOW STICKY) -->
-    <div class="col-md-4">
-        <div class="archetype-card">
-            <div class="archetype-header">
-                <strong>Asset Archetype</strong>
-            </div>
-            <div class="archetype-list">
-                {% if asset_archetypes %}
-                    <div class="archetype-instructions">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Click on an asset archetype to configure its specific sensitivity parameters
-                    </div>
-                    {% for archetype in asset_archetypes %}
-                        <div class="archetype-item" onclick="selectArchetype('{{ archetype.name|escapejs }}', {{ archetype.number }})" data-archetype="{{ archetype.name|escapejs }}">
-                            <span class="archetype-number">{{ archetype.number }}</span>
-                            <span class="archetype-name">{{ archetype.name }}</span>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="no-archetypes">
-                        No asset archetypes found in the uploaded file
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Right Column: Set Sensitivity Parameters (SIMPLIFIED - NO FLOOD THRESHOLDS) -->
-    <div class="col-md-8">
-    <div class="card custom-card">
-        <div class="card-header no-border">
-            <strong>Set Sensitivity Parameters</strong>
-        </div>
-        <div class="card-body">
-            <!-- Selected Archetype Indicator -->
-            <div id="selected-archetype-indicator" class="selected-archetype-indicator" style="display: none;">
-                <i class="fas fa-building me-2"></i>
-                Configuring parameters for: <span id="selected-archetype-name">None Selected</span>
-            </div>
-
-            <div id="default-instructions" class="archetype-instructions">
-            <i class="fas fa-arrow-left me-2"></i>
-            Please select an asset archetype from the left panel to configure its specific sensitivity parameters, or use the default parameters below for all archetypes.
-        </div>
-        
-        <form id="sensitivity-form" method="POST" action="{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}">
-            {% csrf_token %}
-            
-            <!-- Hidden field to store selected archetype -->
-            <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
-            
-            
-            <!-- Hazard-Specific Thresholds (SIMPLIFIED - NO FLOOD THRESHOLDS) -->
-            <div class="hazard-thresholds-section">
-                <h4 class="mb-3">Hazard-Specific Thresholds</h4>
-                
-                <!-- Water Stress Thresholds -->
-                <div class="parameter-card">
-                    <div class="parameter-title">Water Stress Thresholds</div>
-                    <div class="parameter-description">Set water stress percentage thresholds for risk levels</div>
-                    
-                    <!-- Low Risk -->
-                    <div class="water-stress-threshold-item">
-                        <div class="parameter-control">
-                            <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
-                            <div class="threshold-description">Less than</div>
-                            <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="0" max="100" step="1" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
-                        </div>
-                    </div>
-                    
-                    <!-- Medium Risk -->
-                    <div class="water-stress-threshold-item">
-                        <div class="parameter-control">
-                            <label class="form-label">Medium Risk Threshold (%)</label>
-                            <div class="threshold-description">From <span class="range-value" id="waterStressMediumLowerValue">11</span> To <span class="range-value" id="waterStressMediumUpperValue">30</span></div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label for="waterStressMediumLower" class="form-label small">From (lower range)</label>
-                                    <input type="range" class="form-range" id="waterStressMediumLower" name="water_stress_medium_lower" min="0" max="100" step="1" value="11" oninput="updateRangeValue('waterStressMediumLower', this.value)">
-                                </div>
-                                <div class="col-6">
-                                    <label for="waterStressMediumUpper" class="form-label small">To (upper range)</label>
-                                    <input type="range" class="form-range" id="waterStressMediumUpper" name="water_stress_medium_upper" min="0" max="100" step="1" value="30" oninput="updateRangeValue('waterStressMediumUpper', this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- High Risk -->
-                    <div class="water-stress-threshold-item">
-                        <div class="parameter-control">
-                            <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">31</span></label>
-                            <div class="threshold-description">Greater than</div>
-                            <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateRangeValue('waterStressHigh', this.value)">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Heat Exposure Thresholds -->
-                <div class="parameter-card">
-                    <div class="parameter-title">Heat Exposure Thresholds</div>
-                    <div class="parameter-description">Define thresholds for extreme heat days</div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="parameter-control">
-                                <label for="heat30Threshold" class="form-label">Days >30°C High Risk: <span class="range-value" id="heat30Value">300</span></label>
-                                <input type="range" class="form-range" id="heat30Threshold" name="heat_30_threshold" min="200" max="365" value="300" oninput="updateRangeValue('heat30', this.value)">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="parameter-control">
-                                <label for="heat33Threshold" class="form-label">Days >33°C High Risk: <span class="range-value" id="heat33Value">100</span></label>
-                                <input type="range" class="form-range" id="heat33Threshold" name="heat_33_threshold" min="50" max="250" value="100" oninput="updateRangeValue('heat33', this.value)">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="parameter-control">
-                                <label for="heat35Threshold" class="form-label">Days >35°C High Risk: <span class="range-value" id="heat35Value">30</span></label>
-                                <input type="range" class="form-range" id="heat35Threshold" name="heat_35_threshold" min="10" max="100" value="30" oninput="updateRangeValue('heat35', this.value)">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Wind Speed Thresholds -->
-                <div class="parameter-card">
-                    <div class="parameter-title">Wind Speed Thresholds</div>
-                    <div class="parameter-description">Set tropical cyclone wind speed risk thresholds</div>
-                    
-                    <!-- Low Risk -->
-                    <div class="wind-speed-threshold-item">
-                        <div class="parameter-control">
-                            <label for="windSpeedLow" class="form-label">Low Risk Threshold (km/h): <span class="range-value" id="windSpeedLowValue">80</span></label>
-                            <div class="threshold-description">Less than</div>
-                            <input type="range" class="form-range" id="windSpeedLow" name="wind_speed_low" min="0" max="150" step="1" value="80" oninput="updateRangeValue('windSpeedLow', this.value)">
-                        </div>
-                    </div>
-                    
-                    <!-- Medium Risk -->
-                    <div class="wind-speed-threshold-item">
-                        <div class="parameter-control">
-                            <label class="form-label">Medium Risk Threshold (km/h)</label>
-                            <div class="threshold-description">From <span class="range-value" id="windSpeedMediumLowerValue">119</span> To <span class="range-value" id="windSpeedMediumUpperValue">177</span></div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label for="windSpeedMediumLower" class="form-label small">From (lower range)</label>
-                                    <input type="range" class="form-range" id="windSpeedMediumLower" name="wind_speed_medium_lower" min="100" max="200" step="1" value="119" oninput="updateRangeValue('windSpeedMediumLower', this.value)">
-                                </div>
-                                <div class="col-6">
-                                    <label for="windSpeedMediumUpper" class="form-label small">To (upper range)</label>
-                                    <input type="range" class="form-range" id="windSpeedMediumUpper" name="wind_speed_medium_upper" min="100" max="200" step="1" value="177" oninput="updateRangeValue('windSpeedMediumUpper', this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- High Risk -->
-                    <div class="wind-speed-threshold-item">
-                        <div class="parameter-control">
-                            <label for="windSpeedHigh" class="form-label">High Risk Threshold (km/h): <span class="range-value" id="windSpeedHighValue">178</span></label>
-                            <div class="threshold-description">Greater than or equal</div>
-                            <input type="range" class="form-range" id="windSpeedHigh" name="wind_speed_high" min="150" max="300" step="1" value="178" oninput="updateRangeValue('windSpeedHigh', this.value)">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="d-flex justify-content-between mt-4">
-                <div class="d-flex gap-2">
-                    <a href="{% url 'climate_hazards_analysis_v2:show_results' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i> Back to Asset Exposure Results
-                    </a>
-                    <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
-                        <i class="fas fa-undo me-2"></i> Reset to Defaults
-                    </button>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-info" onclick="saveArchetypeParameters()" id="save-archetype-btn" style="display: none;">
-                        <i class="fas fa-save me-2"></i> Save Parameters for This Archetype
-                    </button>
-                    <button type="submit" id="apply-parameters-btn" class="btn btn-warning btn-lg">
-                        <strong>Apply Parameters & Generate Sensitivity Results</strong>
-                        <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-</div>
-</div>
-</div>
 <script>
     // Variables to store archetype-specific parameters
     let archetypeParameters = {};
     let currentSelectedArchetype = null;
     let defaultParameters = null;
 
-    // Function to capture current form state as parameters (SIMPLIFIED)
+    // Function to capture current Water Stress parameters only
     function getCurrentParameters() {
         return {
-            // Buffer size
-            buffer_size: document.getElementById('bufferSizeSlider').value,
-            // Water stress parameters
             water_stress_low: document.getElementById('waterStressLow').value,
             water_stress_medium_lower: document.getElementById('waterStressMediumLower').value,
             water_stress_medium_upper: document.getElementById('waterStressMediumUpper').value,
-            water_stress_high: document.getElementById('waterStressHigh').value,
-            // Heat parameters
-            heat_30_threshold: document.getElementById('heat30Threshold').value,
-            heat_33_threshold: document.getElementById('heat33Threshold').value,
-            heat_35_threshold: document.getElementById('heat35Threshold').value,
-            // Wind speed parameters
-            wind_speed_low: document.getElementById('windSpeedLow').value,
-            wind_speed_medium_lower: document.getElementById('windSpeedMediumLower').value,
-            wind_speed_medium_upper: document.getElementById('windSpeedMediumUpper').value,
-            wind_speed_high: document.getElementById('windSpeedHigh').value
+            water_stress_high: document.getElementById('waterStressHigh').value
         };
     }
 
-    // Function to apply parameters to form (SIMPLIFIED)
+    // Function to apply parameters to form
     function applyParameters(params) {
         if (!params) return;
 
-        // Buffer size
-        document.getElementById('bufferSizeSlider').value = params.buffer_size;
-        updateBufferSize(params.buffer_size);
-        
-        // Water stress parameters
-        document.getElementById('waterStressLow').value = params.water_stress_low;
-        document.getElementById('waterStressMediumLower').value = params.water_stress_medium_lower;
-        document.getElementById('waterStressMediumUpper').value = params.water_stress_medium_upper;
-        document.getElementById('waterStressHigh').value = params.water_stress_high;
+        document.getElementById('waterStressLow').value = params.water_stress_low || 10;
+        document.getElementById('waterStressMediumLower').value = params.water_stress_medium_lower || 11;
+        document.getElementById('waterStressMediumUpper').value = params.water_stress_medium_upper || 30;
+        document.getElementById('waterStressHigh').value = params.water_stress_high || 31;
 
-        // Heat parameters
-        document.getElementById('heat30Threshold').value = params.heat_30_threshold;
-        document.getElementById('heat33Threshold').value = params.heat_33_threshold;
-        document.getElementById('heat35Threshold').value = params.heat_35_threshold;
-        
-        // Wind speed parameters
-        document.getElementById('windSpeedLow').value = params.wind_speed_low;
-        document.getElementById('windSpeedMediumLower').value = params.wind_speed_medium_lower;
-        document.getElementById('windSpeedMediumUpper').value = params.wind_speed_medium_upper;
-        document.getElementById('windSpeedHigh').value = params.wind_speed_high;
-
-        // Update all display values
         updateAllDisplayValues();
     }
 
-    // Function to update all range value displays (SIMPLIFIED)
+    // Function to update all range value displays
     function updateAllDisplayValues() {
-        // Water stress display values
         updateRangeValue('waterStressLow', document.getElementById('waterStressLow').value);
         updateRangeValue('waterStressMediumLower', document.getElementById('waterStressMediumLower').value);
         updateRangeValue('waterStressMediumUpper', document.getElementById('waterStressMediumUpper').value);
         updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
-
-        // Heat display values
-        updateRangeValue('heat30', document.getElementById('heat30Threshold').value);
-        updateRangeValue('heat33', document.getElementById('heat33Threshold').value);
-        updateRangeValue('heat35', document.getElementById('heat35Threshold').value);
-        
-        // Wind speed display values
-        updateRangeValue('windSpeedLow', document.getElementById('windSpeedLow').value);
-        updateRangeValue('windSpeedMediumLower', document.getElementById('windSpeedMediumLower').value);
-        updateRangeValue('windSpeedMediumUpper', document.getElementById('windSpeedMediumUpper').value);
-        updateRangeValue('windSpeedHigh', document.getElementById('windSpeedHigh').value);
     }
 
     // Function to select an archetype
@@ -670,23 +508,17 @@ Set Sensitivity Parameters
     function updateRangeValue(prefix, value) {
         document.getElementById(prefix + 'Value').textContent = value;
     }
-    
-    // Function to update buffer size
-    function updateBufferSize(value) {
-        document.getElementById('bufferSizeValue').textContent = value;
-        const meters = Math.round(value * 111000);
-        document.getElementById('bufferSizeMeters').textContent = meters;
-    }
 
     // Function to reset all parameters to defaults
     function resetToDefaults() {
-        if (confirm('Are you sure you want to reset all parameters to their default values?')) {
-            // Reset all form elements to their default values
-            document.getElementById('sensitivity-form').reset();
+        if (confirm('Are you sure you want to reset all Water Stress parameters to their default values?')) {
+            // Reset form elements to default values
+            document.getElementById('waterStressLow').value = 10;
+            document.getElementById('waterStressMediumLower').value = 11;
+            document.getElementById('waterStressMediumUpper').value = 30;
+            document.getElementById('waterStressHigh').value = 31;
 
-            // Update all displayed values
             updateAllDisplayValues();
-            updateBufferSize(0.0045); // Reset buffer size display
             
             // Clear archetype-specific parameters
             archetypeParameters = {};
@@ -710,41 +542,40 @@ Set Sensitivity Parameters
         // Capture default parameters
         defaultParameters = getCurrentParameters();
         updateAllDisplayValues();
-        updateBufferSize(0.0045);
     });
 
-    // Function to update the steps progress
-    function updateStepProgress(currentStep) {
-        const totalSteps = 5;
-        const progressPercentage = (currentStep / totalSteps) * 100;
-
-        // Update progress bar width
-        document.querySelector('.active-progress').style.width = progressPercentage + '%';
-
-        // Update step circles and labels
-        for (let i = 1; i <= totalSteps; i++) {
-            const stepItem = document.querySelectorAll('.step-item')[i-1];
-            const stepCircle = stepItem.querySelector('.step-circle');
-            const stepLabel = stepItem.querySelector('.step-label');
-            
-            if (i <= currentStep) {
-                // Completed or current step
-                stepCircle.style.backgroundColor = '#F1D500';
-                stepCircle.style.color = '#000';
-                stepLabel.style.color = '#000';
-                stepLabel.style.fontWeight = '500';
-            } else {
-                // Upcoming step
-                stepCircle.style.backgroundColor = '#e9ecef';
-                stepCircle.style.color = '#6c757d';
-                stepLabel.style.color = '#6c757d';
-            }
+    // Handle form submission to collect all archetype parameters
+    document.getElementById('sensitivity-form').addEventListener('submit', function(e) {
+        // Save current archetype parameters if one is selected
+        if (currentSelectedArchetype) {
+            archetypeParameters[currentSelectedArchetype] = getCurrentParameters();
         }
-    }
-
-    // Initialize with current step (4)
-    document.addEventListener('DOMContentLoaded', function() {
-        updateStepProgress(4);
+        
+        // If no archetype-specific parameters were set, use current form values as default
+        if (Object.keys(archetypeParameters).length === 0) {
+            archetypeParameters['_default'] = getCurrentParameters();
+        }
+        
+        // Create hidden inputs for all archetype parameters
+        const form = e.target;
+        
+        // Remove any existing archetype parameter inputs
+        const existingInputs = form.querySelectorAll('input[name^="archetype_params"]');
+        existingInputs.forEach(input => input.remove());
+        
+        // Add hidden inputs for each archetype's parameters
+        Object.keys(archetypeParameters).forEach(archetype => {
+            const params = archetypeParameters[archetype];
+            Object.keys(params).forEach(paramKey => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `archetype_params[${archetype}][${paramKey}]`;
+                input.value = params[paramKey];
+                form.appendChild(input);
+            });
+        });
+        
+        console.log('Submitting archetype parameters:', archetypeParameters);
     });
 </script>
 {% endblock %}

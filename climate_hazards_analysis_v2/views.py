@@ -7,6 +7,7 @@ import json
 from django.conf import settings
 from .utils import standardize_facility_dataframe, load_cached_hazard_data, combine_facility_with_hazard_data
 import logging
+import copy
 
 # Import from climate_hazards_analysis module
 from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
@@ -501,9 +502,9 @@ def identify_high_risk_assets(data, selected_hazards):
 
 def sensitivity_parameters(request):
     """
-    View for setting sensitivity parameters for climate hazard analysis.
+    View for setting Water Stress sensitivity parameters for climate hazard analysis.
     This is the fourth step in the climate hazard analysis workflow.
-    Now supports archetype-specific parameter configuration.
+    Now supports archetype-specific parameter configuration for Water Stress only.
     """
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
@@ -555,13 +556,13 @@ def sensitivity_parameters(request):
                 logger.info(f"Found {len(asset_archetypes)} asset archetypes in column '{archetype_column}'")
             else:
                 logger.warning("No Asset Archetype column found in the facility CSV")
-                asset_archetypes = [{'number': 1, 'name': 'No Asset Archetype data found'}]
+                asset_archetypes = [{'number': 1, 'name': 'Default Archetype'}]
                 
         except Exception as e:
             logger.exception(f"Error reading asset archetypes from CSV: {e}")
-            asset_archetypes = [{'number': 1, 'name': 'Error reading Asset Archetype data'}]
+            asset_archetypes = [{'number': 1, 'name': 'Default Archetype'}]
     else:
-        asset_archetypes = [{'number': 1, 'name': 'Facility CSV file not found'}]
+        asset_archetypes = [{'number': 1, 'name': 'Default Archetype'}]
 
     context = {
         'facility_count': len(facility_data),
@@ -572,100 +573,254 @@ def sensitivity_parameters(request):
     # Handle form submission
     if request.method == 'POST':
         try:
-            # Get the selected archetype (if any)
+            # Get the selected archetype
             selected_archetype = request.POST.get('selected_archetype', '').strip()
             
-            # Extract sensitivity parameters from the form (simplified - no flood thresholds)
-            sensitivity_params = {
-                # Analysis parameters
-                'buffer_size': float(request.POST.get('buffer_size', 0.0045)),
-                'risk_tolerance': request.POST.get('risk_tolerance', 'medium'),
-                'time_horizon': request.POST.get('time_horizon', '2050'),
-                'confidence_level': int(request.POST.get('confidence_level', 95)),
-                
-                # Water stress thresholds
+            # Extract Water Stress sensitivity parameters from the form
+            water_stress_params = {
                 'water_stress_low': int(request.POST.get('water_stress_low', 10)),
-                'water_stress_high': int(request.POST.get('water_stress_high', 30)),
-                
-                # Heat thresholds
-                'heat_30_threshold': int(request.POST.get('heat_30_threshold', 300)),
-                'heat_33_threshold': int(request.POST.get('heat_33_threshold', 100)),
-                'heat_35_threshold': int(request.POST.get('heat_35_threshold', 30)),
-                
-                # Wind speed thresholds
-                'wind_speed_medium': int(request.POST.get('wind_speed_medium', 119)),
-                'wind_speed_high': int(request.POST.get('wind_speed_high', 178)),
-                
-                # Weighting factors
-                'flood_weight': int(request.POST.get('flood_weight', 25)),
-                'water_stress_weight': int(request.POST.get('water_stress_weight', 20)),
-                'heat_weight': int(request.POST.get('heat_weight', 20)),
-                'sea_level_weight': int(request.POST.get('sea_level_weight', 15)),
-                'cyclone_weight': int(request.POST.get('cyclone_weight', 15)),
-                'other_weight': int(request.POST.get('other_weight', 5)),
-                
-                # Advanced options
-                'enable_monte_carlo': request.POST.get('enable_monte_carlo') == 'on',
-                'enable_scenario': request.POST.get('enable_scenario') == 'on',
-                'enable_correlation': request.POST.get('enable_correlation') == 'on',
-                'iterations': int(request.POST.get('iterations', 1000)),
+                'water_stress_medium_lower': int(request.POST.get('water_stress_medium_lower', 11)),
+                'water_stress_medium_upper': int(request.POST.get('water_stress_medium_upper', 30)),
+                'water_stress_high': int(request.POST.get('water_stress_high', 31)),
             }
             
-            # Handle archetype-specific parameters
-            if selected_archetype:
-                # Get existing archetype parameters from session
-                archetype_params = request.session.get('climate_hazards_v2_archetype_params', {})
-                
-                # Store parameters for this specific archetype
-                archetype_params[selected_archetype] = sensitivity_params
-                request.session['climate_hazards_v2_archetype_params'] = archetype_params
-                
-                logger.info(f"Sensitivity parameters saved for archetype '{selected_archetype}': {sensitivity_params}")
-                
-                context['success_message'] = f"Parameters saved for '{selected_archetype}' archetype! You can now select another archetype or apply all parameters."
+            logger.info(f"Water Stress parameters received: {water_stress_params}")
+            
+            # Get existing archetype parameters from session
+            archetype_params = request.session.get('climate_hazards_v2_archetype_params', {})
+            
+            # Check if archetype parameters were submitted through the form
+            collected_archetype_params = {}
+            for key in request.POST.keys():
+                if key.startswith('archetype_params['):
+                    # Parse the archetype_params[archetype_name][param_name] format
+                    import re
+                    match = re.match(r'archetype_params\[([^\]]+)\]\[([^\]]+)\]', key)
+                    if match:
+                        archetype_name, param_name = match.groups()
+                        if archetype_name not in collected_archetype_params:
+                            collected_archetype_params[archetype_name] = {}
+                        collected_archetype_params[archetype_name][param_name] = int(request.POST.get(key))
+            
+            # Use collected parameters if they exist, otherwise use current form values
+            if collected_archetype_params:
+                archetype_params.update(collected_archetype_params)
+                logger.info(f"Updated archetype parameters from form submission: {collected_archetype_params}")
+            elif selected_archetype:
+                # Store parameters for specific archetype
+                archetype_params[selected_archetype] = water_stress_params
+                logger.info(f"Saved Water Stress parameters for archetype '{selected_archetype}': {water_stress_params}")
             else:
-                # Store general sensitivity parameters in session
-                request.session['climate_hazards_v2_sensitivity_params'] = sensitivity_params
-                
-                logger.info(f"General sensitivity parameters saved: {sensitivity_params}")
-                
-                if facility_csv_path and os.path.exists(facility_csv_path):
-                    # Re-run the analysis with new buffer size (simplified - no flood thresholds)
-                    buffer_size = sensitivity_params['buffer_size']
-                    
-                    # Import the analysis function
-                    from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
-                    
-                    # Run sensitivity analysis with custom buffer size (simplified)
-                    result = generate_climate_hazards_analysis(
-                        facility_csv_path=facility_csv_path,
-                        selected_fields=selected_hazards,
-                        buffer_size=buffer_size
-                    )
-                    
-                    if result and 'error' not in result:
-                        # Store sensitivity results in session
-                        request.session['climate_hazards_v2_sensitivity_results'] = {
-                            'combined_csv_path': result.get('combined_csv_path'),
-                            'plot_path': result.get('plot_path'),
-                            'all_plots': result.get('all_plots', []),
-                            'buffer_size': buffer_size,
-                            'parameters': sensitivity_params
-                        }
-                        
-                        buffer_meters = int(buffer_size * 111000)
-                        context['success_message'] = f"Sensitivity analysis completed with {buffer_meters}m buffer size! Parameters have been applied successfully."
-                    else:
-                        context['error'] = f"Error in sensitivity analysis: {result.get('error', 'Unknown error')}"
-                else:
-                    context['error'] = "Facility CSV file not found. Please restart the analysis."
+                # Store as default parameters for all archetypes
+                archetype_params['_default'] = water_stress_params
+                logger.info(f"Saved default Water Stress parameters: {water_stress_params}")
+            
+            # Update session with archetype parameters
+            request.session['climate_hazards_v2_archetype_params'] = archetype_params
+            request.session.modified = True
+            
+            # Check if Apply Parameters button was clicked
+            submit_type = request.POST.get('submit_type', '')
+            if submit_type == 'apply-parameters-btn':
+                logger.info("Redirecting to sensitivity results")
+                return redirect('climate_hazards_analysis_v2:sensitivity_results')
+            else:
+                context['success_message'] = f"Water Stress parameters saved!"
             
         except (ValueError, TypeError) as e:
-            logger.error(f"Error processing sensitivity parameters: {e}")
+            logger.error(f"Error processing Water Stress sensitivity parameters: {e}")
             context['error'] = f"Error processing parameters: {str(e)}"
         except Exception as e:
-            logger.exception(f"Unexpected error in sensitivity parameters: {e}")
+            logger.exception(f"Unexpected error in Water Stress sensitivity parameters: {e}")
             context['error'] = "An unexpected error occurred while processing parameters."
 
     # For GET requests or if there was an error, show the form
     return render(request, 'climate_hazards_analysis_v2/sensitivity_parameters.html', context)
+
+def sensitivity_results(request):
+    """
+    View to display climate hazard analysis results with archetype-specific Water Stress sensitivity parameters.
+    This is step 5 in the climate hazard analysis workflow.
+    """
+    # Get facility data and selected hazards from session
+    facility_data = request.session.get('climate_hazards_v2_facility_data', [])
+    selected_hazards = request.session.get('climate_hazards_v2_selected_hazards', [])
+    facility_csv_path = request.session.get('climate_hazards_v2_facility_csv_path')
+    archetype_params = request.session.get('climate_hazards_v2_archetype_params', {})
+    
+    # Check if we have the necessary data
+    if not facility_data or not selected_hazards:
+        return redirect('climate_hazards_analysis_v2:select_hazards')
+    
+    if not archetype_params:
+        return render(request, 'climate_hazards_analysis_v2/sensitivity_parameters.html', {
+            'error': 'No sensitivity parameters found. Please set Water Stress parameters first.',
+            'facility_count': len(facility_data),
+            'selected_hazards': selected_hazards,
+            'asset_archetypes': []
+        })
+    
+    try:
+        logger.info(f"Starting sensitivity results processing for {len(facility_data)} facilities")
+        logger.info(f"Selected hazards: {selected_hazards}")
+        logger.info(f"Archetype parameters: {archetype_params}")
+        
+        # Get the original analysis results from step 3
+        original_results = request.session.get('climate_hazards_v2_results')
+        if not original_results:
+            logger.error("Original analysis results not found in session")
+            return redirect('climate_hazards_analysis_v2:show_results')
+        
+        # Create a copy of the original data for sensitivity analysis
+        sensitivity_data = copy.deepcopy(original_results['data'])
+        columns = original_results['columns']
+        
+        logger.info(f"Loaded original data with {len(sensitivity_data)} rows")
+        
+        # Load the facility CSV to get archetype information
+        archetype_mapping = {}
+        if facility_csv_path and os.path.exists(facility_csv_path):
+            try:
+                df = pd.read_csv(facility_csv_path, encoding='utf-8')
+            except UnicodeDecodeError:
+                try:
+                    df = pd.read_csv(facility_csv_path, encoding='latin-1')
+                except UnicodeDecodeError:
+                    df = pd.read_csv(facility_csv_path, encoding='cp1252')
+            
+            # Find archetype column
+            archetype_column = None
+            possible_names = [
+                'Asset Archetype', 'asset archetype', 'AssetArchetype', 'assetarchetype',
+                'Archetype', 'archetype', 'Asset Type', 'asset type', 'AssetType', 'assettype',
+                'Type', 'type', 'Category', 'category', 'Asset Category', 'asset category'
+            ]
+            
+            for col_name in possible_names:
+                if col_name in df.columns:
+                    archetype_column = col_name
+                    break
+            
+            if archetype_column:
+                # Create mapping from facility name to archetype
+                for _, row in df.iterrows():
+                    facility_name = str(row.get('Facility', row.get('Site', row.get('Name', '')))).strip()
+                    archetype = str(row.get(archetype_column, '')).strip()
+                    if facility_name and archetype:
+                        archetype_mapping[facility_name] = archetype
+                
+                logger.info(f"Created archetype mapping for {len(archetype_mapping)} facilities")
+        
+        # Apply archetype-specific Water Stress sensitivity parameters
+        if 'Water Stress' in selected_hazards and 'Water Stress Exposure (%)' in columns:
+            for row in sensitivity_data:
+                facility_name = row.get('Facility', '')
+                archetype = archetype_mapping.get(facility_name, 'Default')
+                
+                # Get parameters for this archetype (or default)
+                params = archetype_params.get(archetype, archetype_params.get('_default', {
+                    'water_stress_low': 10,
+                    'water_stress_medium_lower': 11,
+                    'water_stress_medium_upper': 30,
+                    'water_stress_high': 31
+                }))
+                
+                # Apply custom risk classification based on archetype parameters
+                water_stress_value = row.get('Water Stress Exposure (%)')
+                if water_stress_value and water_stress_value != 'N/A':
+                    try:
+                        value = float(water_stress_value)
+                        
+                        # Apply archetype-specific thresholds
+                        if value < params['water_stress_low']:
+                            row['Water Stress Risk Level'] = 'Low'
+                        elif params['water_stress_medium_lower'] <= value <= params['water_stress_medium_upper']:
+                            row['Water Stress Risk Level'] = 'Medium'
+                        elif value > params['water_stress_high']:
+                            row['Water Stress Risk Level'] = 'High'
+                        else:
+                            row['Water Stress Risk Level'] = 'Medium'  # Default case
+                        
+                        # Store the archetype and parameters used for this facility
+                        row['Asset Archetype'] = archetype
+                        row['WS Low Threshold'] = params['water_stress_low']
+                        row['WS High Threshold'] = params['water_stress_high']
+                        
+                    except (ValueError, TypeError):
+                        row['Water Stress Risk Level'] = 'Unknown'
+                        row['Asset Archetype'] = archetype
+                else:
+                    row['Water Stress Risk Level'] = 'N/A'
+                    row['Asset Archetype'] = archetype
+        
+        # Add new columns to the columns list if they don't exist
+        new_columns = ['Water Stress Risk Level', 'Asset Archetype', 'WS Low Threshold', 'WS High Threshold']
+        for col in new_columns:
+            if col not in columns:
+                columns.append(col)
+        
+        logger.info(f"Applied sensitivity parameters to {len(sensitivity_data)} facilities")
+        
+        # Create detailed column groups for the table header (same as original but with new columns)
+        groups = {}
+        # Base group - Facility Information
+        facility_cols = ['Facility', 'Lat', 'Long', 'Asset Archetype', 'WS Low Threshold', 'WS High Threshold']
+        facility_count = sum(1 for col in facility_cols if col in columns)
+        if facility_count > 0:
+            groups['Facility Information'] = facility_count
+        
+        # Create a mapping for each hazard type and its columns (including new sensitivity columns)
+        hazard_columns = {
+            'Flood': ['Flood Depth (meters)'],
+            'Water Stress': ['Water Stress Exposure (%)', 'Water Stress Risk Level'],
+            'Sea Level Rise': ['Elevation (meter above sea level)', 
+                            '2030 Sea Level Rise (in meters)', 
+                            '2040 Sea Level Rise (in meters)', 
+                            '2050 Sea Level Rise (in meters)', 
+                            '2060 Sea Level Rise (in meters)'],
+            'Tropical Cyclone': ['Extreme Windspeed 10 year Return Period (km/h)', 
+                                'Extreme Windspeed 20 year Return Period (km/h)', 
+                                'Extreme Windspeed 50 year Return Period (km/h)', 
+                                'Extreme Windspeed 100 year Return Period (km/h)'],
+            'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius'],
+            'Storm Surge': ['Storm Surge Flood Depth (meters)'],
+            'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
+        }
+        
+        # Add column groups for each hazard type that has columns in the data
+        for hazard, cols in hazard_columns.items():
+            count = sum(1 for col in cols if col in columns)
+            if count > 0:
+                groups[hazard] = count
+                logger.info(f"Added {hazard} group with {count} columns")
+        
+        # Store sensitivity results in session
+        request.session['climate_hazards_v2_sensitivity_results'] = {
+            'data': sensitivity_data,
+            'columns': columns,
+            'archetype_params': archetype_params
+        }
+        
+        # Prepare context for the template
+        context = {
+            'data': sensitivity_data,
+            'columns': columns,
+            'groups': groups,
+            'selected_hazards': selected_hazards,
+            'archetype_params': archetype_params,
+            'is_sensitivity_results': True,  # Flag to indicate this is sensitivity results
+            'success_message': f"Successfully applied Water Stress sensitivity parameters to {len(sensitivity_data)} facilities using archetype-specific thresholds."
+        }
+        
+        logger.info("Rendering sensitivity results template...")
+        return render(request, 'climate_hazards_analysis_v2/sensitivity_results.html', context)
+        
+    except Exception as e:
+        logger.exception(f"Error in sensitivity results: {str(e)}")
+        
+        return render(request, 'climate_hazards_analysis_v2/sensitivity_parameters.html', {
+            'error': f"Error generating sensitivity results: {str(e)}",
+            'facility_count': len(facility_data),
+            'selected_hazards': selected_hazards,
+            'asset_archetypes': []
+        })

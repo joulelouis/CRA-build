@@ -1,0 +1,267 @@
+<!-- Column Selector Component for Sensitivity Results -->
+<div class="card custom-card mb-4">
+    <div class="card-header no-border">
+        <strong>Select Table Columns</strong>
+    </div>
+    <div class="card-body">
+        <div class="column-selector">
+            <!-- Base Columns (always shown) -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Facility Information</label>
+                <div class="ms-2">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input base-column" id="col-facility" checked disabled>
+                        <label class="form-check-label" for="col-facility">Facility</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input base-column" id="col-lat" checked disabled>
+                        <label class="form-check-label" for="col-lat">Latitude</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input base-column" id="col-long" checked disabled>
+                        <label class="form-check-label" for="col-long">Longitude</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-asset-archetype" checked data-column="Asset Archetype">
+                        <label class="form-check-label" for="col-asset-archetype">Asset Archetype</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-ws-low-threshold" data-column="WS Low Threshold">
+                        <label class="form-check-label" for="col-ws-low-threshold">WS Low Threshold</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column facility-info" id="col-ws-high-threshold" data-column="WS High Threshold">
+                        <label class="form-check-label" for="col-ws-high-threshold">WS High Threshold</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Flood -->
+            {% if 'Flood' in selected_hazards %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-flood" checked data-hazard="flood">
+                    <label class="form-check-label fw-bold" for="col-flood">Flood</label>
+                </div>
+                <div class="ms-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column flood" id="col-flood-depth" checked data-column="Flood Depth (meters)">
+                        <label class="form-check-label" for="col-flood-depth">Flood Depth (meters)</label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Water Stress with Sensitivity Columns -->
+            {% if 'Water Stress' in selected_hazards %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-water-stress" checked data-hazard="water-stress">
+                    <label class="form-check-label fw-bold" for="col-water-stress">Water Stress</label>
+                </div>
+                <div class="ms-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column water-stress" id="col-water-stress-exposure" checked data-column="Water Stress Exposure (%)">
+                        <label class="form-check-label" for="col-water-stress-exposure">Water Stress Exposure (%)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column water-stress" id="col-water-stress-risk-level" checked data-column="Water Stress Risk Level">
+                        <label class="form-check-label" for="col-water-stress-risk-level">
+                            <strong>Water Stress Risk Level</strong> <span class="badge bg-warning text-dark">Sensitivity</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Sea Level Rise -->
+            {% if 'Sea Level Rise' in selected_hazards %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-sea-level-rise" data-hazard="sea-level-rise">
+                    <label class="form-check-label fw-bold" for="col-sea-level-rise">Sea Level Rise</label>
+                </div>
+                <div class="ms-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-elevation" data-column="Elevation (meter above sea level)">
+                        <label class="form-check-label" for="col-elevation">Elevation (meter above sea level)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2030" data-column="2030 Sea Level Rise (in meters)">
+                        <label class="form-check-label" for="col-slr-2030">2030 Sea Level Rise (in meters)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2040" checked data-column="2040 Sea Level Rise (in meters)">
+                        <label class="form-check-label" for="col-slr-2040">2040 Sea Level Rise (in meters)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2050" data-column="2050 Sea Level Rise (in meters)">
+                        <label class="form-check-label" for="col-slr-2050">2050 Sea Level Rise (in meters)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2060" data-column="2060 Sea Level Rise (in meters)">
+                        <label class="form-check-label" for="col-slr-2060">2060 Sea Level Rise (in meters)</label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Tropical Cyclone -->
+            {% if 'Tropical Cyclones' in selected_hazards %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-tropical-cyclone" data-hazard="tropical-cyclone">
+                    <label class="form-check-label fw-bold" for="col-tropical-cyclone">Tropical Cyclone</label>
+                </div>
+                <div class="ms-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column tropical-cyclone" id="col-tc-10yr" data-column="Extreme Windspeed 10 year Return Period (km/h)">
+                        <label class="form-check-label" for="col-tc-10yr">Extreme Windspeed 10 year Return Period (km/h)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column tropical-cyclone" id="col-tc-20yr" data-column="Extreme Windspeed 20 year Return Period (km/h)">
+                        <label class="form-check-label" for="col-tc-20yr">Extreme Windspeed 20 year Return Period (km/h)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column tropical-cyclone" id="col-tc-50yr" data-column="Extreme Windspeed 50 year Return Period (km/h)">
+                        <label class="form-check-label" for="col-tc-50yr">Extreme Windspeed 50 year Return Period (km/h)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column tropical-cyclone" id="col-tc-100yr" checked data-column="Extreme Windspeed 100 year Return Period (km/h)">
+                        <label class="form-check-label" for="col-tc-100yr">Extreme Windspeed 100 year Return Period (km/h)</label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Heat -->
+            {% if 'Heat' in selected_hazards %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-heat" data-hazard="heat">
+                    <label class="form-check-label fw-bold" for="col-heat">Heat</label>
+                </div>
+                <div class="ms-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-30c" data-column="Days over 30° Celsius">
+                        <label class="form-check-label" for="col-heat-30c">Days over 30° Celsius</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-33c" data-column="Days over 33° Celsius">
+                        <label class="form-check-label" for="col-heat-33c">Days over 33° Celsius</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-35c" checked data-column="Days over 35° Celsius">
+                        <label class="form-check-label" for="col-heat-35c">Days over 35° Celsius</label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Storm Surge -->
+            {% if 'Storm Surge' in selected_hazards %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-storm-surge" checked data-hazard="storm-surge">
+                    <label class="form-check-label fw-bold" for="col-storm-surge">Storm Surge</label>
+                </div>
+                <div class="ms-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column storm-surge" id="col-storm-surge-rating" checked data-column="Storm Surge Flood Depth (meters)">
+                        <label class="form-check-label" for="col-storm-surge-rating">Storm Surge Flood Depth (meters)</label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Rainfall Induced Landslide -->
+            {% if 'Rainfall Induced Landslide' in selected_hazards %}
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-landslide" checked data-hazard="landslide">
+                    <label class="form-check-label fw-bold" for="col-landslide">Rainfall Induced Landslide</label>
+                </div>
+                <div class="ms-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-column landslide" id="col-landslide-rating" checked data-column="Rainfall Induced Landslide Factor of Safety">
+                        <label class="form-check-label" for="col-landslide-rating">Rainfall Induced Landslide Factor of Safety</label>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Show/Hide All Control -->
+            <div class="mt-4">
+                <button type="button" class="btn btn-sm btn-outline-secondary me-2" id="show-all-columns">Show All</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="hide-all-columns">Hide All</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize column selector functionality for sensitivity results
+$(document).ready(function() {
+    // Update hazard group checkbox handler
+    $('.hazard-group').on('change', function() {
+        const isChecked = $(this).prop('checked');
+        const hazardClass = $(this).data('hazard');
+        
+        // Update all child checkboxes without triggering individual change events
+        $(`.hazard-column.${hazardClass}`).prop('checked', isChecked);
+        
+        // Do a single update to column visibility
+        updateColumnVisibility();
+    });
+    
+    // Individual column checkbox handler
+    $('.hazard-column').on('change', function() {
+        // Update parent checkbox state
+        updateParentCheckboxState($(this));
+        // Update column visibility
+        updateColumnVisibility();
+    });
+    
+    // Make show/hide all buttons more efficient
+    $('#show-all-columns').on('click', function() {
+        $('.hazard-column').prop('checked', true);
+        updateParentCheckboxes();
+        updateColumnVisibility();
+    });
+
+    $('#hide-all-columns').on('click', function() {
+        $('.hazard-column').prop('checked', false);
+        updateParentCheckboxes();
+        updateColumnVisibility();
+    });
+    
+    // Helper function to update a specific parent checkbox state
+    function updateParentCheckboxState(changedCheckbox) {
+        const hazardClass = changedCheckbox.attr('class').split(' ').find(cls => 
+            cls !== 'form-check-input' && cls !== 'hazard-column');
+        
+        if (!hazardClass) return;
+        
+        const parentCheckbox = $(`[data-hazard="${hazardClass}"]`);
+        const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+        const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+        
+        parentCheckbox.prop('checked', checkedChilds.length > 0);
+        parentCheckbox.prop('indeterminate', 
+            checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+    }
+
+    // Helper function to update all parent checkbox states
+    function updateParentCheckboxes() {
+        $('.hazard-group').each(function() {
+            const hazardClass = $(this).data('hazard');
+            const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+            const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+            
+            $(this).prop('checked', checkedChilds.length > 0);
+            $(this).prop('indeterminate', 
+                checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+        });
+    }
+});
+</script>
