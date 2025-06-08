@@ -5,6 +5,9 @@ from io import BytesIO
 import pandas as pd
 import json
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.utils.decorators import method_decorator
 from .utils import standardize_facility_dataframe, load_cached_hazard_data, combine_facility_with_hazard_data
 import logging
 import copy
@@ -909,3 +912,149 @@ def sensitivity_results(request):
             'selected_hazards': selected_hazards,
             'asset_archetypes': []
         })
+    
+@require_http_methods(["POST"])
+def save_table_changes(request):
+    """
+    Handle AJAX requests to save changes made to the Asset Exposure Results table.
+    Updates the session data and optionally saves to CSV file.
+    """
+    try:
+        # Parse the JSON data from the request
+        data = json.loads(request.body)
+        changes = data.get('changes', [])
+        
+        if not changes:
+            return JsonResponse({'success': False, 'error': 'No changes provided'})
+        
+        logger.info(f"Processing {len(changes)} table changes")
+        
+        # Get current asset exposure results data from session
+        results_data = request.session.get('climate_hazards_v2_results', {})
+        
+        if not results_data or 'data' not in results_data:
+            return JsonResponse({'success': False, 'error': 'No asset exposure data found in session'})
+        
+        # Get the current data
+        table_data = results_data['data']
+        
+        # Apply changes to the data
+        for change in changes:
+            row_index = change['rowIndex']
+            column_name = change['column']
+            new_value = change['newValue']
+            facility_name = change['facilityName']
+            
+            # Find the correct row in the data (match by facility name for safety)
+            target_row = None
+            for i, row in enumerate(table_data):
+                if i == row_index and row.get('Facility') == facility_name:
+                    target_row = row
+                    break
+            
+            if target_row is None:
+                logger.warning(f"Could not find row {row_index} for facility {facility_name}")
+                continue
+            
+            # Convert value to appropriate type
+            converted_value = convert_table_value(new_value, column_name)
+            
+            # Update the value
+            target_row[column_name] = converted_value
+            logger.info(f"Updated {facility_name} - {column_name}: {converted_value}")
+        
+        # Update session data for asset exposure results
+        results_data['data'] = table_data
+        request.session['climate_hazards_v2_results'] = results_data
+        
+        # Optionally save to CSV file for persistence
+        try:
+            save_updated_data_to_csv(table_data, request)
+        except Exception as csv_error:
+            logger.warning(f"Failed to save to CSV: {csv_error}")
+            # Don't fail the request if CSV save fails
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Successfully updated {len(changes)} values',
+            'changes_applied': len(changes)
+        })
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in request: {e}")
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    
+    except Exception as e:
+        logger.exception(f"Error saving table changes: {e}")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+def convert_table_value(value, column_name):
+    """
+    Convert string value to appropriate type based on column name.
+    """
+    if value in ['', 'N/A', 'Data not available']:
+        return value
+    
+    # Numeric columns
+    numeric_columns = [
+        'Flood Depth (meters)',
+        'Water Stress Exposure (%)',
+        'Days over 30° Celsius',
+        'Days over 33° Celsius',
+        'Days over 35° Celsius',
+        '2030 Sea Level Rise (in meters)',
+        '2040 Sea Level Rise (in meters)',
+        '2050 Sea Level Rise (in meters)',
+        '2060 Sea Level Rise (in meters)',
+        'Extreme Windspeed 10 year Return Period (km/h)',
+        'Extreme Windspeed 20 year Return Period (km/h)',
+        'Extreme Windspeed 50 year Return Period (km/h)',
+        'Extreme Windspeed 100 year Return Period (km/h)',
+        'Storm Surge Flood Depth (meters)',
+        'Rainfall Induced Landslide Factor of Safety',
+        'Elevation (meter above sea level)'
+    ]
+    
+    if column_name in numeric_columns:
+        try:
+            # Convert to float, then to int if it's a whole number
+            float_val = float(value)
+            if float_val.is_integer():
+                return int(float_val)
+            return float_val
+        except (ValueError, TypeError):
+            logger.warning(f"Could not convert '{value}' to number for column '{column_name}'")
+            return value
+    
+    return str(value)
+
+
+def save_updated_data_to_csv(table_data, request):
+    """
+    Save the updated table data to a CSV file for persistence.
+    """
+    try:
+        # Create DataFrame from the updated data
+        df = pd.DataFrame(table_data)
+        
+        # Generate filename with timestamp
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"asset_exposure_updated_{timestamp}.csv"
+        
+        # Save to a designated directory (adjust path as needed)
+        output_dir = os.path.join('media', 'climate_hazards_v2', 'updated_data')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        file_path = os.path.join(output_dir, filename)
+        df.to_csv(file_path, index=False)
+        
+        # Store the updated file path in session for reference
+        request.session['climate_hazards_v2_asset_exposure_updated_csv_path'] = file_path
+        
+        logger.info(f"Updated data saved to: {file_path}")
+        
+    except Exception as e:
+        logger.error(f"Error saving updated data to CSV: {e}")
+        raise
