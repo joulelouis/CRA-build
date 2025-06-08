@@ -742,16 +742,38 @@ def sensitivity_results(request):
         
         # Apply archetype-specific Water Stress sensitivity parameters
         if 'Water Stress' in selected_hazards and 'Water Stress Exposure (%)' in columns:
+            # Debug: log all facility names from sensitivity data
+            sensitivity_facility_names = [row.get('Facility', '') for row in sensitivity_data]
+            logger.info(f"Facility names in sensitivity data: {sensitivity_facility_names}")
+            logger.info(f"Facility names in archetype mapping: {list(archetype_mapping.keys())}")
+            
             for row in sensitivity_data:
-                facility_name = row.get('Facility', '')
+                facility_name = row.get('Facility', '').strip()
                 archetype = archetype_mapping.get(facility_name)
                 
                 if not archetype:
                     # If no exact match, try to find a partial match
                     for mapped_name, mapped_archetype in archetype_mapping.items():
-                        if facility_name.lower() in mapped_name.lower() or mapped_name.lower() in facility_name.lower():
+                        # Try different matching strategies
+                        if (facility_name.lower() in mapped_name.lower() or 
+                            mapped_name.lower() in facility_name.lower() or
+                            facility_name.lower().replace(' ', '') == mapped_name.lower().replace(' ', '')):
                             archetype = mapped_archetype
                             logger.info(f"Used partial match: '{facility_name}' → '{mapped_name}' → '{archetype}'")
+                            break
+                
+                if not archetype:
+                    # Try removing common prefixes/suffixes and matching
+                    clean_facility_name = facility_name.lower().strip()
+                    for mapped_name, mapped_archetype in archetype_mapping.items():
+                        clean_mapped_name = mapped_name.lower().strip()
+                        # Check if core facility names match (ignoring common words)
+                        facility_words = set(clean_facility_name.split())
+                        mapped_words = set(clean_mapped_name.split())
+                        # If they share at least 2 words, consider it a match
+                        if len(facility_words.intersection(mapped_words)) >= 2:
+                            archetype = mapped_archetype
+                            logger.info(f"Used word-based match: '{facility_name}' → '{mapped_name}' → '{archetype}'")
                             break
                 
                 if not archetype:
@@ -805,6 +827,22 @@ def sensitivity_results(request):
             columns = ordered_columns
             
             logger.info(f"Reordered columns for sensitivity results: {columns}")
+        
+        # CRITICAL: Reorder the actual row data to match the column order
+        # This ensures that when the template iterates through row.items(), 
+        # the values appear in the correct column positions
+        reordered_data = []
+        for row in sensitivity_data:
+            ordered_row = {}
+            for column in columns:
+                if column in row:
+                    ordered_row[column] = row[column]
+                else:
+                    ordered_row[column] = 'N/A'  # Default for missing columns
+            reordered_data.append(ordered_row)
+        
+        sensitivity_data = reordered_data
+        logger.info(f"Reordered row data to match column order. Sample row keys: {list(sensitivity_data[0].keys()) if sensitivity_data else 'No data'}")
         
         logger.info(f"Applied sensitivity parameters to {len(sensitivity_data)} facilities")
         

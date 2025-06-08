@@ -2,7 +2,7 @@
 {% load static %}
 {% load float_filters %}
 {% block title %}
-Water Stress Sensitivity Results
+Sensitivity Results
 {% endblock %}
 {% block content %}
 <style>
@@ -279,7 +279,7 @@ Water Stress Sensitivity Results
     <div class="row mt-4">
         <div class="col-12">
             <div class="sensitivity-info">
-                <h5><i class="fas fa-cog me-2"></i>Water Stress Sensitivity Analysis Results</h5>
+                <h5><i class="fas fa-cog me-2"></i>Sensitivity Analysis Results</h5>
                 <p class="mb-2">The <strong>Water Stress Exposure (%)</strong> values below use custom color coding based on archetype-specific sensitivity parameters.</p>
                 <div class="archetype-params">
                     <strong>Applied Custom Thresholds:</strong>
@@ -305,7 +305,7 @@ Water Stress Sensitivity Results
             <div class="col-md-9">
                 <div class="card custom-card">
                     <div class="card-header no-border">
-                        <strong>Water Stress Sensitivity Analysis Results</strong>
+                        <strong>Sensitivity Analysis Results</strong>
                     </div>
                     <div class="card-body">
                         <!-- Styled Table -->
@@ -581,8 +581,8 @@ Water Stress Sensitivity Results
                 </a>
             </div>
             <div>
-                <button class="btn btn-success btn-lg" onclick="completeSensitivityAnalysis()">
-                    <strong>Complete Analysis</strong>
+                <button class="btn btn-warning btn-lg" onclick="completeSensitivityAnalysis()">
+                    <strong>Go to Dashboard</strong>
                     <i class="fas fa-check ms-2"></i>
                 </button>
             </div>

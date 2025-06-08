@@ -306,7 +306,7 @@ Set Sensitivity Parameters
                     {% if asset_archetypes %}
                         <div class="archetype-instructions">
                             <i class="fas fa-info-circle me-2"></i>
-                            Click on an asset archetype to configure its specific Water Stress sensitivity parameters
+                            Click on an asset archetype to configure its specific sensitivity parameters
                         </div>
                         {% for archetype in asset_archetypes %}
                             <div class="archetype-item" onclick="selectArchetype('{{ archetype.name|escapejs }}', {{ archetype.number }})" data-archetype="{{ archetype.name|escapejs }}">
@@ -323,22 +323,22 @@ Set Sensitivity Parameters
             </div>
         </div>
 
-        <!-- Right Column: Set Water Stress Sensitivity Parameters -->
+        <!-- Right Column: Set Sensitivity Parameters -->
         <div class="col-md-8">
             <div class="card custom-card">
                 <div class="card-header no-border">
-                    <strong>Set Water Stress Sensitivity Parameters</strong>
+                    <strong>Set Sensitivity Parameters</strong>
                 </div>
                 <div class="card-body">
                     <!-- Selected Archetype Indicator -->
                     <div id="selected-archetype-indicator" class="selected-archetype-indicator" style="display: none;">
-                        <i class="fas fa-building me-2"></i>
-                        Configuring Water Stress parameters for: <span id="selected-archetype-name">None Selected</span>
+                        
+                        Configuring parameters for: <span id="selected-archetype-name">None Selected</span>
                     </div>
 
                     <div id="default-instructions" class="archetype-instructions">
                         <i class="fas fa-arrow-left me-2"></i>
-                        Please select an asset archetype from the left panel to configure its Water Stress sensitivity parameters, or use the default parameters below for all archetypes.
+                        Please select an asset archetype from the left panel to configure its sensitivity parameters, or use the default parameters below for all archetypes.
                     </div>
                     
                     <form id="sensitivity-form" method="POST" action="{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}">
