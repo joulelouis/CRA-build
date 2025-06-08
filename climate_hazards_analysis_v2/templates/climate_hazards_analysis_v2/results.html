@@ -628,12 +628,13 @@ Climate Hazard Analysis Results
 <script src="https://cdn.datatables.net/fixedcolumns/4.2.2/js/dataTables.fixedColumns.min.js"></script>
 
 <script>
+
+let dataTable;
+let cellChanges = {};
 $(document).ready(function() {
-    let dataTable;
-    let cellChanges = {};
-    
     try {
-        // Initialize the DataTable with both original and editable functionality
+        console.log('Initializing Asset Exposure Results...');
+
         dataTable = $('#data-table').DataTable({
             scrollX: true,
             scrollCollapse: true,
@@ -668,101 +669,76 @@ $(document).ready(function() {
                 leftColumns: 1
             },
             columnDefs: [
-                // Hide Lat/Long by default
                 { targets: [1, 2], visible: false },
-                
-                // Column proportions
-                { width: '18%', targets: 0 }, // Facility name gets more space
-                { width: '10%', targets: '_all' }, // Other columns share remaining space
-                
-                // Improve wrapping behavior 
+                { width: '18%', targets: 0 },
+                { width: '10%', targets: '_all' },
                 { className: "dt-head-center dt-body-center", targets: "_all" },
-                
-                // FIXED: Define which columns are editable using table header directly
-                { 
+                {
                     targets: '_all',
                     createdCell: function(td, cellData, rowData, row, col) {
-                        // Get column name from table header directly instead of using dataTable reference
-                        const $table = $('#data-table');
-                        const columnName = $table.find('thead th').eq(col).text().trim();
-                        
-                        // Define editable columns (hazard value columns only)
-                        const editableColumns = [
-                            'Flood Depth (meters)',
-                            'Water Stress Exposure (%)',
-                            'Days over 30° Celsius',
-                            'Days over 33° Celsius', 
-                            'Days over 35° Celsius',
-                            '2030 Sea Level Rise (in meters)',
-                            '2040 Sea Level Rise (in meters)',
-                            '2050 Sea Level Rise (in meters)',
-                            '2060 Sea Level Rise (in meters)',
-                            'Elevation (meter above sea level)',
-                            'Extreme Windspeed 10 year Return Period (km/h)',
-                            'Extreme Windspeed 20 year Return Period (km/h)',
-                            'Extreme Windspeed 50 year Return Period (km/h)',
-                            'Extreme Windspeed 100 year Return Period (km/h)',
-                            'Storm Surge Flood Depth (meters)',
-                            'Rainfall Induced Landslide Factor of Safety'
-                        ];
-                        
-                        if (editableColumns.includes(columnName)) {
-                            $(td).addClass('editable-cell');
-                            $(td).attr('data-original-value', cellData);
-                            $(td).attr('data-column', columnName);
-                            $(td).attr('data-row', row);
-                            $(td).attr('title', 'Click to edit');
-                        }
+                        setTimeout(function() {
+                            const columnName = dataTable.column(col).header().textContent.trim();
+                            const editableColumns = [
+                                'Flood Depth (meters)', 'Water Stress Exposure (%)',
+                                'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
+                                '2030 Sea Level Rise (in meters)', '2040 Sea Level Rise (in meters)',
+                                '2050 Sea Level Rise (in meters)', '2060 Sea Level Rise (in meters)',
+                                'Elevation (meter above sea level)',
+                                'Extreme Windspeed 10 year Return Period (km/h)',
+                                'Extreme Windspeed 20 year Return Period (km/h)',
+                                'Extreme Windspeed 50 year Return Period (km/h)',
+                                'Extreme Windspeed 100 year Return Period (km/h)',
+                                'Storm Surge Flood Depth (meters)',
+                                'Rainfall Induced Landslide Factor of Safety'
+                            ];
+
+                            if (editableColumns.includes(columnName)) {
+                                $(td).addClass('editable-cell');
+                                $(td).attr('data-original-value', cellData);
+                                $(td).attr('data-column', columnName);
+                                $(td).attr('data-row', row);
+                                $(td).attr('title', 'Click to edit');
+                            }
+                        }, 10);
                     }
                 }
             ],
-            // FIXED: Use initComplete to ensure handlers are attached after DataTable is fully initialized
             initComplete: function() {
                 console.log('DataTable initialization complete');
-                // Attach editable handlers after DataTable is fully initialized
-                setTimeout(function() {
-                    attachEditableHandlers();
-                    console.log('Editable functionality initialized');
+                setTimeout(() => {
+                    setupColumnSelector();
+                    updateColumnVisibility();
+                    setTimeout(() => {
+                        attachEditableHandlers();
+                        console.log('All functionality initialized');
+                    }, 200);
                 }, 100);
             },
             drawCallback: function() {
-                $(window).trigger('resize');
-                // Re-attach editable handlers after table redraw with delay
-                setTimeout(function() {
+                setTimeout(() => {
                     attachEditableHandlers();
                 }, 100);
             }
         });
-        
-        // Set up column selector
-        setupColumnSelector();
-        
-        console.log('DataTable and column selector initialized successfully');
-        
+
+        console.log('DataTable initialized successfully');
+
     } catch (error) {
         console.error('Error initializing DataTable:', error);
     }
-    
-    // Apply initial column visibility after a delay
-    setTimeout(function() {
-        if (dataTable) {
-            updateColumnVisibility();
-            dataTable.columns.adjust().draw(false);
-        }
-    }, 750);
-    
-    // Handle window resize
+
+    let resizeTimeout;
     $(window).on('resize', function() {
         if (dataTable) {
-            clearTimeout(window.resizeTimeout);
-            window.resizeTimeout = setTimeout(function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
                 dataTable.columns.adjust();
-            }, 100);
+            }, 250);
         }
     });
 });
 
-// FIXED: Editable table functionality with proper error handling
+// FIXED: Improved editable table functionality
 function attachEditableHandlers() {
     // Remove any existing handlers to prevent duplicates
     $('.editable-cell').off('click.editable');
@@ -830,24 +806,24 @@ function saveCell($cell, $input, rowIndex, columnName) {
     
     if (!validateCellValue(newValue, columnName)) {
         alert(`Invalid value for ${columnName}. Please enter a valid number.`);
-        $input.focus();
+        cancelEdit($cell, $cell.text().trim());
         return;
     }
     
     $cell.removeClass('editing').html(newValue);
     
-    const cellKey = `${rowIndex}_${columnName}`;
     if (newValue !== originalValue) {
         $cell.addClass('cell-changed');
+        const cellKey = `${rowIndex}-${columnName}`;
         cellChanges[cellKey] = {
             rowIndex: rowIndex,
             column: columnName,
             oldValue: originalValue,
-            newValue: newValue,
-            facilityName: getFacilityName(rowIndex)
+            newValue: newValue
         };
     } else {
         $cell.removeClass('cell-changed');
+        const cellKey = `${rowIndex}-${columnName}`;
         delete cellChanges[cellKey];
     }
     
@@ -859,62 +835,191 @@ function cancelEdit($cell, originalValue) {
 }
 
 function validateCellValue(value, columnName) {
-    if (value === '' || value === 'N/A' || value === 'Data not available') return true;
-    
-    const numValue = parseFloat(value);
-    if (isNaN(numValue)) return false;
-    
-    if (columnName === 'Water Stress Exposure (%)') {
-        return numValue >= 0 && numValue <= 100;
+    if (value === '' || value === null || value === undefined) {
+        return false;
     }
     
-    if (columnName.includes('Sea Level Rise')) {
-        return numValue >= -10 && numValue <= 10;
+    const numberColumns = [
+        'Flood Depth (meters)', 'Water Stress Exposure (%)',
+        'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
+        '2030 Sea Level Rise (in meters)', '2040 Sea Level Rise (in meters)',
+        '2050 Sea Level Rise (in meters)', '2060 Sea Level Rise (in meters)',
+        'Elevation (meter above sea level)', 'Storm Surge Flood Depth (meters)',
+        'Rainfall Induced Landslide Factor of Safety'
+    ];
+    
+    if (numberColumns.includes(columnName)) {
+        const numValue = parseFloat(value);
+        return !isNaN(numValue) && isFinite(numValue);
     }
     
-    if (columnName.includes('Elevation')) {
-        return numValue >= -500 && numValue <= 9000;
-    }
-    
-    return numValue >= 0;
-}
-
-function getFacilityName(rowIndex) {
-    if (dataTable) {
-        return dataTable.cell(rowIndex, 0).data();
-    }
-    return 'Unknown';
+    return true;
 }
 
 function updateChangeIndicator() {
     const changeCount = Object.keys(cellChanges).length;
-    let indicator = $('#change-indicator');
-    
-    if (indicator.length === 0) {
-        indicator = $(`
-            <div id="change-indicator" class="alert alert-info mt-3" style="display: none;">
-                <i class="fas fa-edit"></i> 
-                <span id="change-count">0</span> changes pending. 
-                <button class="btn btn-sm btn-success ms-2" onclick="saveAllChanges()">
-                    <i class="fas fa-save"></i> Save All
-                </button>
-                <button class="btn btn-sm btn-warning ms-1" onclick="resetAllChanges()">
-                    <i class="fas fa-undo"></i> Reset All
-                </button>
-            </div>
-        `);
-        $('.table-responsive').after(indicator);
-    }
-    
-    $('#change-count').text(changeCount);
+    let indicator = $('#changes-indicator');
     
     if (changeCount > 0) {
-        indicator.show();
+        if (indicator.length === 0) {
+            indicator = $('<div id="changes-indicator" class="alert alert-warning mt-2"></div>');
+            $('.dt-buttons').after(indicator);
+        }
+        indicator.html(`<strong>⚠️ ${changeCount} unsaved change(s)</strong> - Click "Save All Changes" to save your edits.`);
     } else {
-        indicator.hide();
+        indicator.remove();
     }
 }
 
+function setupColumnSelector() {
+    if (!dataTable || typeof dataTable.column !== 'function') {
+        console.error('DataTable not ready for column selector');
+        return;
+    }
+
+    $('.base-column, .hazard-column').on('change', function () {
+        const columnName = $(this).data('column');
+        const columns = dataTable.columns().indexes();
+        columns.each(function (idx) {
+            const header = dataTable.column(idx).header();
+            if ($(header).text().trim() === columnName) {
+                dataTable.column(idx).visible($("input[data-column='" + columnName + "']").prop('checked'));
+            }
+        });
+    });
+
+    $('.hazard-group').on('change', function () {
+        const group = $(this).data('hazard');
+        const isChecked = $(this).is(':checked');
+        $(`.hazard-column.${group}`).prop('checked', isChecked).trigger('change');
+    });
+
+    $('#show-all-columns').on('click', function () {
+        $('.hazard-column').prop('checked', true).trigger('change');
+        $('.base-column:not([disabled])').prop('checked', true).trigger('change');
+        $('.hazard-group').prop('checked', true);
+    });
+
+    $('#hide-all-columns').on('click', function () {
+        $('.hazard-column').prop('checked', false).trigger('change');
+        $('.base-column:not([disabled])').prop('checked', false).trigger('change');
+        $('.hazard-group').prop('checked', false);
+    });
+}
+
+// FIXED: Improved column visibility update function
+function updateColumnVisibility() {
+    if (!dataTable) {
+        console.error("DataTable not initialized");
+        return;
+    }
+    
+    try {
+        console.log('Updating column visibility...');
+        
+        // Create column mapping more reliably
+        const columnMap = {};
+        dataTable.columns().every(function(index) {
+            const headerText = $(this.header()).text().trim();
+            columnMap[headerText] = index;
+            console.log(`Column ${index}: "${headerText}"`);
+        });
+        
+        // Always show Facility column
+        const visibleColumns = new Set(['Facility']);
+        
+        // Handle base columns (Lat/Long)
+        $('.base-column').each(function() {
+            const columnName = $(this).data('column');
+            const isChecked = $(this).prop('checked');
+            
+            if (isChecked && columnMap.hasOwnProperty(columnName)) {
+                visibleColumns.add(columnName);
+                console.log(`Will show base column: ${columnName}`);
+            }
+        });
+        
+        // Handle hazard columns
+        $('.hazard-column').each(function() {
+            const columnName = $(this).data('column');
+            const isChecked = $(this).prop('checked');
+            
+            console.log(`Checkbox for "${columnName}": ${isChecked}`);
+            
+            if (isChecked && columnMap.hasOwnProperty(columnName)) {
+                visibleColumns.add(columnName);
+                console.log(`Will show hazard column: ${columnName}`);
+            }
+        });
+        
+        // Update column visibility
+        let changesCount = 0;
+        dataTable.columns().every(function() {
+            const headerText = $(this.header()).text().trim();
+            const shouldBeVisible = visibleColumns.has(headerText);
+            
+            if (this.visible() !== shouldBeVisible) {
+                this.visible(shouldBeVisible, false); // false = no immediate redraw
+                changesCount++;
+            }
+        });
+        
+        console.log(`Changed visibility for ${changesCount} columns`);
+        
+        // Single redraw after all changes
+        if (changesCount > 0) {
+            dataTable.columns.adjust().draw(false);
+        }
+        
+        // Re-attach editable handlers after column changes
+        setTimeout(function() {
+            attachEditableHandlers();
+            $(window).trigger('resize');
+        }, 100);
+        
+        console.log('Column visibility update complete');
+        
+    } catch (error) {
+        console.error("Error updating column visibility:", error);
+    }
+}
+
+// Helper function to update a specific parent checkbox state
+function updateParentCheckboxState(changedCheckbox) {
+    const classes = changedCheckbox.attr('class').split(' ');
+    const hazardClass = classes.find(cls => 
+        cls !== 'form-check-input' && cls !== 'hazard-column' && cls !== 'facility-info');
+    
+    if (!hazardClass) {
+        console.log('No hazard class found for checkbox');
+        return;
+    }
+    
+    const parentCheckbox = $(`.hazard-group[data-hazard="${hazardClass}"]`);
+    const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+    const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+    
+    if (parentCheckbox.length > 0) {
+        parentCheckbox.prop('checked', checkedChilds.length > 0);
+        parentCheckbox.prop('indeterminate', 
+            checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+    }
+}
+
+// Helper function to update all parent checkbox states
+function updateParentCheckboxes() {
+    $('.hazard-group').each(function() {
+        const hazardClass = $(this).data('hazard');
+        const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+        const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+        
+        $(this).prop('checked', checkedChilds.length > 0);
+        $(this).prop('indeterminate', 
+            checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+    });
+}
+
+// Save and reset functions
 function saveAllChanges() {
     if (Object.keys(cellChanges).length === 0) {
         alert('No changes to save.');
@@ -983,164 +1088,10 @@ function resetAllChanges() {
     }
 }
 
-// RESTORED ORIGINAL COLUMN SELECTOR FUNCTIONALITY
-function setupColumnSelector() {
-    // Update hazard group checkbox handler
-    $('.hazard-group').on('change', function() {
-        const isChecked = $(this).prop('checked');
-        const hazardClass = $(this).data('hazard');
-        
-        // Update all child checkboxes without triggering individual change events
-        $(`.hazard-column.${hazardClass}`).prop('checked', isChecked);
-        
-        // Do a single update to column visibility
-        updateColumnVisibility();
-    });
-    
-    // Individual column checkbox handler
-    $('.hazard-column').on('change', function() {
-        // Update parent checkbox state
-        updateParentCheckboxState($(this));
-        // Update column visibility
-        updateColumnVisibility();
-    });
-    
-    // Make show/hide all buttons more efficient
-    $('#show-all-columns').on('click', function() {
-        $('.hazard-column').prop('checked', true);
-        updateParentCheckboxes();
-        updateColumnVisibility();
-    });
-
-    $('#hide-all-columns').on('click', function() {
-        $('.hazard-column').prop('checked', false);
-        updateParentCheckboxes();
-        updateColumnVisibility();
-    });
-}
-
-// RESTORED ORIGINAL updateColumnVisibility function with editable handlers re-attachment
-function updateColumnVisibility() {
-    if (!dataTable) {
-        console.error("DataTable not initialized");
-        return;
-    }
-    
-    try {
-        // Map column names to indices
-        const columnMap = {};
-        dataTable.columns().every(function(index) {
-            columnMap[$(this.header()).text().trim()] = index;
-        });
-        
-        // Track which columns should be visible
-        const visibleColumns = new Set(['Facility']); // Always show Facility
-        
-        // Determine which columns to show based on checkboxes
-        $('.hazard-column').each(function() {
-            const columnName = $(this).data('column');
-            if ($(this).prop('checked') && columnMap.hasOwnProperty(columnName)) {
-                visibleColumns.add(columnName);
-            }
-        });
-        
-        // Update column visibility without redrawing for each column
-        dataTable.columns().every(function() {
-            const headerText = $(this.header()).text().trim();
-            const shouldBeVisible = visibleColumns.has(headerText);
-            
-            // Only change visibility if needed (avoids unnecessary redraws)
-            if (this.visible() !== shouldBeVisible) {
-                this.visible(shouldBeVisible, false); // false = no redraw
-            }
-        });
-        
-        // Do a single redraw after all columns are updated
-        dataTable.columns.adjust().draw(false);
-        
-        // FIXED: Re-attach editable handlers after column visibility changes
-        setTimeout(function() {
-            attachEditableHandlers();
-            $(window).trigger('resize');
-            dataTable.columns.adjust();
-        }, 50);
-        
-    } catch (error) {
-        console.error("Error updating column visibility:", error);
-    }
-}
-
-// Helper function to update a specific parent checkbox state
-function updateParentCheckboxState(changedCheckbox) {
-    const hazardClass = changedCheckbox.attr('class').split(' ').find(cls => 
-        cls !== 'form-check-input' && cls !== 'hazard-column');
-    
-    if (!hazardClass) return;
-    
-    const parentCheckbox = $(`[data-hazard="${hazardClass}"]`);
-    const childCheckboxes = $(`.hazard-column.${hazardClass}`);
-    const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
-    
-    parentCheckbox.prop('checked', checkedChilds.length > 0);
-    parentCheckbox.prop('indeterminate', 
-        checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
-}
-
-// Helper function to update all parent checkbox states
-function updateParentCheckboxes() {
-    $('.hazard-group').each(function() {
-        const hazardClass = $(this).data('hazard');
-        const childCheckboxes = $(`.hazard-column.${hazardClass}`);
-        const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
-        
-        $(this).prop('checked', checkedChilds.length > 0);
-        $(this).prop('indeterminate', 
-            checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
-    });
-}
-
-// Load map content when tab is shown
-$('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-    var target = $(e.target).attr("href");
-    
-    // Load appropriate map content based on selected tab
-    if (target === "#water-map" && $("#water-map-content").is(':empty')) {
-        $("#water-map-content").load("{% url 'climate_hazards_analysis:water_stress_mapbox_fetch' %}");
-    }
-    if (target === "#flood-map" && $("#flood-map-content").is(':empty')) {
-        $("#flood-map-content").load("{% url 'climate_hazards_analysis:flood_exposure_mapbox_fetch' %}");
-    }
-    if (target === "#heat-map" && $("#heat-map-content").is(':empty')) {
-        $("#heat-map-content").load("{% url 'climate_hazards_analysis:heat_exposure_mapbox_fetch' %}");
-    }
-    if (target === "#sea-map" && $("#sea-map-content").is(':empty')) {
-        $("#sea-map-content").load("{% url 'climate_hazards_analysis:sea_level_rise_mapbox_fetch' %}");
-    }
-    if (target === "#cyclone-map" && $("#cyclone-map-content").is(':empty')) {
-        $("#cyclone-map-content").load("{% url 'climate_hazards_analysis:tropical_cyclone_mapbox_fetch' %}");
-    }
-    if (target === "#multi-hazard-map" && $("#multi-hazard-map-content").is(':empty')) {
-        $("#multi-hazard-map-content").load("{% url 'climate_hazards_analysis:multi_hazard_mapbox_fetch' %}");
-    }
-});
-
+// Proceed to sensitivity parameters function
 function proceedToSensitivityParameters() {
-    // Check if cellChanges exists in global scope
-    const changes = window.cellChanges || {};
-    if (Object.keys(changes).length > 0) {
-        if (!confirm('You have unsaved changes. Are you sure you want to proceed without saving?')) {
-            return;
-        }
-    }
     window.location.href = "{% url 'climate_hazards_analysis_v2:sensitivity_parameters' %}";
 }
-
-// Make functions and variables globally available
-window.saveAllChanges = saveAllChanges;
-window.resetAllChanges = resetAllChanges;
-window.updateColumnVisibility = updateColumnVisibility;
-window.cellChanges = cellChanges;
-window.attachEditableHandlers = attachEditableHandlers;
 </script>
 
 {% endblock %}

@@ -14,17 +14,17 @@
                         <label class="form-check-label" for="col-facility">Facility</label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input base-column" id="col-lat" checked disabled>
+                        <input type="checkbox" class="form-check-input base-column" id="col-lat" data-column="Lat">
                         <label class="form-check-label" for="col-lat">Latitude</label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input base-column" id="col-long" checked disabled>
+                        <input type="checkbox" class="form-check-input base-column" id="col-long" data-column="Long">
                         <label class="form-check-label" for="col-long">Longitude</label>
                     </div>
                 </div>
             </div>
             
-            <!-- Flood - Updated for simplified categories -->
+            <!-- Flood -->
             {% if 'Flood' in selected_hazards %}
             <div class="mb-3">
                 <div class="form-check">
@@ -36,7 +36,6 @@
                         <input type="checkbox" class="form-check-input hazard-column flood" id="col-flood-depth" checked data-column="Flood Depth (meters)">
                         <label class="form-check-label" for="col-flood-depth">Flood Depth (meters)</label>
                     </div>
-                    
                 </div>
             </div>
             {% endif %}
@@ -78,7 +77,7 @@
                         <label class="form-check-label" for="col-slr-2040">2040 Sea Level Rise (in meters)</label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2050" data-column="2050 Sea Level Rise (in meters)">
+                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2050" checked data-column="2050 Sea Level Rise (in meters)">
                         <label class="form-check-label" for="col-slr-2050">2050 Sea Level Rise (in meters)</label>
                     </div>
                     <div class="form-check">
@@ -90,7 +89,7 @@
             {% endif %}
             
             <!-- Tropical Cyclone -->
-            {% if 'Tropical Cyclones' in selected_hazards %}
+            {% if 'Tropical Cyclone' in selected_hazards %}
             <div class="mb-3">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input hazard-group" id="col-tropical-cyclone" data-hazard="tropical-cyclone">
