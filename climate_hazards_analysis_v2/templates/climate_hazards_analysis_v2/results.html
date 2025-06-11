@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load float_filters %}
 
 {% block title %}
 Climate Hazard Analysis Results
@@ -522,32 +523,127 @@ Climate Hazard Analysis Results
                                             {% endfor %}
                                         </tr>
                                     </thead>
+                                    
                                     <tbody>
-                                        {% for row in data %}
-                                            <tr class="custom-table-row">
-                                                {% for key, value in row.items %}
-                                                    <td>
-                                                        {# Flood Depth styling for simplified categories #}
-                                                        {% if key == "Flood Depth (meters)" and value != "N/A" %}
-                                                            {% if value == "0.1 to 0.5" %}
-                                                                <span style="color: green;">{{ value }}</span>
-                                                            {% elif value == "0.5 to 1.5" %}
-                                                                <span style="color: orange;">{{ value }}</span>
-                                                            {% elif value == "Greater than 1.5" %}
-                                                                <span style="color: red;">{{ value }}</span>
-                                                            {% else %}
-                                                                {{ value }}
-                                                            {% endif %}
-                                                        
-                                                        {# Regular cell display #}
-                                                        {% else %}
-                                                            {{ value }}
-                                                        {% endif %}
-                                                    </td>
-                                                {% endfor %}
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
+    {% for row in data %}
+        <tr class="custom-table-row">
+            {% for key, value in row.items %}
+                <td>
+                    {# Water Stress Exposure styling #}
+                    {% if key == "Water Stress Exposure (%)" and value != "N/A" %}
+                        {% with val=value|to_float %}
+                            {% if val < 10 %}
+                                <span style="color: green; font-weight: bold;">{{ value }}</span>
+                            {% elif val >= 10 and val <= 30 %}
+                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                            {% elif val > 30 %}
+                                <span style="color: red; font-weight: bold;">{{ value }}</span>
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        {% endwith %}
+                    
+                    {# Flood Depth styling #}
+                    {% elif key == "Flood Depth (meters)" and value != "N/A" %}
+                        {% if value == "0.1 to 0.5" %}
+                            <span style="color: green; font-weight: bold;">{{ value }}</span>
+                        {% elif value == "0.5 to 1.5" %}
+                            <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                        {% elif value == "Greater than 1.5" %}
+                            <span style="color: red; font-weight: bold;">{{ value }}</span>
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    
+                    {# Heat indicators styling #}
+                    {% elif "Days over" in key and "Celsius" in key and value != "N/A" %}
+                        {% with val=value|to_float %}
+                            {% if "30°" in key %}
+                                {% if val > 200 %}
+                                    <span style="color: red; font-weight: bold;">{{ value }}</span>
+                                {% elif val > 100 %}
+                                    <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                                {% else %}
+                                    <span style="color: green; font-weight: bold;">{{ value }}</span>
+                                {% endif %}
+                            {% elif "33°" in key %}
+                                {% if val > 50 %}
+                                    <span style="color: red; font-weight: bold;">{{ value }}</span>
+                                {% elif val > 20 %}
+                                    <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                                {% else %}
+                                    <span style="color: green; font-weight: bold;">{{ value }}</span>
+                                {% endif %}
+                            {% elif "35°" in key %}
+                                {% if val > 10 %}
+                                    <span style="color: red; font-weight: bold;">{{ value }}</span>
+                                {% elif val > 5 %}
+                                    <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                                {% else %}
+                                    <span style="color: green; font-weight: bold;">{{ value }}</span>
+                                {% endif %}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        {% endwith %}
+                    
+                    {# Sea Level Rise styling #}
+                    {% elif "Sea Level Rise" in key and value != "N/A" %}
+                        {% with val=value|to_float %}
+                            {% if val > 0.5 %}
+                                <span style="color: red; font-weight: bold;">{{ value }}</span>
+                            {% elif val > 0.3 %}
+                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                            {% else %}
+                                <span style="color: green; font-weight: bold;">{{ value }}</span>
+                            {% endif %}
+                        {% endwith %}
+                    
+                    {# Tropical Cyclone Wind Speed styling #}
+                    {% elif "Windspeed" in key and "km/h" in key and value != "N/A" %}
+                        {% with val=value|to_float %}
+                            {% if val > 150 %}
+                                <span style="color: red; font-weight: bold;">{{ value }}</span>
+                            {% elif val > 100 %}
+                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                            {% else %}
+                                <span style="color: green; font-weight: bold;">{{ value }}</span>
+                            {% endif %}
+                        {% endwith %}
+                    
+                    {# Storm Surge styling #}
+                    {% elif "Storm Surge" in key and value != "N/A" %}
+                        {% with val=value|to_float %}
+                            {% if val > 2.0 %}
+                                <span style="color: red; font-weight: bold;">{{ value }}</span>
+                            {% elif val > 1.0 %}
+                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                            {% else %}
+                                <span style="color: green; font-weight: bold;">{{ value }}</span>
+                            {% endif %}
+                        {% endwith %}
+                    
+                    {# Rainfall-Induced Landslide styling #}
+                    {% elif "Landslide Factor" in key and value != "N/A" %}
+                        {% with val=value|to_float %}
+                            {% if val < 1.0 %}
+                                <span style="color: red; font-weight: bold;">{{ value }}</span>
+                            {% elif val < 1.5 %}
+                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                            {% else %}
+                                <span style="color: green; font-weight: bold;">{{ value }}</span>
+                            {% endif %}
+                        {% endwith %}
+                    
+                    {# Default cell display #}
+                    {% else %}
+                        {{ value }}
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</tbody>
                                 </table>
                             </div>
                         </div>

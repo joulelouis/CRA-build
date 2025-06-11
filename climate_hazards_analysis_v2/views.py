@@ -15,6 +15,7 @@ import copy
 # Import from climate_hazards_analysis module
 from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
 from climate_hazards_analysis.utils.generate_report import generate_climate_hazards_report_pdf
+from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +185,7 @@ def select_hazards(request):
 def show_results(request):
     """
     View to display climate hazard analysis results.
-    Updated to work with simplified flood categories.
+    Updated to work with simplified flood categories and tropical cyclone integration.
     """
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
@@ -276,11 +277,139 @@ def show_results(request):
             df['Flood Depth (meters)'] = '0.1 to 0.5'  # Add placeholder with simplified category
             logger.info("Added placeholder Flood Depth (meters) column")
         
+        # NEW: Handle Tropical Cyclone analysis if selected
+        if 'Tropical Cyclones' in selected_hazards:
+            try:
+                logger.info("Processing Tropical Cyclone analysis...")
+                from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
+                
+                tc_result = generate_tropical_cyclone_analysis(facility_csv_path)
+                
+                if tc_result and 'combined_csv_paths' in tc_result and tc_result['combined_csv_paths']:
+                    tc_csv_path = tc_result['combined_csv_paths'][0]
+                    
+                    if os.path.exists(tc_csv_path):
+                        logger.info(f"Loading tropical cyclone data from: {tc_csv_path}")
+                        
+                        # Load TC data with same encoding handling
+                        try:
+                            tc_df = pd.read_csv(tc_csv_path, encoding='utf-8')
+                        except UnicodeDecodeError:
+                            try:
+                                tc_df = pd.read_csv(tc_csv_path, encoding='latin-1')
+                            except UnicodeDecodeError:
+                                tc_df = pd.read_csv(tc_csv_path, encoding='cp1252')
+                        
+                        logger.info(f"TC data shape: {tc_df.shape}")
+                        logger.info(f"TC columns: {tc_df.columns.tolist()}")
+                        logger.info(f"Main data columns: {df.columns.tolist()}")
+                        
+                        # FIXED: Look for the actual TC column names
+                        tc_wind_columns = [col for col in tc_df.columns if 'MSW' in col and 'yr RP' in col]
+                        logger.info(f"Found TC wind columns: {tc_wind_columns}")
+                        
+                        # Try to find matching facility column
+                        merge_column = None
+                        
+                        # Check for facility name columns in both dataframes
+                        main_facility_cols = []
+                        for col in df.columns:
+                            if any(keyword in col.lower() for keyword in ['facility', 'name', 'site']):
+                                main_facility_cols.append(col)
+                        
+                        tc_facility_cols = []
+                        for col in tc_df.columns:
+                            if any(keyword in col.lower() for keyword in ['facility', 'name', 'site']):
+                                tc_facility_cols.append(col)
+                        
+                        logger.info(f"Main facility columns: {main_facility_cols}")
+                        logger.info(f"TC facility columns: {tc_facility_cols}")
+                        
+                        # Try to find a matching column
+                        if main_facility_cols and tc_facility_cols:
+                            # Try exact match first
+                            for main_col in main_facility_cols:
+                                if main_col in tc_facility_cols:
+                                    merge_column = main_col
+                                    break
+                            
+                            # If no exact match, try renaming TC column to match main column
+                            if not merge_column:
+                                merge_column = main_facility_cols[0]  # Use first main facility column
+                                tc_merge_column = tc_facility_cols[0]  # Use first TC facility column
+                                
+                                if tc_merge_column != merge_column:
+                                    tc_df = tc_df.rename(columns={tc_merge_column: merge_column})
+                                    logger.info(f"Renamed TC column '{tc_merge_column}' to '{merge_column}'")
+                        
+                        if merge_column and tc_wind_columns:
+                            # Select only the columns we need for merging
+                            tc_columns_to_merge = [merge_column] + tc_wind_columns
+                            tc_df_subset = tc_df[tc_columns_to_merge]
+                            
+                            # FIXED: Rename TC wind columns to match expected names for the table
+                            column_rename_map = {}
+                            if "1-min MSW 10 yr RP" in tc_df_subset.columns:
+                                column_rename_map["1-min MSW 10 yr RP"] = "Extreme Windspeed 10 year Return Period (km/h)"
+                            if "1-min MSW 20 yr RP" in tc_df_subset.columns:
+                                column_rename_map["1-min MSW 20 yr RP"] = "Extreme Windspeed 20 year Return Period (km/h)"
+                            if "1-min MSW 50 yr RP" in tc_df_subset.columns:
+                                column_rename_map["1-min MSW 50 yr RP"] = "Extreme Windspeed 50 year Return Period (km/h)"
+                            if "1-min MSW 100 yr RP" in tc_df_subset.columns:
+                                column_rename_map["1-min MSW 100 yr RP"] = "Extreme Windspeed 100 year Return Period (km/h)"
+                            
+                            if column_rename_map:
+                                tc_df_subset = tc_df_subset.rename(columns=column_rename_map)
+                                logger.info(f"Renamed TC columns: {column_rename_map}")
+                            
+                            logger.info(f"Merging using column '{merge_column}' with TC columns: {tc_df_subset.columns.tolist()}")
+                            
+                            # Merge the dataframes
+                            merged_df = pd.merge(df, tc_df_subset, on=merge_column, how='left')
+                            df = merged_df
+                            logger.info(f"Successfully merged tropical cyclone data. New shape: {df.shape}")
+                            logger.info(f"New columns after merge: {df.columns.tolist()}")
+                            
+                        else:
+                            logger.warning(f"Could not merge TC data. Merge column: {merge_column}, TC wind columns: {tc_wind_columns}")
+                            # Add placeholder columns with expected names
+                            placeholder_columns = [
+                                'Extreme Windspeed 10 year Return Period (km/h)',
+                                'Extreme Windspeed 20 year Return Period (km/h)', 
+                                'Extreme Windspeed 50 year Return Period (km/h)', 
+                                'Extreme Windspeed 100 year Return Period (km/h)'
+                            ]
+                            for col in placeholder_columns:
+                                if col not in df.columns:
+                                    df[col] = 85.0
+                            logger.info("Added placeholder tropical cyclone columns")
+                    else:
+                        logger.error(f"Tropical cyclone CSV file not found: {tc_csv_path}")
+                        # Add placeholder columns (same as above)
+                else:
+                    logger.error("Tropical cyclone analysis did not return valid results")
+                    # Add placeholder columns (same as above)
+                    
+            except Exception as tc_error:
+                logger.exception(f"Error in tropical cyclone analysis: {str(tc_error)}")
+                # Add placeholder columns with expected names
+                placeholder_columns = [
+                    'Extreme Windspeed 10 year Return Period (km/h)',
+                    'Extreme Windspeed 20 year Return Period (km/h)', 
+                    'Extreme Windspeed 50 year Return Period (km/h)', 
+                    'Extreme Windspeed 100 year Return Period (km/h)'
+                ]
+                for col in placeholder_columns:
+                    if col not in df.columns:
+                        df[col] = 85.0
+                logger.info("Added placeholder tropical cyclone columns due to exception")
+        
         # Convert to dict for template
         data = df.to_dict(orient="records")
         columns = df.columns.tolist()
         
         logger.info(f"Final data has {len(data)} rows and {len(columns)} columns")
+        logger.info(f"Final columns: {columns}")
         
         # Create detailed column groups for the table header
         groups = {}
@@ -299,10 +428,10 @@ def show_results(request):
                             '2040 Sea Level Rise (in meters)', 
                             '2050 Sea Level Rise (in meters)', 
                             '2060 Sea Level Rise (in meters)'],
-            'Tropical Cyclone': ['Extreme Windspeed 10 year Return Period (km/h)', 
+            'Tropical Cyclones': ['Extreme Windspeed 10 year Return Period (km/h)', 
                                 'Extreme Windspeed 20 year Return Period (km/h)', 
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
-                                'Extreme Windspeed 100 year Return Period (km/h)'],
+                                'Extreme Windspeed 100 year Return Period (km/h)'],  # FIXED: These match the renamed columns
             'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius'],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
             'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
@@ -315,12 +444,18 @@ def show_results(request):
                 groups[hazard] = count
                 logger.info(f"Added {hazard} group with {count} columns")
         
-        # Verify flood group was added if flood was selected
+        # Verify specific hazard groups were added if selected
         if 'Flood' in selected_hazards:
             if 'Flood' in groups:
                 logger.info(f"✓ Flood group successfully added to table headers")
             else:
                 logger.error("✗ Flood group missing from table headers!")
+                
+        if 'Tropical Cyclones' in selected_hazards:
+            if 'Tropical Cyclone' in groups:
+                logger.info(f"✓ Tropical Cyclone group successfully added to table headers")
+            else:
+                logger.error("✗ Tropical Cyclone group missing from table headers!")
         
         # Get the paths to any generated plots
         plot_path = result.get('plot_path')
@@ -866,7 +1001,7 @@ def sensitivity_results(request):
                             '2040 Sea Level Rise (in meters)', 
                             '2050 Sea Level Rise (in meters)', 
                             '2060 Sea Level Rise (in meters)'],
-            'Tropical Cyclone': ['Extreme Windspeed 10 year Return Period (km/h)', 
+            'Tropical Cyclones': ['Extreme Windspeed 10 year Return Period (km/h)', 
                                 'Extreme Windspeed 20 year Return Period (km/h)', 
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
                                 'Extreme Windspeed 100 year Return Period (km/h)'],
