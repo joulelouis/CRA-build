@@ -1175,7 +1175,7 @@ function autoSaveChange(change) {
     };
     
     $.ajax({
-        url: '/climate-hazards-v2/save-table-changes/',
+        url: '/climate-hazards-analysis-v2/save-table-changes/',
         method: 'POST',
         data: JSON.stringify(changesData),
         contentType: 'application/json',
