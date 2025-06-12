@@ -566,33 +566,13 @@ Climate Hazard Analysis Results
                     
                     {# Heat indicators styling #}
                     {% elif "Days over" in key and "Celsius" in key and value != "N/A" %}
-                        {% with val=value|to_float %}
-                            {% if "30°" in key %}
-                                {% if val > 200 %}
-                                    <span style="color: red; font-weight: bold;">{{ value }}</span>
-                                {% elif val > 100 %}
-                                    <span style="color: orange; font-weight: bold;">{{ value }}</span>
-                                {% else %}
-                                    <span style="color: green; font-weight: bold;">{{ value }}</span>
-                                {% endif %}
-                            {% elif "33°" in key %}
-                                {% if val > 50 %}
-                                    <span style="color: red; font-weight: bold;">{{ value }}</span>
-                                {% elif val > 20 %}
-                                    <span style="color: orange; font-weight: bold;">{{ value }}</span>
-                                {% else %}
-                                    <span style="color: green; font-weight: bold;">{{ value }}</span>
-                                {% endif %}
-                            {% elif "35°" in key %}
-                                {% if val > 10 %}
-                                    <span style="color: red; font-weight: bold;">{{ value }}</span>
-                                {% elif val > 5 %}
-                                    <span style="color: orange; font-weight: bold;">{{ value }}</span>
-                                {% else %}
-                                    <span style="color: green; font-weight: bold;">{{ value }}</span>
-                                {% endif %}
+                        {% with num=value|to_float %}
+                            {% if num >= 45 %}
+                                <span style="color: red; font-weight: bold;">{{ value }}</span>
+                            {% elif num >= 10 %}
+                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
                             {% else %}
-                                {{ value }}
+                                <span style="color: green; font-weight: bold;">{{ value }}</span>
                             {% endif %}
                         {% endwith %}
                     
@@ -974,6 +954,22 @@ function categorizeExtremeWindspeed(value) {
     return { text: value, color: 'black' };
 }
 
+function categorizeHeatDays(value) {
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+        if (num >= 45) {
+            return { text: value, color: 'red' };
+        }
+        if (num >= 10) {
+            return { text: value, color: 'orange' };
+        }
+        if (num < 10) {
+            return { text: value, color: 'green' };
+        }
+    }
+    return { text: value, color: 'black' };
+}
+
 function saveCell($cell, $input, rowIndex, columnName) {
     let newValue = $input.val().trim();
     const originalValue = $cell.attr('data-original-value');
@@ -994,6 +990,11 @@ function saveCell($cell, $input, rowIndex, columnName) {
     if (columnName.includes('Extreme Windspeed') && newValue !== 'N/A') {
         const ew = categorizeExtremeWindspeed(newValue);
         displayHTML = `<span style="color: ${ew.color}; font-weight: bold;">${ew.text}</span>`;
+    }
+
+    if (columnName.includes('Days over') && columnName.includes('Celsius') && newValue !== 'N/A') {
+        const hd = categorizeHeatDays(newValue);
+        displayHTML = `<span style="color: ${hd.color}; font-weight: bold;">${hd.text}</span>`;
     }
     
     if (!validateCellValue(newValue, columnName)) {
