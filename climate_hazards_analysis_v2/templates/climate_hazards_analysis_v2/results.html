@@ -974,32 +974,31 @@ function setupColumnSelector() {
     }
 
     $('.base-column, .hazard-column').on('change', function () {
-        const columnName = $(this).data('column');
-        const columns = dataTable.columns().indexes();
-        columns.each(function (idx) {
-            const header = dataTable.column(idx).header();
-            if ($(header).text().trim() === columnName) {
-                dataTable.column(idx).visible($("input[data-column='" + columnName + "']").prop('checked'));
-            }
-        });
+        if ($(this).hasClass('hazard-column')) {
+            updateParentCheckboxState($(this));
+        }
+        updateColumnVisibility();
     });
 
     $('.hazard-group').on('change', function () {
         const group = $(this).data('hazard');
         const isChecked = $(this).is(':checked');
-        $(`.hazard-column.${group}`).prop('checked', isChecked).trigger('change');
+        $(`.hazard-column.${group}`).prop('checked', isChecked);
+        updateColumnVisibility();
     });
 
     $('#show-all-columns').on('click', function () {
-        $('.hazard-column').prop('checked', true).trigger('change');
-        $('.base-column:not([disabled])').prop('checked', true).trigger('change');
-        $('.hazard-group').prop('checked', true);
+        $('.hazard-column').prop('checked', true);
+        $('.base-column:not([disabled])').prop('checked', true);
+        updateParentCheckboxes();
+        updateColumnVisibility();
     });
 
     $('#hide-all-columns').on('click', function () {
-        $('.hazard-column').prop('checked', false).trigger('change');
-        $('.base-column:not([disabled])').prop('checked', false).trigger('change');
-        $('.hazard-group').prop('checked', false);
+        $('.hazard-column').prop('checked', false);
+        $('.base-column:not([disabled])').prop('checked', false);
+        updateParentCheckboxes();
+        updateColumnVisibility();
     });
 }
 

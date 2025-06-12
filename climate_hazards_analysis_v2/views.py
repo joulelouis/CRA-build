@@ -481,6 +481,15 @@ def show_results(request):
         # Track column count after TC processing
         columns_after_tc = len(df.columns)
         logger.info(f"📊 Columns after TC processing: {columns_after_tc} (change: {columns_after_tc - columns_before_tc})")
+
+        # Clean up potential merge suffixes like _x or _y that may appear
+        rename_map = {c: c[:-2] for c in df.columns if c.endswith('_x') or c.endswith('_y')}
+        if rename_map:
+            logger.info(f"Renaming columns to remove merge suffixes: {rename_map}")
+            df.rename(columns=rename_map, inplace=True)
+            # Drop any duplicate columns that may remain after renaming
+            df = df.loc[:, ~df.columns.duplicated()]
+
         
         # Convert to dict for template
         data = df.to_dict(orient="records")
