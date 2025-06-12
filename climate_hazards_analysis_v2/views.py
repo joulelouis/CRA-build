@@ -592,6 +592,13 @@ def show_results(request):
             'plot_path': plot_path if plot_path else None,
             'all_plots': all_plots
         }
+
+        # Preserve a baseline copy of the results the first time they are
+        # generated so we can restore them later if needed
+        if 'climate_hazards_v2_baseline_results' not in request.session:
+            request.session['climate_hazards_v2_baseline_results'] = copy.deepcopy(
+                request.session['climate_hazards_v2_results']
+            )
         
         # Prepare context for the template
         context = {
@@ -1247,6 +1254,16 @@ def save_table_changes(request):
         logger.exception(f"Error saving table changes: {e}")
         return JsonResponse({'success': False, 'error': str(e)})
 
+
+@require_http_methods(["POST"])
+def reset_table_data(request):
+    """Restore the asset exposure results to the original baseline."""
+    baseline = request.session.get('climate_hazards_v2_baseline_results')
+    if not baseline:
+        return JsonResponse({'success': False, 'error': 'No baseline data available'})
+
+    request.session['climate_hazards_v2_results'] = copy.deepcopy(baseline)
+    return JsonResponse({'success': True})
 
 def convert_table_value(value, column_name):
     """

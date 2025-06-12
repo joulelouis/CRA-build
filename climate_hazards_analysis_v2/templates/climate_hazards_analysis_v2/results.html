@@ -1365,21 +1365,27 @@ function autoSaveChange(change) {
 }
 
 function resetAllChanges() {
-    if (Object.keys(cellChanges).length === 0) {
-        alert('No changes to reset.');
+    if (!confirm('Are you sure you want to reset all changes?')) {
         return;
     }
     
-    if (confirm('Are you sure you want to reset all changes?')) {
-        Object.keys(cellChanges).forEach(cellKey => {
-            const change = cellChanges[cellKey];
-            const $cell = $(`.editable-cell[data-row="${change.rowIndex}"][data-column="${change.column}"]`);
-            $cell.html(change.oldValue).removeClass('cell-changed');
-        });
-        
-        cellChanges = {};
-        updateChangeIndicator();
-    }
+    $.ajax({
+        url: '/climate-hazards-analysis-v2/reset-table-data/',
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert(response.error || 'Failed to reset data.');
+            }
+        },
+        error: function() {
+            alert('Failed to reset data.');
+        }
+    });
 }
 
 // Proceed to sensitivity parameters function
