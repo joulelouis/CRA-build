@@ -645,6 +645,31 @@ Climate Hazard Analysis Results
 </tbody>
                                 </table>
                             </div>
+
+                            <!-- After table controls -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <!-- Legend on the left -->
+                            <ul class="legend d-flex" style="list-style: none; padding: 0; margin: 0;">
+                                <li class="low" style="display: flex; align-items: center; margin-right: 15px;">
+                                    <span style="display: inline-block; width: 15px; height: 15px; background-color: green; margin-right: 8px;"></span>
+                                    Low Risk
+                                </li>
+                                <li class="medium" style="display: flex; align-items: center; margin-right: 15px;">
+                                    <span style="display: inline-block; width: 15px; height: 15px; background-color: orange; margin-right: 8px;"></span>
+                                    Medium Risk
+                                </li>
+                                <li class="high" style="display: flex; align-items: center;">
+                                    <span style="display: inline-block; width: 15px; height: 15px; background-color: red; margin-right: 8px;"></span>
+                                    High Risk
+                                </li>
+                            </ul>
+                            <!-- Generate Report Button on the right -->
+                            <div class="text-end">
+                                <a href="{% url 'climate_hazards_analysis_v2:generate_report' %}" class="btn btn-warning">
+                                    <strong>Generate Report</strong>
+                                </a>
+                            </div>
+                        </div>
                         </div>
 
                         <!-- Multi-Hazard Map Tab -->
