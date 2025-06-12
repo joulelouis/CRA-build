@@ -623,12 +623,14 @@ Climate Hazard Analysis Results
                     {# Rainfall-Induced Landslide styling #}
                     {% elif "Landslide Factor" in key and value != "N/A" %}
                         {% with val=value|to_float %}
-                            {% if val < 1.0 %}
-                                <span style="color: red; font-weight: bold;">{{ value }}</span>
-                            {% elif val < 1.5 %}
-                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                            {% if value|lower == "generally stable" or val > 2.5 %}
+                                <span style="color: black; font-weight: bold;">Generally stable</span>
+                            {% elif val > 1.5 %}
+                                <span style="color: green; font-weight: bold;">FoS &gt; 1.5</span>
+                            {% elif val >= 1 %}
+                                <span style="color: orange; font-weight: bold;">FoS 1 &lt; FoS &lt; 1.5</span>
                             {% else %}
-                                <span style="color: green; font-weight: bold;">{{ value }}</span>
+                                <span style="color: red; font-weight: bold;">FoS &lt; 1</span>
                             {% endif %}
                         {% endwith %}
                     
@@ -1003,6 +1005,38 @@ function categorizeHeatDays(value) {
     return { text: value, color: 'black' };
 }
 
+function categorizeLandslideFOS(value) {
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+        if (num > 2.5) {
+            return { text: 'Generally stable', color: 'black' };
+        }
+        if (num > 1.5) {
+            return { text: 'FoS > 1.5', color: 'green' };
+        }
+        if (num >= 1) {
+            return { text: 'FoS 1 < FoS < 1.5', color: 'orange' };
+        }
+        return { text: 'FoS < 1', color: 'red' };
+    }
+
+    const normalized = String(value).toLowerCase();
+    if (normalized.includes('generally')) {
+        return { text: 'Generally stable', color: 'black' };
+    }
+    if (normalized.includes('> 1.5')) {
+        return { text: 'FoS > 1.5', color: 'green' };
+    }
+    if (normalized.includes('1 <') || normalized.includes('1<')) {
+        return { text: 'FoS 1 < FoS < 1.5', color: 'orange' };
+    }
+    if (normalized.includes('< 1')) {
+        return { text: 'FoS < 1', color: 'red' };
+    }
+
+    return { text: value, color: 'black' };
+}
+
 function saveCell($cell, $input, rowIndex, columnName) {
     let newValue = $input.val().trim();
     const originalValue = $cell.attr('data-original-value');
@@ -1034,6 +1068,12 @@ function saveCell($cell, $input, rowIndex, columnName) {
     if (columnName.includes('Days over') && columnName.includes('Celsius') && newValue !== 'N/A') {
         const hd = categorizeHeatDays(newValue);
         displayHTML = `<span style="color: ${hd.color}; font-weight: bold;">${hd.text}</span>`;
+    }
+
+    if (columnName === 'Rainfall Induced Landslide Factor of Safety' && newValue !== 'N/A') {
+        const ls = categorizeLandslideFOS(newValue);
+        displayHTML = `<span style="color: ${ls.color}; font-weight: bold;">${ls.text}</span>`;
+        newValue = ls.text;
     }
     
     if (!validateCellValue(newValue, columnName)) {
@@ -1104,6 +1144,15 @@ function validateCellValue(value, columnName) {
         }
         const normalized = String(value).toLowerCase();
         return ['little to none', '0.1 to 0.5', '0.5 to 1.5', '≥ 1.5', '>= 1.5', '>1.5', 'greater than 1.5'].includes(normalized);
+    }
+
+    if (columnName === 'Rainfall Induced Landslide Factor of Safety') {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue) && isFinite(numValue)) {
+            return true;
+        }
+        const normalized = String(value).toLowerCase();
+        return ['fos < 1', 'fos 1 < fos < 1.5', 'fos > 1.5', 'generally stable'].includes(normalized);
     }
     
     if (numberColumns.includes(columnName)) {
