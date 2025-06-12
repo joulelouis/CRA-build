@@ -929,6 +929,22 @@ function categorizeFloodDepth(value) {
     return { text: value, color: 'black' };
 }
 
+function categorizeWaterStress(value) {
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+        if (num > 30) {
+            return { text: value, color: 'red' };
+        }
+        if (num >= 10) {
+            return { text: value, color: 'orange' };
+        }
+        if (num < 10) {
+            return { text: value, color: 'green' };
+        }
+    }
+    return { text: value, color: 'black' };
+}
+
 function saveCell($cell, $input, rowIndex, columnName) {
     let newValue = $input.val().trim();
     const originalValue = $cell.attr('data-original-value');
@@ -939,6 +955,11 @@ function saveCell($cell, $input, rowIndex, columnName) {
         const fd = categorizeFloodDepth(newValue);
         displayHTML = `<span style="color: ${fd.color}; font-weight: bold;">${fd.text}</span>`;
         newValue = fd.text;
+    }
+
+    if (columnName === 'Water Stress Exposure (%)' && newValue !== 'N/A') {
+        const ws = categorizeWaterStress(newValue);
+        displayHTML = `<span style="color: ${ws.color}; font-weight: bold;">${ws.text}</span>`;
     }
     
     if (!validateCellValue(newValue, columnName)) {
