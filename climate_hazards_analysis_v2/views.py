@@ -269,6 +269,9 @@ def show_results(request):
                 except UnicodeDecodeError:
                     logger.error(f"Could not read CSV file {combined_csv_path} with any encoding")
                     raise
+
+        # Normalize column names
+        df.columns = df.columns.str.strip()
         
         logger.info(f"Loaded CSV with shape: {df.shape}")
         logger.info(f"CSV columns: {df.columns.tolist()}")
@@ -339,6 +342,8 @@ def show_results(request):
                                 tc_df = pd.read_csv(tc_csv_path, encoding='latin-1')
                             except UnicodeDecodeError:
                                 tc_df = pd.read_csv(tc_csv_path, encoding='cp1252')
+
+                        tc_df.columns = tc_df.columns.str.strip()
                         
                         logger.info(f"TC data shape: {tc_df.shape}")
                         logger.info(f"TC columns: {tc_df.columns.tolist()}")
@@ -387,16 +392,18 @@ def show_results(request):
                             tc_columns_to_merge = [merge_column] + tc_wind_columns
                             tc_df_subset = tc_df[tc_columns_to_merge]
                             
-                            # FIXED: Rename TC wind columns to match expected names for the table
                             column_rename_map = {}
-                            if "1-min MSW 10 yr RP" in tc_df_subset.columns:
-                                column_rename_map["1-min MSW 10 yr RP"] = "Extreme Windspeed 10 year Return Period (km/h)"
-                            if "1-min MSW 20 yr RP" in tc_df_subset.columns:
-                                column_rename_map["1-min MSW 20 yr RP"] = "Extreme Windspeed 20 year Return Period (km/h)"
-                            if "1-min MSW 50 yr RP" in tc_df_subset.columns:
-                                column_rename_map["1-min MSW 50 yr RP"] = "Extreme Windspeed 50 year Return Period (km/h)"
-                            if "1-min MSW 100 yr RP" in tc_df_subset.columns:
-                                column_rename_map["1-min MSW 100 yr RP"] = "Extreme Windspeed 100 year Return Period (km/h)"
+                            for col in tc_df_subset.columns:
+                                col_normalized = col.lower().replace('-', ' ').replace('_', ' ')
+                                if 'msw' in col_normalized and 'rp' in col_normalized:
+                                    if '10' in col_normalized:
+                                        column_rename_map[col] = 'Extreme Windspeed 10 year Return Period (km/h)'
+                                    elif '20' in col_normalized:
+                                        column_rename_map[col] = 'Extreme Windspeed 20 year Return Period (km/h)'
+                                    elif '50' in col_normalized:
+                                        column_rename_map[col] = 'Extreme Windspeed 50 year Return Period (km/h)'
+                                    elif '100' in col_normalized:
+                                        column_rename_map[col] = 'Extreme Windspeed 100 year Return Period (km/h)'
                             
                             if column_rename_map:
                                 tc_df_subset = tc_df_subset.rename(columns=column_rename_map)
