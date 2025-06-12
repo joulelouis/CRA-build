@@ -609,16 +609,22 @@ Climate Hazard Analysis Results
                         {% endwith %}
                     
                     {# Tropical Cyclone Wind Speed styling #}
-                    {% elif "Windspeed" in key and "km/h" in key and value != "N/A" %}
-                        {% with val=value|to_float %}
-                            {% if val > 150 %}
-                                <span style="color: red; font-weight: bold;">{{ value }}</span>
-                            {% elif val > 100 %}
-                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
-                            {% else %}
-                                <span style="color: green; font-weight: bold;">{{ value }}</span>
-                            {% endif %}
-                        {% endwith %}
+                    {% elif "Windspeed" in key and "km/h" in key %}
+                        {% if value == "Data not available" %}
+                            <span style="color: black; font-weight: bold;">{{ value }}</span>
+                        {% elif value != "N/A" %}
+                            {% with val=value|to_float %}
+                                {% if val >= 178 %}
+                                    <span style="color: red; font-weight: bold;">{{ value }}</span>
+                                {% elif val >= 119 %}
+                                    <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                                {% else %}
+                                    <span style="color: green; font-weight: bold;">{{ value }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
                     
                     {# Storm Surge styling #}
                     {% elif "Storm Surge" in key and value != "N/A" %}
@@ -889,6 +895,10 @@ function getInputType(columnName) {
         'Days over 35° Celsius', '2030 Sea Level Rise (in meters)',
         '2040 Sea Level Rise (in meters)', '2050 Sea Level Rise (in meters)',
         '2060 Sea Level Rise (in meters)', 'Elevation (meter above sea level)',
+        'Extreme Windspeed 10 year Return Period (km/h)',
+        'Extreme Windspeed 20 year Return Period (km/h)',
+        'Extreme Windspeed 50 year Return Period (km/h)',
+        'Extreme Windspeed 100 year Return Period (km/h)',
         'Storm Surge Flood Depth (meters)', 'Rainfall Induced Landslide Factor of Safety'
     ];
     
@@ -945,6 +955,25 @@ function categorizeWaterStress(value) {
     return { text: value, color: 'black' };
 }
 
+function categorizeExtremeWindspeed(value) {
+    if (value === 'Data not available') {
+        return { text: value, color: 'black' };
+    }
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+        if (num >= 178) {
+            return { text: value, color: 'red' };
+        }
+        if (num >= 119) {
+            return { text: value, color: 'orange' };
+        }
+        if (num < 119) {
+            return { text: value, color: 'green' };
+        }
+    }
+    return { text: value, color: 'black' };
+}
+
 function saveCell($cell, $input, rowIndex, columnName) {
     let newValue = $input.val().trim();
     const originalValue = $cell.attr('data-original-value');
@@ -960,6 +989,11 @@ function saveCell($cell, $input, rowIndex, columnName) {
     if (columnName === 'Water Stress Exposure (%)' && newValue !== 'N/A') {
         const ws = categorizeWaterStress(newValue);
         displayHTML = `<span style="color: ${ws.color}; font-weight: bold;">${ws.text}</span>`;
+    }
+
+    if (columnName.includes('Extreme Windspeed') && newValue !== 'N/A') {
+        const ew = categorizeExtremeWindspeed(newValue);
+        displayHTML = `<span style="color: ${ew.color}; font-weight: bold;">${ew.text}</span>`;
     }
     
     if (!validateCellValue(newValue, columnName)) {
@@ -1005,7 +1039,12 @@ function validateCellValue(value, columnName) {
         'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
         '2030 Sea Level Rise (in meters)', '2040 Sea Level Rise (in meters)',
         '2050 Sea Level Rise (in meters)', '2060 Sea Level Rise (in meters)',
-        'Elevation (meter above sea level)', 'Storm Surge Flood Depth (meters)',
+        'Elevation (meter above sea level)',
+        'Extreme Windspeed 10 year Return Period (km/h)',
+        'Extreme Windspeed 20 year Return Period (km/h)',
+        'Extreme Windspeed 50 year Return Period (km/h)',
+        'Extreme Windspeed 100 year Return Period (km/h)',
+        'Storm Surge Flood Depth (meters)',
         'Rainfall Induced Landslide Factor of Safety'
     ];
 
@@ -1019,6 +1058,9 @@ function validateCellValue(value, columnName) {
     }
     
     if (numberColumns.includes(columnName)) {
+        if (value === 'Data not available') {
+            return true;
+        }
         const numValue = parseFloat(value);
         return !isNaN(numValue) && isFinite(numValue);
     }
