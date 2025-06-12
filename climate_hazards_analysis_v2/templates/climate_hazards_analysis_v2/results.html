@@ -545,15 +545,19 @@ Climate Hazard Analysis Results
                     
                     {# Flood Depth styling #}
                     {% elif key == "Flood Depth (meters)" and value != "N/A" %}
-                        {% if value == "0.1 to 0.5" %}
-                            <span style="color: green; font-weight: bold;">{{ value }}</span>
-                        {% elif value == "0.5 to 1.5" %}
-                            <span style="color: orange; font-weight: bold;">{{ value }}</span>
-                        {% elif value == "Greater than 1.5" %}
-                            <span style="color: red; font-weight: bold;">{{ value }}</span>
-                        {% else %}
-                            {{ value }}
-                        {% endif %}
+                        {% with numeric=value|to_float %}
+                            {% if value == "Little to none" or numeric < 0.1 %}
+                                <span style="color: black; font-weight: bold;">Little to none</span>
+                            {% elif value == "0.1 to 0.5" or (numeric >= 0.1 and numeric < 0.5) %}
+                                <span style="color: green; font-weight: bold;">0.1 to 0.5</span>
+                            {% elif value == "0.5 to 1.5" or (numeric >= 0.5 and numeric <= 1.5) %}
+                                <span style="color: orange; font-weight: bold;">0.5 to 1.5</span>
+                            {% elif value == ">1.5" or value == "Greater than 1.5" or numeric > 1.5 %}
+                                <span style="color: red; font-weight: bold;">&gt;1.5</span>
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        {% endwith %}
                     
                     {# Heat indicators styling #}
                     {% elif "Days over" in key and "Celsius" in key and value != "N/A" %}
@@ -896,9 +900,48 @@ function getInputType(columnName) {
     return 'text';
 }
 
+function categorizeFloodDepth(value) {
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+        if (num > 1.5) {
+            return { text: '>1.5', color: 'red' };
+        }
+        if (num >= 0.5) {
+            return { text: '0.5 to 1.5', color: 'orange' };
+        }
+        if (num >= 0.1) {
+            return { text: '0.1 to 0.5', color: 'green' };
+        }
+        return { text: 'Little to none', color: 'black' };
+    }
+
+    const normalized = String(value).toLowerCase();
+    if (normalized.includes('little')) {
+        return { text: 'Little to none', color: 'black' };
+    }
+    if (normalized.includes('0.1') && normalized.includes('0.5')) {
+        return { text: '0.1 to 0.5', color: 'green' };
+    }
+    if (normalized.includes('0.5') && normalized.includes('1.5')) {
+        return { text: '0.5 to 1.5', color: 'orange' };
+    }
+    if (normalized.includes('1.5')) {
+        return { text: '>1.5', color: 'red' };
+    }
+    return { text: value, color: 'black' };
+}
+
 function saveCell($cell, $input, rowIndex, columnName) {
-    const newValue = $input.val().trim();
+    let newValue = $input.val().trim();
     const originalValue = $cell.attr('data-original-value');
+
+    let displayHTML = newValue;
+
+    if (columnName === 'Flood Depth (meters)' && newValue !== 'N/A') {
+        const fd = categorizeFloodDepth(newValue);
+        displayHTML = `<span style="color: ${fd.color}; font-weight: bold;">${fd.text}</span>`;
+        newValue = fd.text;
+    }
     
     if (!validateCellValue(newValue, columnName)) {
         alert(`Invalid value for ${columnName}. Please enter a valid number.`);
@@ -906,7 +949,7 @@ function saveCell($cell, $input, rowIndex, columnName) {
         return;
     }
     
-    $cell.removeClass('editing').html(newValue);
+    $cell.removeClass('editing').html(displayHTML);
     
     if (newValue !== originalValue) {
         $cell.addClass('cell-changed');
@@ -943,6 +986,15 @@ function validateCellValue(value, columnName) {
         'Elevation (meter above sea level)', 'Storm Surge Flood Depth (meters)',
         'Rainfall Induced Landslide Factor of Safety'
     ];
+
+    if (columnName === 'Flood Depth (meters)') {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue) && isFinite(numValue)) {
+            return true;
+        }
+        const normalized = String(value).toLowerCase();
+        return ['little to none', '0.1 to 0.5', '0.5 to 1.5', '>1.5', 'greater than 1.5'].includes(normalized);
+    }
     
     if (numberColumns.includes(columnName)) {
         const numValue = parseFloat(value);
