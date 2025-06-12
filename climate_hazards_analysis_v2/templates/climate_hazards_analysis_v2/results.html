@@ -548,9 +548,9 @@ Climate Hazard Analysis Results
                         {% with numeric=value|to_float %}
                             {% if value == "Little to none" or numeric < 0.1 %}
                                 <span style="color: black; font-weight: bold;">Little to none</span>
-                            {% elif value == "0.1 to 0.5" or (numeric >= 0.1 and numeric < 0.5) %}
+                            {% elif value == "0.1 to 0.5" or numeric >= 0.1 and numeric < 0.5 %}
                                 <span style="color: green; font-weight: bold;">0.1 to 0.5</span>
-                            {% elif value == "0.5 to 1.5" or (numeric >= 0.5 and numeric <= 1.5) %}
+                            {% elif value == "0.5 to 1.5" or numeric >= 0.5 and numeric <= 1.5 %}
                                 <span style="color: orange; font-weight: bold;">0.5 to 1.5</span>
                             {% elif value == ">1.5" or value == "Greater than 1.5" or numeric > 1.5 %}
                                 <span style="color: red; font-weight: bold;">&gt;1.5</span>
