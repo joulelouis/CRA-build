@@ -607,14 +607,16 @@ Climate Hazard Analysis Results
                         {% endif %}
                     
                     {# Storm Surge styling #}
-                    {% elif "Storm Surge" in key and value != "N/A" %}
+                    {% elif key == "Storm Surge Flood Depth (meters)" and value != "N/A" %}
                         {% with val=value|to_float %}
-                            {% if val > 2.0 %}
-                                <span style="color: red; font-weight: bold;">{{ value }}</span>
-                            {% elif val > 1.0 %}
-                                <span style="color: orange; font-weight: bold;">{{ value }}</span>
+                            {% if val >= 1.5 %}
+                                <span style="color: red; font-weight: bold;">≥ 1.5</span>
+                            {% elif val >= 0.5 %}
+                                <span style="color: orange; font-weight: bold;">0.5 to 1.5</span>
+                            {% elif val >= 0.1 %}
+                                <span style="color: green; font-weight: bold;">0.1 to 0.5</span>
                             {% else %}
-                                <span style="color: green; font-weight: bold;">{{ value }}</span>
+                                <span style="color: black; font-weight: bold;">Little to none</span>
                             {% endif %}
                         {% endwith %}
                     
@@ -919,6 +921,37 @@ function categorizeFloodDepth(value) {
     return { text: value, color: 'black' };
 }
 
+function categorizeStormSurge(value) {
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+        if (num >= 1.5) {
+            return { text: '≥ 1.5', color: 'red' };
+        }
+        if (num >= 0.5) {
+            return { text: '0.5 to 1.5', color: 'orange' };
+        }
+        if (num >= 0.1) {
+            return { text: '0.1 to 0.5', color: 'green' };
+        }
+        return { text: 'Little to none', color: 'black' };
+    }
+
+    const normalized = String(value).toLowerCase();
+    if (normalized.includes('little')) {
+        return { text: 'Little to none', color: 'black' };
+    }
+    if (normalized.includes('0.1') && normalized.includes('0.5')) {
+        return { text: '0.1 to 0.5', color: 'green' };
+    }
+    if (normalized.includes('0.5') && normalized.includes('1.5')) {
+        return { text: '0.5 to 1.5', color: 'orange' };
+    }
+    if (normalized.includes('1.5')) {
+        return { text: '≥ 1.5', color: 'red' };
+    }
+    return { text: value, color: 'black' };
+}
+
 function categorizeWaterStress(value) {
     const num = parseFloat(value);
     if (!isNaN(num)) {
@@ -980,6 +1013,12 @@ function saveCell($cell, $input, rowIndex, columnName) {
         const fd = categorizeFloodDepth(newValue);
         displayHTML = `<span style="color: ${fd.color}; font-weight: bold;">${fd.text}</span>`;
         newValue = fd.text;
+    }
+
+    if (columnName === 'Storm Surge Flood Depth (meters)' && newValue !== 'N/A') {
+        const ss = categorizeStormSurge(newValue);
+        displayHTML = `<span style="color: ${ss.color}; font-weight: bold;">${ss.text}</span>`;
+        newValue = ss.text;
     }
 
     if (columnName === 'Water Stress Exposure (%)' && newValue !== 'N/A') {
@@ -1056,6 +1095,15 @@ function validateCellValue(value, columnName) {
         }
         const normalized = String(value).toLowerCase();
         return ['little to none', '0.1 to 0.5', '0.5 to 1.5', '>1.5', 'greater than 1.5'].includes(normalized);
+    }
+
+    if (columnName === 'Storm Surge Flood Depth (meters)') {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue) && isFinite(numValue)) {
+            return true;
+        }
+        const normalized = String(value).toLowerCase();
+        return ['little to none', '0.1 to 0.5', '0.5 to 1.5', '≥ 1.5', '>= 1.5', '>1.5', 'greater than 1.5'].includes(normalized);
     }
     
     if (numberColumns.includes(columnName)) {
