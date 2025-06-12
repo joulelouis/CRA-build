@@ -187,6 +187,8 @@ def show_results(request):
     View to display climate hazard analysis results.
     Updated to work with simplified flood categories and tropical cyclone integration.
     """
+
+    logger.info("🔥 SHOW_RESULTS FUNCTION CALLED! 🔥")  # ADD THIS LINE
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
     selected_hazards = request.session.get('climate_hazards_v2_selected_hazards', [])
@@ -271,16 +273,54 @@ def show_results(request):
         logger.info(f"Loaded CSV with shape: {df.shape}")
         logger.info(f"CSV columns: {df.columns.tolist()}")
         
+        # 🚨 EMERGENCY TC DEBUG - Check columns immediately after CSV load
+        logger.info("🚨 EMERGENCY TC DEBUG - POST CSV LOAD 🚨")
+        logger.info(f"Selected hazards: {selected_hazards}")
+        logger.info(f"DataFrame shape: {df.shape}")
+        logger.info(f"Column count: {len(df.columns)}")
+        logger.info(f"All columns: {df.columns.tolist()}")
+
+        # Check specifically for TC columns
+        tc_expected = [
+            'Extreme Windspeed 10 year Return Period (km/h)',
+            'Extreme Windspeed 20 year Return Period (km/h)', 
+            'Extreme Windspeed 50 year Return Period (km/h)',
+            'Extreme Windspeed 100 year Return Period (km/h)'
+        ]
+
+        logger.info("🔍 TC COLUMN CHECK:")
+        for i, tc_col in enumerate(tc_expected):
+            exists = tc_col in df.columns
+            logger.info(f"  {i+1}. '{tc_col}' -> {'✅ EXISTS' if exists else '❌ MISSING'}")
+
+        # Check for any TC-related columns
+        tc_related = [col for col in df.columns if 'windspeed' in col.lower() or 'extreme' in col.lower() or 'cyclone' in col.lower()]
+        logger.info(f"🌀 TC-related columns found: {tc_related}")
+
+        # Check for MSW columns (original TC columns)
+        msw_cols = [col for col in df.columns if 'MSW' in col]
+        logger.info(f"💨 MSW columns found: {msw_cols}")
+
+        # Count how many TC columns we have
+        tc_found = [col for col in tc_expected if col in df.columns]
+        logger.info(f"📊 TC SUMMARY: Expected {len(tc_expected)}, Found {len(tc_found)}")
+        logger.info(f"📊 TC found columns: {tc_found}")
+        logger.info("🚨 END EMERGENCY DEBUG - POST CSV LOAD 🚨")
+        
         # CRITICAL: Verify flood column exists and add if missing
         if 'Flood' in selected_hazards and 'Flood Depth (meters)' not in df.columns:
             logger.warning("Flood was selected but Flood Depth (meters) column is missing!")
             df['Flood Depth (meters)'] = '0.1 to 0.5'  # Add placeholder with simplified category
             logger.info("Added placeholder Flood Depth (meters) column")
         
+        # Track column count before TC processing
+        columns_before_tc = len(df.columns)
+        logger.info(f"📊 Columns before TC processing: {columns_before_tc}")
+        
         # NEW: Handle Tropical Cyclone analysis if selected
         if 'Tropical Cyclones' in selected_hazards:
             try:
-                logger.info("Processing Tropical Cyclone analysis...")
+                logger.info("🌀 Processing Tropical Cyclone analysis...")
                 from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
                 
                 tc_result = generate_tropical_cyclone_analysis(facility_csv_path)
@@ -370,6 +410,13 @@ def show_results(request):
                             logger.info(f"Successfully merged tropical cyclone data. New shape: {df.shape}")
                             logger.info(f"New columns after merge: {df.columns.tolist()}")
                             
+                            # 🚨 DEBUG: Check TC columns after merge
+                            logger.info("🚨 POST-MERGE TC CHECK 🚨")
+                            tc_cols_after_merge = [col for col in tc_expected if col in df.columns]
+                            logger.info(f"TC columns after merge: {tc_cols_after_merge}")
+                            logger.info(f"TC column count after merge: {len(tc_cols_after_merge)}")
+                            logger.info("🚨 END POST-MERGE TC CHECK 🚨")
+                            
                         else:
                             logger.warning(f"Could not merge TC data. Merge column: {merge_column}, TC wind columns: {tc_wind_columns}")
                             # Add placeholder columns with expected names
@@ -385,10 +432,30 @@ def show_results(request):
                             logger.info("Added placeholder tropical cyclone columns")
                     else:
                         logger.error(f"Tropical cyclone CSV file not found: {tc_csv_path}")
-                        # Add placeholder columns (same as above)
+                        # Add placeholder columns with expected names
+                        placeholder_columns = [
+                            'Extreme Windspeed 10 year Return Period (km/h)',
+                            'Extreme Windspeed 20 year Return Period (km/h)', 
+                            'Extreme Windspeed 50 year Return Period (km/h)', 
+                            'Extreme Windspeed 100 year Return Period (km/h)'
+                        ]
+                        for col in placeholder_columns:
+                            if col not in df.columns:
+                                df[col] = 85.0
+                        logger.info("Added placeholder tropical cyclone columns")
                 else:
                     logger.error("Tropical cyclone analysis did not return valid results")
-                    # Add placeholder columns (same as above)
+                    # Add placeholder columns with expected names
+                    placeholder_columns = [
+                        'Extreme Windspeed 10 year Return Period (km/h)',
+                        'Extreme Windspeed 20 year Return Period (km/h)', 
+                        'Extreme Windspeed 50 year Return Period (km/h)', 
+                        'Extreme Windspeed 100 year Return Period (km/h)'
+                    ]
+                    for col in placeholder_columns:
+                        if col not in df.columns:
+                            df[col] = 85.0
+                    logger.info("Added placeholder tropical cyclone columns")
                     
             except Exception as tc_error:
                 logger.exception(f"Error in tropical cyclone analysis: {str(tc_error)}")
@@ -404,12 +471,23 @@ def show_results(request):
                         df[col] = 85.0
                 logger.info("Added placeholder tropical cyclone columns due to exception")
         
+        # Track column count after TC processing
+        columns_after_tc = len(df.columns)
+        logger.info(f"📊 Columns after TC processing: {columns_after_tc} (change: {columns_after_tc - columns_before_tc})")
+        
         # Convert to dict for template
         data = df.to_dict(orient="records")
         columns = df.columns.tolist()
         
         logger.info(f"Final data has {len(data)} rows and {len(columns)} columns")
         logger.info(f"Final columns: {columns}")
+        
+        # 🚨 EMERGENCY TC DEBUG - Final check before group creation
+        logger.info("🚨 EMERGENCY TC DEBUG - PRE GROUP CREATION 🚨")
+        tc_final_check = [col for col in tc_expected if col in columns]
+        logger.info(f"TC columns in final data: {tc_final_check}")
+        logger.info(f"TC column count in final data: {len(tc_final_check)}")
+        logger.info("🚨 END EMERGENCY DEBUG - PRE GROUP CREATION 🚨")
         
         # Create detailed column groups for the table header
         groups = {}
@@ -431,7 +509,7 @@ def show_results(request):
             'Tropical Cyclones': ['Extreme Windspeed 10 year Return Period (km/h)', 
                                 'Extreme Windspeed 20 year Return Period (km/h)', 
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
-                                'Extreme Windspeed 100 year Return Period (km/h)'],  # FIXED: These match the renamed columns
+                                'Extreme Windspeed 100 year Return Period (km/h)'],
             'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius'],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
             'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
@@ -440,9 +518,33 @@ def show_results(request):
         # Add column groups for each hazard type that has columns in the data
         for hazard, cols in hazard_columns.items():
             count = sum(1 for col in cols if col in columns)
+            logger.info(f"🔍 Group Creation - Checking {hazard}: found {count} columns out of {len(cols)} expected")
+            if hazard == 'Tropical Cyclones':
+                logger.info(f"🌀 TC specific check: {[col for col in cols if col in columns]}")
             if count > 0:
                 groups[hazard] = count
-                logger.info(f"Added {hazard} group with {count} columns")
+                logger.info(f"✅ Added {hazard} group with {count} columns")
+            else:
+                logger.warning(f"❌ No columns found for {hazard} group")
+
+        logger.info("=== DEBUG: Column Detection ===")
+        logger.info(f"Final columns list: {columns}")
+        logger.info(f"Groups created: {groups}")
+        
+        if 'Flood' in selected_hazards:
+            flood_col_exists = 'Flood Depth (meters)' in columns
+            logger.info(f"'Flood Depth (meters)' in columns: {flood_col_exists}")
+        
+        # Enhanced TC Debug
+        if 'Tropical Cyclones' in selected_hazards:
+            tc_expected = ['Extreme Windspeed 10 year Return Period (km/h)', 
+                          'Extreme Windspeed 20 year Return Period (km/h)', 
+                          'Extreme Windspeed 50 year Return Period (km/h)', 
+                          'Extreme Windspeed 100 year Return Period (km/h)']
+            tc_found = [col for col in tc_expected if col in columns]
+            logger.info(f"'Tropical Cyclones' expected columns: {tc_expected}")
+            logger.info(f"'Tropical Cyclones' found columns: {tc_found}")
+            logger.info(f"'Tropical Cyclones' found count: {len(tc_found)}")
         
         # Verify specific hazard groups were added if selected
         if 'Flood' in selected_hazards:
@@ -450,12 +552,18 @@ def show_results(request):
                 logger.info(f"✓ Flood group successfully added to table headers")
             else:
                 logger.error("✗ Flood group missing from table headers!")
-                
+                        
         if 'Tropical Cyclones' in selected_hazards:
-            if 'Tropical Cyclone' in groups:
-                logger.info(f"✓ Tropical Cyclone group successfully added to table headers")
+            if 'Tropical Cyclones' in groups:  # ← Correct key name!
+                logger.info(f"✅ Tropical Cyclones group successfully added to table headers")
             else:
-                logger.error("✗ Tropical Cyclone group missing from table headers!")
+                logger.error("❌ Tropical Cyclones group missing from table headers!")
+                # Additional detailed debug
+                logger.error(f"❌ Groups dict: {groups}")
+                logger.error(f"❌ Selected hazards: {selected_hazards}")
+                logger.error(f"❌ TC columns expected: {hazard_columns['Tropical Cyclones']}")
+                tc_debug_found = [col for col in hazard_columns['Tropical Cyclones'] if col in columns]
+                logger.error(f"❌ TC columns actually found: {tc_debug_found}")
         
         # Get the paths to any generated plots
         plot_path = result.get('plot_path')
