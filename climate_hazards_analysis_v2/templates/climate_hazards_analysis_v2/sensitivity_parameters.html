@@ -51,6 +51,35 @@ Set Sensitivity Parameters
         font-size: 12px;
     }
 
+    /* Styles for combined multi-handle slider */
+    .multi-range-slider {
+        position: relative;
+        height: 40px;
+    }
+
+    .multi-range-slider input[type=range] {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        pointer-events: none;
+        appearance: none;
+        background: transparent;
+        margin: 0;
+        padding: 0;
+    }
+
+    .multi-range-slider input[type=range]::-webkit-slider-thumb {
+        pointer-events: all;
+        position: relative;
+        z-index: 3;
+    }
+
+    .multi-range-slider input[type=range]::-moz-range-thumb {
+        pointer-events: all;
+        position: relative;
+        z-index: 3;
+    }
+
     /* Asset Archetype Component Styles - MADE STICKY */
     .archetype-card {
         background-color: #F8F9FA;
@@ -352,34 +381,21 @@ Set Sensitivity Parameters
                             <div class="parameter-title">Water Stress Thresholds</div>
                             <div class="parameter-description">Set water stress percentage thresholds for risk levels for the selected asset archetype</div>
                             
-                            <!-- Low Risk Threshold -->
-                            <div class="parameter-control">
-                                <label for="waterStressLow" class="form-label">Low Risk Threshold (%): <span class="range-value" id="waterStressLowValue">10</span></label>
-                                <div class="threshold-description">Values less than this percentage are considered low risk</div>
-                                <input type="range" class="form-range" id="waterStressLow" name="water_stress_low" min="0" max="100" step="1" value="10" oninput="updateRangeValue('waterStressLow', this.value)">
-                            </div>
                             
-                            <!-- Medium Risk Threshold -->
                             <div class="parameter-control">
-                                <label class="form-label">Medium Risk Threshold (%)</label>
-                                <div class="threshold-description">From <span class="range-value" id="waterStressMediumLowerValue">11</span> To <span class="range-value" id="waterStressMediumUpperValue">30</span></div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="waterStressMediumLower" class="form-label small">From (lower bound)</label>
-                                        <input type="range" class="form-range" id="waterStressMediumLower" name="water_stress_medium_lower" min="0" max="100" step="1" value="11" oninput="updateRangeValue('waterStressMediumLower', this.value)">
-                                    </div>
-                                    <div class="col-6">
-                                        <label for="waterStressMediumUpper" class="form-label small">To (upper bound)</label>
-                                        <input type="range" class="form-range" id="waterStressMediumUpper" name="water_stress_medium_upper" min="0" max="100" step="1" value="30" oninput="updateRangeValue('waterStressMediumUpper', this.value)">
-                                    </div>
+                                <label class="form-label">Water Stress Risk Thresholds</label>
+                                <div class="threshold-description">Drag the handles to set the low, medium, and high risk thresholds</div>
+                                <div id="waterStressSlider" class="multi-range-slider">
+                                    <input type="range" id="waterStressLow" name="water_stress_low" min="0" max="100" step="1" value="10" oninput="updateAllDisplayValues()">
+                                    <input type="range" id="waterStressMedium" name="water_stress_medium" min="0" max="100" step="1" value="30" oninput="updateAllDisplayValues()">
+                                    <input type="range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateAllDisplayValues()">
                                 </div>
-                            </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div>Low: <span class="range-value" id="waterStressLowValue">10</span></div>
+                                    <div>Medium: <span class="range-value" id="waterStressMediumValue">30</span></div>
+                                    <div>High: <span class="range-value" id="waterStressHighValue">31</span></div>
+                                </div>
                             
-                            <!-- High Risk Threshold -->
-                            <div class="parameter-control">
-                                <label for="waterStressHigh" class="form-label">High Risk Threshold (%): <span class="range-value" id="waterStressHighValue">31</span></label>
-                                <div class="threshold-description">Values greater than this percentage are considered high risk</div>
-                                <input type="range" class="form-range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateRangeValue('waterStressHigh', this.value)">
                             </div>
                         </div>
                         
@@ -423,8 +439,7 @@ Set Sensitivity Parameters
     function getCurrentParameters() {
         return {
             water_stress_low: document.getElementById('waterStressLow').value,
-            water_stress_medium_lower: document.getElementById('waterStressMediumLower').value,
-            water_stress_medium_upper: document.getElementById('waterStressMediumUpper').value,
+            water_stress_medium: document.getElementById('waterStressMedium').value,
             water_stress_high: document.getElementById('waterStressHigh').value
         };
     }
@@ -434,18 +449,30 @@ Set Sensitivity Parameters
         if (!params) return;
 
         document.getElementById('waterStressLow').value = params.water_stress_low || 10;
-        document.getElementById('waterStressMediumLower').value = params.water_stress_medium_lower || 11;
-        document.getElementById('waterStressMediumUpper').value = params.water_stress_medium_upper || 30;
+        document.getElementById('waterStressMedium').value = params.water_stress_medium || 30;
         document.getElementById('waterStressHigh').value = params.water_stress_high || 31;
 
         updateAllDisplayValues();
     }
 
+    // Ensure slider handles remain in logical order
+    function enforceSliderOrder() {
+        const low = document.getElementById('waterStressLow');
+        const medium = document.getElementById('waterStressMedium');
+        const high = document.getElementById('waterStressHigh');
+
+        if (parseInt(low.value) > parseInt(medium.value)) {
+            medium.value = low.value;
+        }
+        if (parseInt(medium.value) > parseInt(high.value)) {
+            high.value = medium.value;
+        }
+    }
+
     // Function to update all range value displays
     function updateAllDisplayValues() {
         updateRangeValue('waterStressLow', document.getElementById('waterStressLow').value);
-        updateRangeValue('waterStressMediumLower', document.getElementById('waterStressMediumLower').value);
-        updateRangeValue('waterStressMediumUpper', document.getElementById('waterStressMediumUpper').value);
+        updateRangeValue('waterStressMedium', document.getElementById('waterStressMedium').value);
         updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
     }
 
@@ -514,8 +541,7 @@ Set Sensitivity Parameters
         if (confirm('Are you sure you want to reset all Water Stress parameters to their default values?')) {
             // Reset form elements to default values
             document.getElementById('waterStressLow').value = 10;
-            document.getElementById('waterStressMediumLower').value = 11;
-            document.getElementById('waterStressMediumUpper').value = 30;
+            document.getElementById('waterStressMedium').value = 30;
             document.getElementById('waterStressHigh').value = 31;
 
             updateAllDisplayValues();
