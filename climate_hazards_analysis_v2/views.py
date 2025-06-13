@@ -851,8 +851,16 @@ def sensitivity_parameters(request):
                 'water_stress_high': int(request.POST.get('water_stress_high', 31)),
                 'water_stress_not_material': int(request.POST.get('water_stress_not_material', 0)),
             }
+
+            # Extract Heat sensitivity parameters from the form
+            heat_params = {
+                'heat_low': int(request.POST.get('heat_low', 10)),
+                'heat_high': int(request.POST.get('heat_high', 45)),
+                'heat_not_material': int(request.POST.get('heat_not_material', 0)),
+            }
             
             logger.info(f"Water Stress parameters received: {water_stress_params}")
+            logger.info(f"Heat parameters received: {heat_params}")
             
             # Get existing archetype parameters from session
             archetype_params = request.session.get('climate_hazards_v2_archetype_params', {})
@@ -869,19 +877,20 @@ def sensitivity_parameters(request):
                         if archetype_name not in collected_archetype_params:
                             collected_archetype_params[archetype_name] = {}
                         collected_archetype_params[archetype_name][param_name] = int(request.POST.get(key))
+
+            # Combine parameters
+            combined_params = {**water_stress_params, **heat_params}
             
             # Use collected parameters if they exist, otherwise use current form values
             if collected_archetype_params:
                 archetype_params.update(collected_archetype_params)
                 logger.info(f"Updated archetype parameters from form submission: {collected_archetype_params}")
             elif selected_archetype:
-                # Store parameters for specific archetype
-                archetype_params[selected_archetype] = water_stress_params
-                logger.info(f"Saved Water Stress parameters for archetype '{selected_archetype}': {water_stress_params}")
+                archetype_params[selected_archetype] = combined_params
+                logger.info(f"Saved parameters for archetype '{selected_archetype}': {combined_params}")
             else:
-                # Store as default parameters for all archetypes
-                archetype_params['_default'] = water_stress_params
-                logger.info(f"Saved default Water Stress parameters: {water_stress_params}")
+                archetype_params['_default'] = combined_params
+                logger.info(f"Saved default parameters: {combined_params}")
             
             # Update session with archetype parameters
             request.session['climate_hazards_v2_archetype_params'] = archetype_params
@@ -893,7 +902,7 @@ def sensitivity_parameters(request):
                 logger.info("Redirecting to sensitivity results")
                 return redirect('climate_hazards_analysis_v2:sensitivity_results')
             else:
-                context['success_message'] = f"Water Stress parameters saved!"
+                context['success_message'] = "Sensitivity parameters saved!"
             
         except (ValueError, TypeError) as e:
             logger.error(f"Error processing Water Stress sensitivity parameters: {e}")

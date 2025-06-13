@@ -403,7 +403,7 @@ Set Sensitivity Parameters
                         <!-- Hidden field to store selected archetype -->
                         <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
                         
-                        <!-- Water Stress Thresholds Only -->
+                        <!-- Water Stress Thresholds -->
 
                         <div class="accordion" id="waterStressAccordion">
                             <div class="accordion-item parameter-card">
@@ -439,6 +439,39 @@ Set Sensitivity Parameters
                         </div>
                         
                         <!-- Hidden field to track which button was clicked -->
+
+                        <!-- Heat Thresholds -->
+                        <div class="accordion" id="heatAccordion">
+                            <div class="accordion-item parameter-card">
+                                <h2 class="accordion-header d-flex align-items-center" id="heatHeader">
+                                    <button class="accordion-button flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#heatCollapse" aria-expanded="true" aria-controls="heatCollapse">
+                                        <strong>Heat Thresholds</strong>
+                                        <div class="form-check position-absolute end-0 top-50 translate-middle-y me-5">
+                                            <input class="form-check-input" type="checkbox" id="heatNotMaterial" name="heat_not_material">
+                                            <label class="form-check-label" for="heatNotMaterial">This hazard is not material to the asset</label>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="heatCollapse" class="accordion-collapse collapse show" aria-labelledby="heatHeader" data-bs-parent="#heatAccordion">
+                                    <div class="accordion-body">
+                                        <div class="parameter-description">Set heat days thresholds for risk levels for the selected asset archetype</div>
+                                        <div class="parameter-control">
+                                            <div id="heatSlider" class="multi-range-slider">
+                                                <div id="heatTrack" class="slider-track"></div>
+                                                <input type="range" id="heatLow" name="heat_low" min="0" max="366" step="1" value="10" oninput="updateAllDisplayValues()">
+                                                <input type="range" id="heatHigh" name="heat_high" min="0" max="366" step="1" value="45" oninput="updateAllDisplayValues()">
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <div>Low: 0 to <span class="range-value" id="heatLowValue">10</span></div>
+                                                <div>Medium: <span class="range-value" id="heatMediumLow">10</span> to <span class="range-value" id="heatMediumHigh">45</span></div>
+                                                <div>High: <span class="range-value" id="heatHighValue">45</span> to 366</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <input type="hidden" id="submit-type" name="submit_type" value="">
                         
                         <!-- Action Buttons -->
@@ -475,12 +508,15 @@ Set Sensitivity Parameters
     let defaultParameters = null;
     let isAccordionEnabled = false;
 
-    // Function to capture current Water Stress parameters only
+    // Function to capture current parameters for both hazards
     function getCurrentParameters() {
         return {
             water_stress_low: document.getElementById('waterStressLow').value,
             water_stress_high: document.getElementById('waterStressHigh').value,
-            water_stress_not_material: document.getElementById('waterStressNotMaterial').checked ? 1 : 0
+            water_stress_not_material: document.getElementById('waterStressNotMaterial').checked ? 1 : 0,
+            heat_low: document.getElementById('heatLow').value,
+            heat_high: document.getElementById('heatHigh').value,
+            heat_not_material: document.getElementById('heatNotMaterial').checked ? 1 : 0
         };
     }
 
@@ -491,15 +527,20 @@ Set Sensitivity Parameters
         document.getElementById('waterStressLow').value = params.water_stress_low !== undefined ? params.water_stress_low : 10;
         document.getElementById('waterStressHigh').value = params.water_stress_high !== undefined ? params.water_stress_high : 31;
         document.getElementById('waterStressNotMaterial').checked = !!params.water_stress_not_material;
+        document.getElementById('heatLow').value = params.heat_low !== undefined ? params.heat_low : 10;
+        document.getElementById('heatHigh').value = params.heat_high !== undefined ? params.heat_high : 45;
+        document.getElementById('heatNotMaterial').checked = !!params.heat_not_material;
 
         updateAllDisplayValues();
-        toggleWaterStressHazard();
+        toggleHazard('waterStress');
+        toggleHazard('heat');
     }
 
     // Ensure slider handles remain in logical order
-    function enforceSliderOrder() {
-        const low = document.getElementById('waterStressLow');
-        const high = document.getElementById('waterStressHigh');
+    function enforceSliderOrder(prefix) {
+        const low = document.getElementById(prefix + 'Low');
+        const high = document.getElementById(prefix + 'High');
+        if (!low || !high) return;
 
         if (parseInt(low.value) > parseInt(high.value)) {
             high.value = low.value;
@@ -507,25 +548,32 @@ Set Sensitivity Parameters
     }
 
     // Update gradient track based on handle positions
-    function updateSliderTrack() {
-        const low = parseInt(document.getElementById('waterStressLow').value);
-        const high = parseInt(document.getElementById('waterStressHigh').value);
-        const min = parseInt(document.getElementById('waterStressLow').min);
-        const max = parseInt(document.getElementById('waterStressLow').max);
+    function updateSliderTrack(prefix) {
+        const lowEl = document.getElementById(prefix + 'Low');
+        const highEl = document.getElementById(prefix + 'High');
+        if (!lowEl || !highEl) return;
+        const low = parseInt(lowEl.value);
+        const high = parseInt(highEl.value);
+        const min = parseInt(lowEl.min);
+        const max = parseInt(lowEl.max);
         const lowPct = ((low - min) / (max - min)) * 100;
         const highPct = ((high - min) / (max - min)) * 100;
-        document.getElementById('waterStressTrack').style.background =
+        document.getElementById(prefix + 'Track').style.background =
             `linear-gradient(to right, green 0%, green ${lowPct}%, orange ${lowPct}%, orange ${highPct}%, red ${highPct}%, red 100%)`;
     }
 
     // Function to update all range value displays
     function updateAllDisplayValues() {
-        enforceSliderOrder();
-        updateRangeValue('waterStressLow', document.getElementById('waterStressLow').value);
-        updateRangeValue('waterStressHigh', document.getElementById('waterStressHigh').value);
-        document.getElementById('waterStressMediumLow').textContent = document.getElementById('waterStressLow').value;
-        document.getElementById('waterStressMediumHigh').textContent = document.getElementById('waterStressHigh').value;
-        updateSliderTrack();
+        ['waterStress', 'heat'].forEach(prefix => {
+            const lowEl = document.getElementById(prefix + 'Low');
+            if (!lowEl) return;
+            enforceSliderOrder(prefix);
+            updateRangeValue(prefix + 'Low', lowEl.value);
+            updateRangeValue(prefix + 'High', document.getElementById(prefix + 'High').value);
+            document.getElementById(prefix + 'MediumLow').textContent = lowEl.value;
+            document.getElementById(prefix + 'MediumHigh').textContent = document.getElementById(prefix + 'High').value;
+            updateSliderTrack(prefix);
+        });
     }
 
     // Function to select an archetype
@@ -593,32 +641,36 @@ Set Sensitivity Parameters
     // Update accordion state based on whether the hazard is marked not material
     // and whether an archetype has been selected
     function updateAccordionState() {
-        const checkbox = document.getElementById('waterStressNotMaterial');
-        const accordionButton = document.querySelector('#waterStressHeader button');
-        const collapseEl = document.getElementById('waterStressCollapse');
-        const sliderInputs = document.querySelectorAll('#waterStressSlider input');
+        ['waterStress', 'heat'].forEach(prefix => {
+            const checkbox = document.getElementById(prefix + 'NotMaterial');
+            const accordionButton = document.querySelector('#' + prefix + 'Header button');
+            const collapseEl = document.getElementById(prefix + 'Collapse');
+            const sliderInputs = document.querySelectorAll('#' + prefix + 'Slider input');
+            if (!checkbox || !accordionButton) return;
 
-        const disabled = !isAccordionEnabled || checkbox.checked;
-        accordionButton.disabled = disabled;
-        sliderInputs.forEach(input => input.disabled = disabled);
-        checkbox.disabled = !isAccordionEnabled;
+            const disabled = !isAccordionEnabled || checkbox.checked;
+            accordionButton.disabled = disabled;
+            sliderInputs.forEach(input => input.disabled = disabled);
+            checkbox.disabled = !isAccordionEnabled;
 
-        const collapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, {toggle: false});
-        if (disabled) {
-            collapse.hide();
-        } else {
-            collapse.show();
-        }
+            const collapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, {toggle: false});
+            if (disabled) {
+                collapse.hide();
+            } else {
+                collapse.show();
+            }
+        });
     }
 
     // Enable/disable water stress accordion when checkbox changes
-    function toggleWaterStressHazard() {
-        const checkbox = document.getElementById('waterStressNotMaterial');
+    function toggleHazard(prefix) {
+        const checkbox = document.getElementById(prefix + 'NotMaterial');
+        if (!checkbox) return;
         if (checkbox.checked) {
             if (
                 defaultParameters &&
-                (document.getElementById('waterStressLow').value !== defaultParameters.water_stress_low ||
-                 document.getElementById('waterStressHigh').value !== defaultParameters.water_stress_high)
+                (document.getElementById(prefix + 'Low').value != defaultParameters[prefix.toLowerCase() + '_low'] ||
+                 document.getElementById(prefix + 'High').value != defaultParameters[prefix.toLowerCase() + '_high'])
             ) {
                 applyParameters(defaultParameters);
             }
@@ -628,11 +680,13 @@ Set Sensitivity Parameters
 
     // Function to reset all parameters to defaults
     function resetToDefaults() {
-        if (confirm('Are you sure you want to reset all Water Stress parameters to their default values?')) {
-            // Reset form elements to default values
+        if (confirm('Are you sure you want to reset all Water Stress and Heat parameters to their default values?')) {
             document.getElementById('waterStressLow').value = 10;
             document.getElementById('waterStressHigh').value = 31;
             document.getElementById('waterStressNotMaterial').checked = false;
+            document.getElementById('heatLow').value = 10;
+            document.getElementById('heatHigh').value = 45;
+            document.getElementById('heatNotMaterial').checked = false;
 
             updateAllDisplayValues();
             
@@ -664,7 +718,10 @@ Set Sensitivity Parameters
 
         // Initially keep the accordion disabled until an archetype is selected
         updateAccordionState();
-        document.getElementById('waterStressNotMaterial').addEventListener('change', toggleWaterStressHazard);
+        ['waterStress', 'heat'].forEach(prefix => {
+            const el = document.getElementById(prefix + 'NotMaterial');
+            if (el) el.addEventListener('change', () => toggleHazard(prefix));
+        });
     });
 
     // Handle form submission to collect all archetype parameters
