@@ -597,6 +597,13 @@ Set Sensitivity Parameters
 
         const collapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, {toggle: false});
         if (disabled) {
+            if (
+                defaultParameters &&
+                (document.getElementById('waterStressLow').value !== defaultParameters.water_stress_low ||
+                 document.getElementById('waterStressHigh').value !== defaultParameters.water_stress_high)
+            ) {
+                applyParameters(defaultParameters);
+            }
             collapse.hide();
         } else {
             collapse.show();
@@ -634,6 +641,11 @@ Set Sensitivity Parameters
         // Capture default parameters
         defaultParameters = getCurrentParameters();
         updateAllDisplayValues();
+
+        // Ensure the Water Stress accordion starts expanded
+        const collapseEl = document.getElementById('waterStressCollapse');
+        bootstrap.Collapse.getOrCreateInstance(collapseEl).show();
+
         toggleWaterStressHazard();
         document.getElementById('waterStressNotMaterial').addEventListener('change', toggleWaterStressHazard);
     });
