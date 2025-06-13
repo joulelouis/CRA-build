@@ -848,7 +848,6 @@ def sensitivity_parameters(request):
             # Extract Water Stress sensitivity parameters from the form
             water_stress_params = {
                 'water_stress_low': int(request.POST.get('water_stress_low', 10)),
-                'water_stress_medium': int(request.POST.get('water_stress_medium', 30)),
                 'water_stress_high': int(request.POST.get('water_stress_high', 31)),
             }
             
@@ -1053,7 +1052,6 @@ def sensitivity_results(request):
                 # Get parameters for this archetype (or default)
                 params = archetype_params.get(archetype, archetype_params.get('_default', {
                     'water_stress_low': 10,
-                    'water_stress_medium': 30,
                     'water_stress_high': 31
                 }))
                 
