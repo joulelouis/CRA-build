@@ -849,6 +849,7 @@ def sensitivity_parameters(request):
             water_stress_params = {
                 'water_stress_low': int(request.POST.get('water_stress_low', 10)),
                 'water_stress_high': int(request.POST.get('water_stress_high', 31)),
+                'water_stress_not_material': int(request.POST.get('water_stress_not_material', 0)),
             }
             
             logger.info(f"Water Stress parameters received: {water_stress_params}")

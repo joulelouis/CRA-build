@@ -473,12 +473,14 @@ Set Sensitivity Parameters
     let archetypeParameters = {};
     let currentSelectedArchetype = null;
     let defaultParameters = null;
+    let isAccordionEnabled = false;
 
     // Function to capture current Water Stress parameters only
     function getCurrentParameters() {
         return {
             water_stress_low: document.getElementById('waterStressLow').value,
-            water_stress_high: document.getElementById('waterStressHigh').value
+            water_stress_high: document.getElementById('waterStressHigh').value,
+            water_stress_not_material: document.getElementById('waterStressNotMaterial').checked ? 1 : 0
         };
     }
 
@@ -486,10 +488,12 @@ Set Sensitivity Parameters
     function applyParameters(params) {
         if (!params) return;
 
-        document.getElementById('waterStressLow').value = params.water_stress_low || 10;
-        document.getElementById('waterStressHigh').value = params.water_stress_high || 31;
+        document.getElementById('waterStressLow').value = params.water_stress_low !== undefined ? params.water_stress_low : 10;
+        document.getElementById('waterStressHigh').value = params.water_stress_high !== undefined ? params.water_stress_high : 31;
+        document.getElementById('waterStressNotMaterial').checked = !!params.water_stress_not_material;
 
         updateAllDisplayValues();
+        toggleWaterStressHazard();
     }
 
     // Ensure slider handles remain in logical order
@@ -557,6 +561,8 @@ Set Sensitivity Parameters
         }
 
         currentSelectedArchetype = archetypeName;
+        isAccordionEnabled = true;
+        updateAccordionState();
     }
 
     // Function to save parameters for current archetype
@@ -584,19 +590,31 @@ Set Sensitivity Parameters
         document.getElementById(prefix + 'Value').textContent = value;
     }
 
-    // Enable/disable water stress accordion based on checkbox
-    function toggleWaterStressHazard() {
+    // Update accordion state based on whether the hazard is marked not material
+    // and whether an archetype has been selected
+    function updateAccordionState() {
         const checkbox = document.getElementById('waterStressNotMaterial');
         const accordionButton = document.querySelector('#waterStressHeader button');
         const collapseEl = document.getElementById('waterStressCollapse');
         const sliderInputs = document.querySelectorAll('#waterStressSlider input');
 
-        const disabled = checkbox.checked;
+        const disabled = !isAccordionEnabled || checkbox.checked;
         accordionButton.disabled = disabled;
         sliderInputs.forEach(input => input.disabled = disabled);
+        checkbox.disabled = !isAccordionEnabled;
 
         const collapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, {toggle: false});
         if (disabled) {
+            collapse.hide();
+        } else {
+            collapse.show();
+        }
+    }
+
+    // Enable/disable water stress accordion when checkbox changes
+    function toggleWaterStressHazard() {
+        const checkbox = document.getElementById('waterStressNotMaterial');
+        if (checkbox.checked) {
             if (
                 defaultParameters &&
                 (document.getElementById('waterStressLow').value !== defaultParameters.water_stress_low ||
@@ -604,10 +622,8 @@ Set Sensitivity Parameters
             ) {
                 applyParameters(defaultParameters);
             }
-            collapse.hide();
-        } else {
-            collapse.show();
         }
+        updateAccordionState();
     }
 
     // Function to reset all parameters to defaults
@@ -616,6 +632,7 @@ Set Sensitivity Parameters
             // Reset form elements to default values
             document.getElementById('waterStressLow').value = 10;
             document.getElementById('waterStressHigh').value = 31;
+            document.getElementById('waterStressNotMaterial').checked = false;
 
             updateAllDisplayValues();
             
@@ -633,6 +650,9 @@ Set Sensitivity Parameters
             document.getElementById('default-instructions').style.display = 'block';
             document.getElementById('save-archetype-btn').style.display = 'none';
             document.getElementById('selected-archetype-input').value = '';
+
+            isAccordionEnabled = false;
+            updateAccordionState();
         }
     }
 
@@ -642,11 +662,8 @@ Set Sensitivity Parameters
         defaultParameters = getCurrentParameters();
         updateAllDisplayValues();
 
-        // Ensure the Water Stress accordion starts expanded
-        const collapseEl = document.getElementById('waterStressCollapse');
-        bootstrap.Collapse.getOrCreateInstance(collapseEl).show();
-
-        toggleWaterStressHazard();
+        // Initially keep the accordion disabled until an archetype is selected
+        updateAccordionState();
         document.getElementById('waterStressNotMaterial').addEventListener('change', toggleWaterStressHazard);
     });
 
