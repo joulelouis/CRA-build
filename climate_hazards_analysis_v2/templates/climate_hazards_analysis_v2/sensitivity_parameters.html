@@ -404,22 +404,35 @@ Set Sensitivity Parameters
                         <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
                         
                         <!-- Water Stress Thresholds Only -->
-                        <div class="parameter-card">
-                            <div class="parameter-title">Water Stress Thresholds</div>
-                            <div class="parameter-description">Set water stress percentage thresholds for risk levels for the selected asset archetype</div>
-                            
-                            
-                            <div class="parameter-control">
-                                <div id="waterStressSlider" class="multi-range-slider">
-                                    <div id="waterStressTrack" class="slider-track"></div>
-                                    <input type="range" id="waterStressLow" name="water_stress_low" min="0" max="100" step="1" value="10" oninput="updateAllDisplayValues()">
+
+                        <div class="accordion" id="waterStressAccordion">
+                            <div class="accordion-item parameter-card">
+                                <h2 class="accordion-header d-flex align-items-center" id="waterStressHeader">
+                                    <button class="accordion-button flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#waterStressCollapse" aria-expanded="true" aria-controls="waterStressCollapse">
+                                        Water Stress Thresholds
+                                        <div class="form-check ms-3">
+                                        <input class="form-check-input" type="checkbox" id="waterStressNotMaterial" name="water_stress_not_material">
+                                        <label class="form-check-label" for="waterStressNotMaterial">This hazard is not material to the asset</label>
+                                    </div>
+                                    </button>
                                     
-                                    <input type="range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateAllDisplayValues()">
-                                </div>
-                                <div class="d-flex justify-content-between mt-2">
-                                    <div>Low: 0% to <span class="range-value" id="waterStressLowValue">10</span> %</div>
-                                    <div>Medium: <span class="range-value" id="waterStressMediumLow">10</span>% to <span class="range-value" id="waterStressMediumHigh">31</span>%</div>
-                                    <div>High: <span class="range-value" id="waterStressHighValue">31</span> to 100%</div>
+                                </h2>
+                                <div id="waterStressCollapse" class="accordion-collapse collapse show" aria-labelledby="waterStressHeader" data-bs-parent="#waterStressAccordion">
+                                    <div class="accordion-body">
+                                        <div class="parameter-description">Set water stress percentage thresholds for risk levels for the selected asset archetype</div>
+                                        <div class="parameter-control">
+                                            <div id="waterStressSlider" class="multi-range-slider">
+                                                <div id="waterStressTrack" class="slider-track"></div>
+                                                <input type="range" id="waterStressLow" name="water_stress_low" min="0" max="100" step="1" value="10" oninput="updateAllDisplayValues()">
+                                                <input type="range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateAllDisplayValues()">
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <div>Low: 0% to <span class="range-value" id="waterStressLowValue">10</span> %</div>
+                                                <div>Medium: <span class="range-value" id="waterStressMediumLow">10</span>% to <span class="range-value" id="waterStressMediumHigh">31</span>%</div>
+                                                <div>High: <span class="range-value" id="waterStressHighValue">31</span> to 100%</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             
                             </div>
@@ -435,7 +448,7 @@ Set Sensitivity Parameters
                                     <i class="fas fa-arrow-left me-2"></i> Back to Asset Exposure Results
                                 </a>
                                 <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
-                                    <i class="fas fa-undo me-2"></i> Reset to Defaults
+                                    <i class="fas fa-undo me-2"></i> Reset to Default
                                 </button>
                             </div>
                             <div class="d-flex gap-2">
@@ -571,6 +584,25 @@ Set Sensitivity Parameters
         document.getElementById(prefix + 'Value').textContent = value;
     }
 
+    // Enable/disable water stress accordion based on checkbox
+    function toggleWaterStressHazard() {
+        const checkbox = document.getElementById('waterStressNotMaterial');
+        const accordionButton = document.querySelector('#waterStressHeader button');
+        const collapseEl = document.getElementById('waterStressCollapse');
+        const sliderInputs = document.querySelectorAll('#waterStressSlider input');
+
+        const disabled = checkbox.checked;
+        accordionButton.disabled = disabled;
+        sliderInputs.forEach(input => input.disabled = disabled);
+
+        const collapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, {toggle: false});
+        if (disabled) {
+            collapse.hide();
+        } else {
+            collapse.show();
+        }
+    }
+
     // Function to reset all parameters to defaults
     function resetToDefaults() {
         if (confirm('Are you sure you want to reset all Water Stress parameters to their default values?')) {
@@ -602,6 +634,8 @@ Set Sensitivity Parameters
         // Capture default parameters
         defaultParameters = getCurrentParameters();
         updateAllDisplayValues();
+        toggleWaterStressHazard();
+        document.getElementById('waterStressNotMaterial').addEventListener('change', toggleWaterStressHazard);
     });
 
     // Handle form submission to collect all archetype parameters
