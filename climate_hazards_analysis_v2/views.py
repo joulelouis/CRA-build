@@ -19,6 +19,17 @@ from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_t
 
 logger = logging.getLogger(__name__)
 
+def parse_numeric(value, default=0):
+    """Convert POST parameter to int or float.
+
+    Returns ``default`` if conversion fails.
+    """
+    try:
+        float_val = float(value)
+        return int(float_val) if float_val.is_integer() else float_val
+    except (TypeError, ValueError):
+        raise ValueError(f"Invalid numeric value: {value}")
+
 def view_map(request):
     """
     Main view for the Climate Hazards Analysis V2 module that displays the map interface
@@ -847,15 +858,15 @@ def sensitivity_parameters(request):
             
             # Extract Water Stress sensitivity parameters from the form
             water_stress_params = {
-                'water_stress_low': int(request.POST.get('water_stress_low', 10)),
-                'water_stress_high': int(request.POST.get('water_stress_high', 31)),
+                'water_stress_low': parse_numeric(request.POST.get('water_stress_low', 10)),
+                'water_stress_high': parse_numeric(request.POST.get('water_stress_high', 31)),
                 'water_stress_not_material': int(request.POST.get('water_stress_not_material', 0)),
             }
 
             # Extract Heat sensitivity parameters from the form
             heat_params = {
-                'heat_low': int(request.POST.get('heat_low', 10)),
-                'heat_high': int(request.POST.get('heat_high', 45)),
+                'heat_low': parse_numeric(request.POST.get('heat_low', 10)),
+                'heat_high': parse_numeric(request.POST.get('heat_high', 45)),
                 'heat_not_material': int(request.POST.get('heat_not_material', 0)),
             }
             
