@@ -470,6 +470,38 @@ Set Sensitivity Parameters
                             
                             </div>
                         </div>
+
+                        <!-- Tropical Cyclones Thresholds -->
+                        <div class="accordion" id="tropicalCycloneAccordion">
+                            <div class="accordion-item parameter-card">
+                                <h2 class="accordion-header d-flex align-items-center" id="tropicalCycloneHeader">
+                                    <button class="accordion-button flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#tropicalCycloneCollapse" aria-expanded="true" aria-controls="tropicalCycloneCollapse">
+                                        <strong>Tropical Cyclones Thresholds</strong>
+                                        <div class="form-check position-absolute end-0 top-50 translate-middle-y me-5">
+                                            <input class="form-check-input" type="checkbox" id="tropicalCycloneNotMaterial" name="tropical_cyclone_not_material">
+                                            <label class="form-check-label" for="tropicalCycloneNotMaterial">This hazard is not material to the asset</label>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="tropicalCycloneCollapse" class="accordion-collapse collapse show" aria-labelledby="tropicalCycloneHeader" data-bs-parent="#tropicalCycloneAccordion">
+                                    <div class="accordion-body">
+                                        <div class="parameter-description">Set wind speed thresholds for risk levels for the selected asset archetype</div>
+                                        <div class="parameter-control">
+                                            <div id="tropicalCycloneSlider" class="multi-range-slider">
+                                                <div id="tropicalCycloneTrack" class="slider-track"></div>
+                                                <input type="range" id="tropicalCycloneLow" name="tropical_cyclone_low" min="0" max="300" step="1" value="119" oninput="updateAllDisplayValues()">
+                                                <input type="range" id="tropicalCycloneHigh" name="tropical_cyclone_high" min="0" max="300" step="1" value="178" oninput="updateAllDisplayValues()">
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <div>Low: 0 to <span class="range-value" id="tropicalCycloneLowValue">119</span></div>
+                                                <div>Medium: <span class="range-value" id="tropicalCycloneMediumLow">119</span> to <span class="range-value" id="tropicalCycloneMediumHigh">178</span></div>
+                                                <div>High: <span class="range-value" id="tropicalCycloneHighValue">178</span> to 300</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Hidden field to track which button was clicked -->
 
@@ -550,6 +582,9 @@ Set Sensitivity Parameters
             water_stress_low: document.getElementById('waterStressLow').value,
             water_stress_high: document.getElementById('waterStressHigh').value,
             water_stress_not_material: document.getElementById('waterStressNotMaterial').checked ? 1 : 0,
+            tropical_cyclone_low: document.getElementById('tropicalCycloneLow').value,
+            tropical_cyclone_high: document.getElementById('tropicalCycloneHigh').value,
+            tropical_cyclone_not_material: document.getElementById('tropicalCycloneNotMaterial').checked ? 1 : 0,
             heat_low: document.getElementById('heatLow').value,
             heat_high: document.getElementById('heatHigh').value,
             heat_not_material: document.getElementById('heatNotMaterial').checked ? 1 : 0
@@ -566,6 +601,9 @@ Set Sensitivity Parameters
         document.getElementById('waterStressLow').value = params.water_stress_low !== undefined ? params.water_stress_low : 10;
         document.getElementById('waterStressHigh').value = params.water_stress_high !== undefined ? params.water_stress_high : 31;
         document.getElementById('waterStressNotMaterial').checked = !!params.water_stress_not_material;
+        document.getElementById('tropicalCycloneLow').value = params.tropical_cyclone_low !== undefined ? params.tropical_cyclone_low : 119;
+        document.getElementById('tropicalCycloneHigh').value = params.tropical_cyclone_high !== undefined ? params.tropical_cyclone_high : 178;
+        document.getElementById('tropicalCycloneNotMaterial').checked = !!params.tropical_cyclone_not_material;
         document.getElementById('heatLow').value = params.heat_low !== undefined ? params.heat_low : 10;
         document.getElementById('heatHigh').value = params.heat_high !== undefined ? params.heat_high : 45;
         document.getElementById('heatNotMaterial').checked = !!params.heat_not_material;
@@ -573,6 +611,7 @@ Set Sensitivity Parameters
         updateAllDisplayValues();
         toggleHazard('flood');
         toggleHazard('waterStress');
+        toggleHazard('tropicalCyclone');
         toggleHazard('heat');
     }
 
@@ -604,7 +643,7 @@ Set Sensitivity Parameters
 
     // Function to update all range value displays
     function updateAllDisplayValues() {
-        ['waterStress', 'flood', 'heat'].forEach(prefix => {
+        ['waterStress', 'flood', 'heat', 'tropicalCyclone'].forEach(prefix => {
             const lowEl = document.getElementById(prefix + 'Low');
             if (!lowEl) return;
             enforceSliderOrder(prefix);
@@ -681,7 +720,7 @@ Set Sensitivity Parameters
     // Update accordion state based on whether the hazard is marked not material
     // and whether an archetype has been selected
     function updateAccordionState() {
-        ['waterStress', 'flood', 'heat'].forEach(prefix => {
+        ['waterStress', 'flood', 'heat', 'tropicalCyclone'].forEach(prefix => {
             const checkbox = document.getElementById(prefix + 'NotMaterial');
             const accordionButton = document.querySelector('#' + prefix + 'Header button');
             const collapseEl = document.getElementById(prefix + 'Collapse');
@@ -720,7 +759,7 @@ Set Sensitivity Parameters
 
     // Function to reset all parameters to defaults
     function resetToDefaults() {
-        if (confirm('Are you sure you want to reset all Water Stress, Flood and Heat parameters to their default values?')) {
+        if (confirm('Are you sure you want to reset all Water Stress, Flood, Heat and Tropical Cyclone parameters to their default values?')) {
             document.getElementById('waterStressLow').value = 10;
             document.getElementById('waterStressHigh').value = 31;
             document.getElementById('waterStressNotMaterial').checked = false;
@@ -730,6 +769,9 @@ Set Sensitivity Parameters
             document.getElementById('heatLow').value = 10;
             document.getElementById('heatHigh').value = 45;
             document.getElementById('heatNotMaterial').checked = false;
+            document.getElementById('tropicalCycloneLow').value = 119;
+            document.getElementById('tropicalCycloneHigh').value = 178;
+            document.getElementById('tropicalCycloneNotMaterial').checked = false;
 
             updateAllDisplayValues();
             
@@ -761,7 +803,7 @@ Set Sensitivity Parameters
 
         // Initially keep the accordion disabled until an archetype is selected
         updateAccordionState();
-        ['waterStress', 'flood', 'heat'].forEach(prefix => {
+        ['waterStress', 'flood', 'heat', 'tropicalCyclone'].forEach(prefix => {
             const el = document.getElementById(prefix + 'NotMaterial');
             if (el) el.addEventListener('change', () => toggleHazard(prefix));
         });
