@@ -916,7 +916,10 @@ Adjust Sensitivity Thresholds
         updateAccordionState();
         ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge'].forEach(prefix => {
             const el = document.getElementById(prefix + 'NotMaterial');
-            if (el) el.addEventListener('change', () => toggleHazard(prefix));
+            if (el) {
+                el.addEventListener('change', () => toggleHazard(prefix));
+                el.addEventListener('click', e => e.stopPropagation());
+            }
         });
     });
 
