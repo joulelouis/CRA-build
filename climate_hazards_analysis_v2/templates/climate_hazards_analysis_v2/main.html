@@ -59,6 +59,51 @@
     .steps-container {
         padding: 0 30px;
     }
+
+    .step-group-headers {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .step-header {
+        position: relative;
+        padding: 4px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+    }
+
+    .step-header.arrow {
+        margin-right: 20px;
+    }
+
+    .step-header.arrow::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -20px;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-top: 18px solid transparent;
+        border-bottom: 18px solid transparent;
+        border-left: 20px solid #dee2e6;
+    }
+
+    .step-header.arrow::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -18px;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-top: 17px solid transparent;
+        border-bottom: 17px solid transparent;
+        border-left: 18px solid #f8f9fa;
+    }
     
     .step-item {
         transition: all 0.3s ease;
@@ -116,6 +161,11 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-2 step-group-headers">
+                    <div class="step-header arrow text-center" style="width:40%;">Exposure Overlay</div>
+                    <div class="step-header arrow text-center" style="width:40%;">Exposure Override</div>
+                    <div class="step-header text-center" style="width:20%;">Sensitivity Analysis</div>
+                </div>
                 <div class="steps-container d-flex justify-content-between position-relative">
                     <!-- Progress Line -->
                     <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
@@ -128,7 +178,7 @@
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                             1
                         </div>
-                        <div class="step-label text-center" style="font-weight: 500;">Upload Facility Location</div>
+                        <div class="step-label text-center" style="font-weight: 500;">Upload Asset Data</div>
                     </div>
                     
                     <!-- Step 2 (completed) -->
@@ -136,7 +186,7 @@
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                             2
                         </div>
-                        <div class="step-label text-center" style="font-weight: 500;">Select Climate/Weather Hazards and Generate Asset Exposure</div>
+                        <div class="step-label text-center" style="font-weight: 500;">Select Hazards and Scenarios</div>
                     </div>
                     
                     <!-- Step 3 (active) -->
@@ -144,7 +194,7 @@
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                             3
                         </div>
-                        <div class="step-label text-center" style="font-weight: 500;">Asset Exposure Results</div>
+                        <div class="step-label text-center" style="font-weight: 500;">Adjust Magnitude with Local Conditions</div>
                     </div>
                     
                     <!-- Step 4 (upcoming) -->
@@ -152,7 +202,7 @@
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
                             4
                         </div>
-                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Set Sensitivity Parameters</div>
+                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Adjust Sensitivity Thresholds</div>
                     </div>
                     
                     <!-- Step 5 (upcoming) -->
@@ -160,7 +210,7 @@
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9ecef; color: #6c757d; font-weight: bold; margin-bottom: 10px;">
                             5
                         </div>
-                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">Sensitivity Results</div>
+                        <div class="step-label text-center" style="font-weight: 500; color: #6c757d;">View Sensitivity Results</div>
                     </div>
                 </div>
             </div>
@@ -190,7 +240,7 @@
                 {% csrf_token %}
                 <div class="card h-100 mb-3 custom-card">
                     <div class="card-header no-border upload-card-header">
-                        <strong>Upload Facility Location Excel Sheet</strong>
+                        <strong>Upload Asset Data Excel Sheet</strong>
                     </div>
                     <div class="card-body upload-card-body">
                         <div class="file-input-wrapper">
@@ -220,7 +270,7 @@
                     <li>Click "Generate Map" to display facilities on the map.</li>
                     <li>Click anywhere on the map to add a new marker.</li>
                     <li>Hover over markers to see facility names.</li>
-                    <li>Click "Proceed to Select Climate/Weather Hazard" button to select climate/weather hazards and generate asset exposure.</li>
+                    <li>Click "Proceed to Select Hazards and Scenarios" button to select hazards and scenarios.</li>
                 </ol>
             </div>
         </div>
@@ -261,7 +311,7 @@
                 <button id="proceed-button" class="btn btn-warning btn-lg shadow" 
                         onclick="proceedToSelectHazards()" 
                         style="display: block !important;">
-                    <strong>Proceed to Select Climate/Weather Hazard</strong>
+                    <strong>Proceed to Select Hazards and Scenarios</strong>
                     <i class="fas fa-arrow-right ms-2"></i>
                 </button>
                 
@@ -434,7 +484,7 @@
         document.querySelector('.active-progress').style.width = '66%';
         
         // Navigate to the hazard selection page
-        alert("Proceeding to select climate/weather hazards...");
+        //alert("Proceeding to select climate/weather hazards...");
         window.location.href = "{% url 'climate_hazards_analysis_v2:select_hazards' %}";
     }
 

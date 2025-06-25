@@ -1199,7 +1199,7 @@ def sensitivity_results(request):
 @require_http_methods(["POST"])
 def save_table_changes(request):
     """
-    Handle AJAX requests to save changes made to the Asset Exposure Results table.
+    Handle AJAX requests to save changes made to the Adjust Magnitude with Local Conditions table.
     Updates the session data and optionally saves to CSV file.
     """
     try:
