@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_GET
 from django.utils.decorators import method_decorator
 from .utils import standardize_facility_dataframe, load_cached_hazard_data, combine_facility_with_hazard_data
+from .error_utils import handle_sensitivity_param_error
 import logging
 import copy
 
@@ -807,9 +808,8 @@ def identify_high_risk_assets(data, selected_hazards):
 
 def sensitivity_parameters(request):
     """
-    View for setting Water Stress sensitivity parameters for climate hazard analysis.
+    View for setting sensitivity parameters for climate hazard analysis.
     This is the fourth step in the climate hazard analysis workflow.
-    Now supports archetype-specific parameter configuration for Water Stress only.
     """
     # Get facility data and selected hazards from session
     facility_data = request.session.get('climate_hazards_v2_facility_data', [])
@@ -894,6 +894,27 @@ def sensitivity_parameters(request):
                 'heat_high': parse_numeric(request.POST.get('heat_high', 45)),
                 'heat_not_material': int(request.POST.get('heat_not_material', 0)),
             }
+
+            # Extract Flood sensitivity parameters from the form
+            flood_params = {
+                'flood_low': parse_numeric(request.POST.get('flood_low', 0.5)),
+                'flood_high': parse_numeric(request.POST.get('flood_high', 1.5)),
+                'flood_not_material': int(request.POST.get('flood_not_material', 0)),
+            }
+
+            # Extract Tropical Cyclone sensitivity parameters from the form
+            tropical_cyclone_params = {
+                'tropical_cyclone_low': parse_numeric(request.POST.get('tropical_cyclone_low', 119)),
+                'tropical_cyclone_high': parse_numeric(request.POST.get('tropical_cyclone_high', 178)),
+                'tropical_cyclone_not_material': int(request.POST.get('tropical_cyclone_not_material', 0)),
+            }
+
+            # Extract Storm Surge sensitivity parameters from the form
+            storm_surge_params = {
+                'storm_surge_low': parse_numeric(request.POST.get('storm_surge_low', 0.5)),
+                'storm_surge_high': parse_numeric(request.POST.get('storm_surge_high', 1.5)),
+                'storm_surge_not_material': int(request.POST.get('storm_surge_not_material', 0)),
+            }
             
             logger.info(f"Water Stress parameters received: {water_stress_params}")
             logger.info(f"Heat parameters received: {heat_params}")
@@ -912,10 +933,16 @@ def sensitivity_parameters(request):
                         archetype_name, param_name = match.groups()
                         if archetype_name not in collected_archetype_params:
                             collected_archetype_params[archetype_name] = {}
-                        collected_archetype_params[archetype_name][param_name] = int(request.POST.get(key))
+                        collected_archetype_params[archetype_name][param_name] = parse_numeric(request.POST.get(key))
 
             # Combine parameters
-            combined_params = {**water_stress_params, **heat_params}
+            combined_params = {
+                **water_stress_params,
+                **heat_params,
+                **flood_params,
+                **tropical_cyclone_params,
+                **storm_surge_params,
+            }
             
             # Use collected parameters if they exist, otherwise use current form values
             if collected_archetype_params:
@@ -941,10 +968,9 @@ def sensitivity_parameters(request):
                 context['success_message'] = "Sensitivity parameters saved!"
             
         except (ValueError, TypeError) as e:
-            logger.error(f"Error processing Water Stress sensitivity parameters: {e}")
-            context['error'] = f"Error processing parameters: {str(e)}"
+            handle_sensitivity_param_error(context, e)
         except Exception as e:
-            logger.exception(f"Unexpected error in Water Stress sensitivity parameters: {e}")
+            logger.exception(f"Unexpected error in sensitivity parameter processing: {e}")
             context['error'] = "An unexpected error occurred while processing parameters."
 
     # For GET requests or if there was an error, show the form
@@ -953,7 +979,7 @@ def sensitivity_parameters(request):
 
 def sensitivity_results(request):
     """
-    View to display climate hazard analysis results with archetype-specific Water Stress sensitivity parameters.
+    View to display climate hazard analysis results with archetype-specific sensitivity parameters.
     This is step 5 in the climate hazard analysis workflow.
     """
     # Get facility data and selected hazards from session
@@ -968,7 +994,7 @@ def sensitivity_results(request):
     
     if not archetype_params:
         return render(request, 'climate_hazards_analysis_v2/sensitivity_parameters.html', {
-            'error': 'No sensitivity parameters found. Please set Water Stress parameters first.',
+            'error': 'No sensitivity parameters found. Please set sensitivity parameters first.',
             'facility_count': len(facility_data),
             'selected_hazards': selected_hazards,
             'asset_archetypes': []
