@@ -263,7 +263,7 @@
                                 </label>
                                 
                                 <!-- File Name Display -->
-                                <p id="file-name" class="file-name-display">No file chosen</p>
+                                <p id="file-name" class="file-name-display">{{ uploaded_file_name|default:"No file chosen" }}</p>
                             </div>
                         </div>
 
@@ -274,8 +274,8 @@
             </div>
             <div class="card-body p-3 bg-light rounded">
                 <ol class="mb-0 ps-3">
-                    <li>Upload a CSV file with facility locations (must include Latitude/Longitude columns).</li>
-                    <li>Click "Generate Map" to display facilities on the map.</li>
+                    <li>Upload a CSV or Excel (.xlsx) file with facility locations (must include Latitude/Longitude columns).</li>
+                    <li>The map will be generated automatically after the file is uploaded.</li>
                     <li>Click anywhere on the map to add a new marker.</li>
                     <li>Hover over markers to see facility names.</li>
                     <li>Click "Proceed to Select Hazards and Scenarios" button to select hazards and scenarios.</li>
@@ -291,14 +291,11 @@
                                     data-bs-toggle="modal" data-bs-target="#csvPreviewModal" onclick="previewCSV()">
                                 <strong>Preview Excel Upload</strong>
                             </button>
-                            <button type="submit" id="upload-btn" class="btn btn-warning upload-button flex-fill">
-                                <strong>Generate Map</strong>
-                            </button>
                         </div>
                     </div>
                 </div>
                 <!-- Hidden File Input -->
-                <input type="file" name="facility_csv" id="facilityCsv" accept=".csv" class="d-none" onchange="updateFileName()">
+                <input type="file" name="facility_csv" id="facilityCsv" accept=".csv,.xlsx" class="d-none" onchange="updateFileName()">
             </form>
         </div>
         
@@ -394,6 +391,7 @@
   
         if (input.files.length > 0) {
             fileNameDisplay.textContent = input.files[0].name;
+            document.getElementById('upload-form').submit();
         } else {
             fileNameDisplay.textContent = "No file chosen";
         }
@@ -401,46 +399,45 @@
 
     // Function to read the CSV file and populate the preview table in the modal
     function previewCSV() {
-      var input = document.getElementById("facilityCsv");
-      if (input.files.length > 0) {
-          // Show loading indicator
-          document.getElementById('preview-loading').style.display = 'block';
-          document.getElementById('preview-table-container').style.display = 'none';
-          
-          var file = input.files[0];
-          var reader = new FileReader();
-          reader.onload = function(e) {
-              // Hide loading indicator and show table
-              document.getElementById('preview-loading').style.display = 'none';
-              document.getElementById('preview-table-container').style.display = 'block';
-              
-              var csvData = e.target.result;
-              var lines = csvData.split("\n");
-              var headerHtml = "";
-              var bodyHtml = "";
-              if (lines.length > 0) {
-                  // Assume the first line contains headers
-                  var headers = lines[0].split(",");
-                  headerHtml += headers.map(function(header) {
-                      return "<th>" + header.trim() + "</th>";
-                  }).join("");
-              }
-              // Process each row after the header
-              for (var i = 1; i < lines.length; i++) {
-                  if (lines[i].trim() === "") continue;
-                  var cells = lines[i].split(",");
-                  var rowHtml = cells.map(function(cell) {
-                      return "<td>" + cell.trim() + "</td>";
-                  }).join("");
-                  bodyHtml += "<tr>" + rowHtml + "</tr>";
-              }
-              document.getElementById("preview-table-header").innerHTML = headerHtml;
-              document.getElementById("preview-table-body").innerHTML = bodyHtml;
-          };
-          reader.readAsText(file);
-      } else {
-          alert("Please select a file first");
-      }
+      // Show loading indicator while fetching
+      document.getElementById('preview-loading').style.display = 'block';
+      document.getElementById('preview-table-container').style.display = 'none';
+
+      fetch("{% url 'climate_hazards_analysis_v2:preview_uploaded_file' %}")
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('No uploaded file found');
+            }
+            return response.text();
+        })
+        .then(function(csvData) {
+            document.getElementById('preview-loading').style.display = 'none';
+            document.getElementById('preview-table-container').style.display = 'block';
+
+            var lines = csvData.split("\n");
+            var headerHtml = "";
+            var bodyHtml = "";
+            if (lines.length > 0) {
+                var headers = lines[0].split(",");
+                headerHtml += headers.map(function(header) {
+                    return "<th>" + header.trim() + "</th>";
+                }).join("");
+            }
+            for (var i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === "") continue;
+                var cells = lines[i].split(",");
+                var rowHtml = cells.map(function(cell) {
+                    return "<td>" + cell.trim() + "</td>";
+                }).join("");
+                bodyHtml += "<tr>" + rowHtml + "</tr>";
+            }
+            document.getElementById("preview-table-header").innerHTML = headerHtml;
+            document.getElementById("preview-table-body").innerHTML = bodyHtml;
+        })
+        .catch(function(error) {
+            document.getElementById('preview-loading').style.display = 'none';
+            alert(error.message || 'No uploaded file found');
+        });
     }
     
     // Ensure facilityMarkers global variable exists for script compatibility

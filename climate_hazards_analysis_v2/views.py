@@ -6,7 +6,7 @@ import pandas as pd
 import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_GET
 from django.utils.decorators import method_decorator
 from .utils import standardize_facility_dataframe, load_cached_hazard_data, combine_facility_with_hazard_data
 import logging
@@ -38,9 +38,10 @@ def view_map(request):
     context = {
         'error': None,
         'success_message': None,
+        'uploaded_file_name': request.session.get('climate_hazards_v2_uploaded_filename')
     }
     
-    # If a facility CSV has been uploaded through the form
+    # If a facility CSV or Excel file has been uploaded through the form
     if request.method == 'POST' and request.FILES.get('facility_csv'):
         try:
             # Save the uploaded file
@@ -54,11 +55,18 @@ def view_map(request):
                 for chunk in file.chunks():
                     destination.write(chunk)
             
-            # Store file path in session
-            request.session['climate_hazards_v2_facility_csv_path'] = file_path
-            
-            # Process the CSV to get facility data
-            df = pd.read_csv(file_path)
+            ext = os.path.splitext(file.name)[1].lower()
+
+            # Process the uploaded file to get facility data
+            if ext in ['.xls', '.xlsx']:
+                df = pd.read_excel(file_path)
+                # Convert to CSV for downstream processing
+                csv_path = os.path.splitext(file_path)[0] + '.csv'
+                df.to_csv(csv_path, index=False)
+                request.session['climate_hazards_v2_facility_csv_path'] = csv_path
+            else:
+                df = pd.read_csv(file_path)
+                request.session['climate_hazards_v2_facility_csv_path'] = file_path
             
             # Standardize column names and validate data
             df = standardize_facility_dataframe(df)
@@ -116,6 +124,23 @@ def get_facility_data(request):
             'facilities': facility_data,
             'error': str(e)
         })
+    
+
+@require_GET
+def preview_uploaded_file(request):
+    """Return the most recently uploaded facility file for preview."""
+    file_path = request.session.get('climate_hazards_v2_facility_csv_path')
+    if not file_path or not os.path.exists(file_path):
+        return JsonResponse({'error': 'No uploaded file found'}, status=404)
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        with open(file_path, 'r', encoding='latin-1') as f:
+            content = f.read()
+
+    return HttpResponse(content, content_type='text/csv')
 
 def add_facility(request):
     """
