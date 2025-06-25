@@ -49,13 +49,17 @@ View Sensitivity Results
         padding: 4px 12px;
         font-size: 14px;
         font-weight: 600;
-        border: 1px solid #dee2e6;
+        border: 5px solid #dee2e6;
         border-radius: 4px;
         background-color: #f8f9fa;
     }
 
     .active-step-header {
         border-color: #F1D500 !important;
+    }
+
+    .active-step-header.arrow::after {
+        border-left-color: #F1D500 !important;
     }
 
     .step-header.arrow {
@@ -771,11 +775,11 @@ function highlightHeaders(currentStep) {
 
     [overlay, override, sensitivity].forEach(el => el.classList.remove('active-step-header'));
 
-    if (currentStep <= 2) {
+    if (currentStep >= 1) {
         overlay.classList.add('active-step-header');
-    } else if (currentStep <= 4) {
+    } if (currentStep >= 3) {
         override.classList.add('active-step-header');
-    } else {
+    } if (currentStep >= 5) {
         sensitivity.classList.add('active-step-header');
     }
 }
