@@ -663,6 +663,15 @@ Adjust Sensitivity Thresholds
     let defaultParameters = null;
     let isAccordionEnabled = false;
 
+    // Mapping from UI prefix to parameter prefix used in defaultParameters
+    const paramKeyMap = {
+        waterStress: 'water_stress',
+        flood: 'flood',
+        heat: 'heat',
+        tropicalCyclone: 'tropical_cyclone',
+        stormSurge: 'storm_surge'
+    };
+
     // Function to capture current parameters for all hazards
     function getCurrentParameters() {
         return {
@@ -843,14 +852,16 @@ Adjust Sensitivity Thresholds
         const checkbox = document.getElementById(prefix + 'NotMaterial');
         if (!checkbox) return;
         if (checkbox.checked) {
+            const keyPrefix = paramKeyMap[prefix] || prefix.toLowerCase();
             if (
                 defaultParameters &&
-                (document.getElementById(prefix + 'Low').value != defaultParameters[prefix.toLowerCase() + '_low'] ||
-                 document.getElementById(prefix + 'High').value != defaultParameters[prefix.toLowerCase() + '_high'])
+                (document.getElementById(prefix + 'Low').value != defaultParameters[keyPrefix + '_low'] ||
+                document.getElementById(prefix + 'High').value != defaultParameters[keyPrefix + '_high'])
             ) {
                 applyParameters(defaultParameters);
             }
         }
+        
         updateAccordionState();
     }
 
