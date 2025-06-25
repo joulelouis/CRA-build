@@ -252,6 +252,10 @@ Adjust Sensitivity Thresholds
         background-color: #f8f9fa;
     }
 
+    .active-step-header {
+        border-color: #F1D500 !important;
+    }
+
     .step-header.arrow {
         margin-right: 20px;
     }
@@ -340,9 +344,9 @@ Adjust Sensitivity Thresholds
             <div class="card">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between mb-2 step-group-headers">
-                        <div class="step-header arrow text-center" style="width:40%;">Exposure Overlay</div>
-                        <div class="step-header arrow text-center" style="width:40%;">Exposure Override</div>
-                        <div class="step-header text-center" style="width:20%;">Sensitivity Analysis</div>
+                        <div id="overlay-header" class="step-header arrow text-center" style="width:40%;">Exposure Overlay</div>
+                        <div id="override-header" class="step-header arrow text-center" style="width:40%;">Exposure Override</div>
+                        <div id="sensitivity-header" class="step-header text-center" style="width:20%;">Sensitivity Analysis</div>
                     </div>
                     <div class="steps-container d-flex justify-content-between position-relative">
                         <!-- Progress Line -->
@@ -934,5 +938,37 @@ Adjust Sensitivity Thresholds
         
         console.log('Submitting archetype parameters:', archetypeParameters);
     });
+
+    function highlightHeaders(currentStep) {
+        const overlay = document.getElementById('overlay-header');
+        const override = document.getElementById('override-header');
+        const sensitivity = document.getElementById('sensitivity-header');
+
+        [overlay, override, sensitivity].forEach(el => el.classList.remove('active-step-header'));
+
+        if (currentStep <= 2) {
+            overlay.classList.add('active-step-header');
+        } else if (currentStep <= 4) {
+            override.classList.add('active-step-header');
+        } else {
+            sensitivity.classList.add('active-step-header');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const path = window.location.pathname;
+        let currentStep = 1;
+        if (path.includes('select-hazards')) {
+            currentStep = 2;
+        } else if (path.includes('results')) {
+            currentStep = 3;
+        } else if (path.includes('sensitivity-parameters')) {
+            currentStep = 4;
+        } else if (path.includes('sensitivity-results')) {
+            currentStep = 5;
+        }
+        highlightHeaders(currentStep);
+    });
+    
 </script>
 {% endblock %}
