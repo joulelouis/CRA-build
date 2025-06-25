@@ -742,7 +742,7 @@ Adjust Sensitivity Thresholds
         const high = document.getElementById(prefix + 'High');
         if (!low || !high) return;
 
-        if (parseInt(low.value) > parseInt(high.value)) {
+        if (parseFloat(low.value) > parseFloat(high.value)) {
             high.value = low.value;
         }
     }
@@ -752,10 +752,10 @@ Adjust Sensitivity Thresholds
         const lowEl = document.getElementById(prefix + 'Low');
         const highEl = document.getElementById(prefix + 'High');
         if (!lowEl || !highEl) return;
-        const low = parseInt(lowEl.value);
-        const high = parseInt(highEl.value);
-        const min = parseInt(lowEl.min);
-        const max = parseInt(lowEl.max);
+        const low = parseFloat(lowEl.value);
+        const high = parseFloat(highEl.value);
+        const min = parseFloat(lowEl.min);
+        const max = parseFloat(lowEl.max);
         const lowPct = ((low - min) / (max - min)) * 100;
         const highPct = ((high - min) / (max - min)) * 100;
         document.getElementById(prefix + 'Track').style.background =
