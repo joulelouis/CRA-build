@@ -24,6 +24,7 @@ from sea_level_rise_analysis.utils.sea_level_rise_analysis import generate_sea_l
 from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
 from water_stress.utils.water_stress_analysis import generate_water_stress_analysis
 from heat_exposure_analysis.utils.heat_exposure_analysis import generate_heat_exposure_analysis
+from heat_exposure_analysis.utils.heat_future_analysis import generate_heat_future_analysis
 from flood_exposure_analysis.utils.flood_exposure_analysis import generate_flood_exposure_analysis
 
 # Set up logging
@@ -772,6 +773,23 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                     df_values, on=['Facility', 'Lat', 'Long'], how='left'
                 )
                 logger.info(f"Combined DF after {name} merge - shape: {combined_df.shape}")
+
+        # Add future heat exposure values if heat analysis was performed
+        if 'Heat' in selected_fields:
+            try:
+                combined_df = generate_heat_future_analysis(combined_df)
+
+                future_cols = [c for c in combined_df.columns if c.startswith('n>35degC_ssp585')]
+                if 'Days over 35° Celsius' in combined_df.columns and future_cols:
+                    cols = [c for c in combined_df.columns if c not in future_cols]
+                    insert_pos = cols.index('Days over 35° Celsius') + 1
+                    for col in future_cols:
+                        cols.insert(insert_pos, col)
+                        insert_pos += 1
+                    combined_df = combined_df[cols]
+                logger.info('Future heat exposure columns added')
+            except Exception as e:
+                logger.warning(f'Failed to add future heat exposure values: {e}')
 
         # VERIFICATION: Check if flood column exists
         logger.info("=== FINAL VERIFICATION ===")
