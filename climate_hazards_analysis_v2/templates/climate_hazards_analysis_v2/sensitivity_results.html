@@ -586,15 +586,15 @@ View Sensitivity Results
                                                         {% elif value == "N/A" %}
                                                             {{ value }}
                                                         {% else %}
-                                                            {% with ss=value|to_float %}
+                                                            {% with ss=value|to_float low=row.SS_Low_Threshold|default:0.5 high=row.SS_High_Threshold|default:1.5 %}
                                                                 {% if ss < 0.1 %}
-                                                                    <span style="color:black">{{ value }}</span>
-                                                                {% elif ss < 0.5 %}
-                                                                    <span style="color:green">{{ value }}</span>
-                                                                {% elif ss < 1.5 %}
-                                                                    <span style="color:orange">{{ value }}</span>
+                                                                    <span style="color:black">Little to none</span>
+                                                                {% elif ss < low %}
+                                                                    <span style="color:green">0.1 to {{ low }}</span>
+                                                                {% elif ss < high %}
+                                                                    <span style="color:orange">{{ low }} to {{ high }}</span>
                                                                 {% else %}
-                                                                    <span style="color:red">{{ value }}</span>
+                                                                    <span style="color:red">≥ {{ high }}</span>
                                                                 {% endif %}
                                                             {% endwith %}
                                                         {% endif %}
@@ -605,15 +605,15 @@ View Sensitivity Results
                                                         {% elif value == "N/A" %}
                                                             {{ value }}
                                                         {% else %}
-                                                            {% with ril=value|to_float %}
-                                                                {% if ril == 0 %}
-                                                                    <span style="color:black">{{ value }}</span>
-                                                                {% elif ril < 1 %}
-                                                                    <span style="color:red">{{ value }}</span>
-                                                                {% elif ril < 1.5 %}
-                                                                    <span style="color:orange">{{ value }}</span>
+                                                            {% with ril=value|to_float high=1.5 low=1 %}
+                                                                {% if ril > 2.5 %}
+                                                                    <span style="color:black">FoS significantly greater than {{ high }}</span>
+                                                                {% elif ril > high %}
+                                                                    <span style="color:green">FoS > {{ high }}</span>
+                                                                {% elif ril >= low %}
+                                                                    <span style="color:orange">FoS {{ low }} &lt; FoS &lt; {{ high }}</span>
                                                                 {% else %}
-                                                                    <span style="color:green">{{ value }}</span>
+                                                                    <span style="color:red">FoS < {{ low }}</span>
                                                                 {% endif %}
                                                             {% endwith %}
                                                         {% endif %}

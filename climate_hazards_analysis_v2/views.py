@@ -1124,18 +1124,23 @@ def sensitivity_results(request):
                 # Get parameters for this archetype (or default)
                 params = archetype_params.get(archetype, archetype_params.get('_default', {
                     'water_stress_low': 10,
-                    'water_stress_high': 31
+                    'water_stress_high': 31,
+                    'storm_surge_low': 0.5,
+                    'storm_surge_high': 1.5,
                 }))
                 
                 # Store the archetype and parameters used for this facility (for template access)
                 row['Asset Archetype'] = archetype
                 row['WS_Low_Threshold'] = params['water_stress_low']
                 row['WS_High_Threshold'] = params['water_stress_high']
+                row['SS_Low_Threshold'] = params.get('storm_surge_low', 0.5)
+                row['SS_High_Threshold'] = params.get('storm_surge_high', 1.5)
                 
                 logger.info(f"Applied thresholds for '{facility_name}' ({archetype}): Low<{params['water_stress_low']}%, High>{params['water_stress_high']}%")
         
         # Add new columns to the columns list and reorder to put Asset Archetype as 2nd column
-        new_columns = ['Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold']
+        new_columns = ['Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold',
+                       'SS_Low_Threshold', 'SS_High_Threshold']
         
         # Reorder columns to put Asset Archetype as 2nd column
         if 'Asset Archetype' not in columns:
@@ -1151,7 +1156,7 @@ def sensitivity_results(request):
             
             # Add remaining columns (excluding the ones we're repositioning)
             for col in columns:
-                if col not in ['Facility', 'Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold']:
+                if col not in ['Facility', 'Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold', 'SS_Low_Threshold', 'SS_High_Threshold']:
                     ordered_columns.append(col)
             
             # Add threshold columns at the end
@@ -1159,6 +1164,10 @@ def sensitivity_results(request):
                 ordered_columns.append('WS_Low_Threshold')
             if 'WS_High_Threshold' not in columns:
                 ordered_columns.append('WS_High_Threshold')
+            if 'SS_Low_Threshold' not in columns:
+                ordered_columns.append('SS_Low_Threshold')
+            if 'SS_High_Threshold' not in columns:
+                ordered_columns.append('SS_High_Threshold')
             
             # Update the columns list
             columns = ordered_columns
@@ -1186,7 +1195,9 @@ def sensitivity_results(request):
         # Create detailed column groups for the table header (same as original but with new columns)
         groups = {}
         # Base group - Facility Information
-        facility_cols = ['Facility', 'Lat', 'Long', 'Asset Archetype', 'WS Low Threshold', 'WS High Threshold']
+        facility_cols = ['Facility', 'Lat', 'Long', 'Asset Archetype',
+                        'WS Low Threshold', 'WS High Threshold',
+                        'SS Low Threshold', 'SS High Threshold']
         facility_count = sum(1 for col in facility_cols if col in columns)
         if facility_count > 0:
             groups['Facility Information'] = facility_count
