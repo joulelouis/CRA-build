@@ -109,6 +109,11 @@ View Sensitivity Results
     
     /* Custom Table Styles */
     .custom-table {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
         width: 100%;
         border-collapse: collapse;
         border-spacing: 0 8px;
@@ -122,14 +127,50 @@ View Sensitivity Results
 
     .custom-table-header {
         background-color: #F8F8F8;
-        font-weight: bold;
-        text-align: left;
+        color: #495057;
+        font-weight: 600;
+        text-align: center;
+        border: none;
+        padding: 15px 10px;
+        vertical-align: middle;
+        font-size: 14px;
     }
 
-    .custom-table-row {
-        background-color: #FFFFFF;
-        border-radius: 8px;
-        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
+    .custom-table-row:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .custom-table-row:hover {
+        background-color: #e9ecef;
+        transition: background-color 0.3s ease;
+    }
+
+    .custom-table td {
+        border: none;
+        padding: 12px 10px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 13px;
+    }
+
+    /* Custom Card Styling */
+    .custom-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-card .card-header {
+        background-color: #f8f9fa;
+        border-bottom: none;
+        border-radius: 15px 15px 0 0;
+        padding: 20px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .no-border {
+        border: none !important;
     }
     
     /* Column Selector Styles */
@@ -218,14 +259,6 @@ View Sensitivity Results
         background-color: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
         padding: 10px 4px;
-    }
-
-    /* Better cell styling for uniform look */
-    .custom-table td {
-        text-align: center;
-        vertical-align: middle;
-        padding: 8px 4px;
-        word-break: break-word;
     }
 
     /* Keep header text centered as well */
