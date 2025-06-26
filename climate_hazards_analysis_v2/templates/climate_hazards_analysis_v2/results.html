@@ -939,16 +939,21 @@ function editCell($cell) {
             'Little to none',
             '0.1 to 0.5',
             '0.5 to 1.5',
-            'greater than or equal to 1.5'
+            'Greater than or equal to 1.5'
         ];
         options.forEach(opt => {
             const option = $('<option></option>').val(opt).text(opt);
             $input.append(option);
         });
-        const category = categorizeFloodDepth(currentValue).text;
+        let category;
+        if (columnName === 'Storm Surge Flood Depth (meters)') {
+            category = categorizeStormSurge(currentValue).text;
+        } else {
+            category = categorizeFloodDepth(currentValue).text;
+        }
         let selected = category;
         if (category === '>1.5' || category === '≥ 1.5') {
-            selected = 'greater than or equal to 1.5';
+            selected = 'Greater than or equal to 1.5';
         }
         $input.val(selected);
     } else {
@@ -989,7 +994,7 @@ function getInputType(columnName) {
         'Storm Surge Flood Depth (meters)', 'Rainfall Induced Landslide Factor of Safety'
     ];
 
-    if (columnName === 'Flood Depth (meters)') {
+    if (columnName === 'Flood Depth (meters)' || columnName === 'Storm Surge Flood Depth (meters)') {
         return 'select';
     }
     
