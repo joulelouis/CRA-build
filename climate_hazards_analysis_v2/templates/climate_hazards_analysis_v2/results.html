@@ -612,10 +612,10 @@ Climate Hazard Analysis Results
                                 <span style="color: black; font-weight: bold;">Little to none</span>
                             {% elif value == "0.1 to 0.5" or numeric >= 0.1 and numeric < 0.5 %}
                                 <span style="color: green; font-weight: bold;">0.1 to 0.5</span>
-                            {% elif value == "0.5 to 1.5" or numeric >= 0.5 and numeric <= 1.5 %}
+                            {% elif value == "0.5 to 1.5" or numeric >= 0.5 and numeric < 1.5 %}
                                 <span style="color: orange; font-weight: bold;">0.5 to 1.5</span>
-                            {% elif value == ">1.5" or value == "Greater than 1.5" or numeric > 1.5 %}
-                                <span style="color: red; font-weight: bold;">&gt;1.5</span>
+                            {% elif value == ">1.5" or value == "Greater than 1.5" or value == ">= 1.5" or value == "≥ 1.5" or value == "Greater than or equal to 1.5" or numeric >= 1.5 %}
+                                <span style="color: red; font-weight: bold;">≥ 1.5</span>
                             {% else %}
                                 {{ value }}
                             {% endif %}
@@ -932,7 +932,28 @@ function editCell($cell) {
     const rowIndex = parseInt($cell.attr('data-row'));
     
     const inputType = getInputType(columnName);
-    const $input = $(`<input type="${inputType}" class="form-control edit-input" value="${currentValue}">`);
+    let $input;
+    if (inputType === 'select') {
+        $input = $('<select class="form-control edit-input"></select>');
+        const options = [
+            'Little to none',
+            '0.1 to 0.5',
+            '0.5 to 1.5',
+            'greater than or equal to 1.5'
+        ];
+        options.forEach(opt => {
+            const option = $('<option></option>').val(opt).text(opt);
+            $input.append(option);
+        });
+        const category = categorizeFloodDepth(currentValue).text;
+        let selected = category;
+        if (category === '>1.5' || category === '≥ 1.5') {
+            selected = 'greater than or equal to 1.5';
+        }
+        $input.val(selected);
+    } else {
+        $input = $(`<input type="${inputType}" class="form-control edit-input" value="${currentValue}">`);
+    }
     
     $input.css({
         'width': '100%',
@@ -967,6 +988,10 @@ function getInputType(columnName) {
         'Extreme Windspeed 100 year Return Period (km/h)',
         'Storm Surge Flood Depth (meters)', 'Rainfall Induced Landslide Factor of Safety'
     ];
+
+    if (columnName === 'Flood Depth (meters)') {
+        return 'select';
+    }
     
     if (percentageColumns.includes(columnName) || numberColumns.includes(columnName)) {
         return 'number';
@@ -977,8 +1002,8 @@ function getInputType(columnName) {
 function categorizeFloodDepth(value) {
     const num = parseFloat(value);
     if (!isNaN(num)) {
-        if (num > 1.5) {
-            return { text: '>1.5', color: 'red' };
+        if (num >= 1.5) {
+            return { text: '≥ 1.5', color: 'red' };
         }
         if (num >= 0.5) {
             return { text: '0.5 to 1.5', color: 'orange' };
@@ -1000,7 +1025,7 @@ function categorizeFloodDepth(value) {
         return { text: '0.5 to 1.5', color: 'orange' };
     }
     if (normalized.includes('1.5')) {
-        return { text: '>1.5', color: 'red' };
+        return { text: '≥ 1.5', color: 'red' };
     }
     return { text: value, color: 'black' };
 }
@@ -1216,7 +1241,7 @@ function validateCellValue(value, columnName) {
             return true;
         }
         const normalized = String(value).toLowerCase();
-        return ['little to none', '0.1 to 0.5', '0.5 to 1.5', '>1.5', 'greater than 1.5'].includes(normalized);
+        return ['little to none', '0.1 to 0.5', '0.5 to 1.5', '>1.5', '>= 1.5', '≥ 1.5', 'greater than 1.5', 'greater than or equal to 1.5'].includes(normalized);
     }
 
     if (columnName === 'Storm Surge Flood Depth (meters)') {
