@@ -186,6 +186,7 @@
                         <div id="overlay-header" class="step-header arrow text-center" style="width:40%;">Exposure Overlay</div>
                         <div id="override-header" class="step-header arrow text-center" style="width:40%;">Exposure Override</div>
                         <div id="sensitivity-header" class="step-header text-center" style="width:20%;">Sensitivity Analysis</div>
+                        <div id="impact-header" class="step-header text-center" style="width:20%;">Impact Assessment</div>
                     </div>
                     <div class="steps-container d-flex justify-content-between position-relative">
                         <!-- Progress Line -->
@@ -215,7 +216,7 @@
                             <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">
                                 3
                             </div>
-                            <div class="step-label text-center" style="font-weight: 500;">Adjust Magnitude with Local Conditions</div>
+                            <div class="step-label text-center" style="font-weight: 500;">Consider Site Conditions to Adjust Magnitude</div>
                         </div>
                         
                         <!-- Step 4 (upcoming) -->
@@ -382,8 +383,9 @@
         const overlay = document.getElementById('overlay-header');
         const override = document.getElementById('override-header');
         const sensitivity = document.getElementById('sensitivity-header');
+        const impact = document.getElementById('impact-header');
 
-        [overlay, override, sensitivity].forEach(el => el.classList.remove('active-step-header'));
+        [overlay, override, sensitivity, impact].forEach(el => el.classList.remove('active-step-header'));
 
         if (currentStep >= 1) {
             overlay.classList.add('active-step-header');
@@ -391,6 +393,8 @@
             override.classList.add('active-step-header');
         } if (currentStep >= 5) {
             sensitivity.classList.add('active-step-header');
+        } if (currentStep >= 6) {
+            impact.classList.add('active-step-header');
         }
     }
 
