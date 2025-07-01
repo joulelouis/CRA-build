@@ -779,7 +779,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             try:
                 combined_df = generate_heat_future_analysis(combined_df)
 
-                future_cols = [c for c in combined_df.columns if c.startswith('n>35degC_ssp585')]
+                future_cols = [c for c in combined_df.columns if c.startswith('DaysOver35C_ssp')]
                 if 'Days over 35° Celsius' in combined_df.columns and future_cols:
                     cols = [c for c in combined_df.columns if c not in future_cols]
                     insert_pos = cols.index('Days over 35° Celsius') + 1

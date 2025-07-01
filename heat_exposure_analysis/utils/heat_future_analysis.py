@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_heat_future_analysis(df):
-    """Add future heat exposure values for SSP585 scenarios.
+    """Add future heat exposure values for SSP245 and SSP585 scenarios.
 
     Parameters
     ----------
@@ -22,7 +22,7 @@ def generate_heat_future_analysis(df):
     -------
     pandas.DataFrame
         DataFrame with additional columns for the 75th percentile of days
-        over 35°C for three future timeframes.
+        over 35°C for three future timeframes under SSP245 and SSP585.
     """
     try:
         idir = (
@@ -32,36 +32,38 @@ def generate_heat_future_analysis(df):
             / "input_files"
         )
 
-        timeframe_map = {
-            "2630": "2026-2030",
-            "3140": "2031-2040",
-            "4150": "2041-2050",
-        }
+        grid_dir = idir
+        fps = sorted(
+            grid_dir.glob(
+                "PH_DaysOver35degC_ANN_*_20[2-4][1|6]-20[2-5][0|5].tif"
+            )
+        )
 
-        # Build mapping of timeframe -> raster path (may be missing)
-        fp_map = {}
-        for tf, span in timeframe_map.items():
-            fp = idir / f"PH_DaysOver35degC_ANN_ssp585_{span}.tif"
-            if fp.exists():
-                fp_map[tf] = fp
+        if not fps:
+            logger.warning("No matching GeoTIFFs found in %s", grid_dir)
+            return df
+
+        timeframes = sorted({fp.stem[-9:] for fp in fps})
+        cols_35 = []
+        for tf in timeframes:
+            short_tf = tf[2:4] + tf[-2:]
+            if short_tf == "2125":
+                cols_35.append(f"DaysOver35C_base_{short_tf}")
             else:
-                logger.warning("Future heat raster not found: %s", fp)
+                cols_35.append(f"DaysOver35C_ssp245_{short_tf}")
+                cols_35.append(f"DaysOver35C_ssp585_{short_tf}")
 
-        # Always create the output columns even if rasters are missing
         gdf = gpd.GeoDataFrame(
             df,
             geometry=gpd.points_from_xy(df["Long"], df["Lat"]),
             crs="EPSG:4326",
-        )
+        ).to_crs(epsg=32651)
 
-        temp_cols = [f"n>35degC_ssp585_{tf}" for tf in timeframe_map.keys()]
-        for col in temp_cols:
+        for col in cols_35:
             gdf[col] = np.nan
-        geojson_all = gdf.__geo_interface__
-        for tf, fp in fp_map.items():
-            col = f"n>35degC_ssp585_{tf}"
+       
             stats = rstat.zonal_stats(
-                geojson_all,
+                gdf.to_crs(epsg=4326),
                 str(fp),
                 stats="percentile_75",
                 all_touched=True,
@@ -69,21 +71,14 @@ def generate_heat_future_analysis(df):
             )
             ids = [int(feat["id"]) for feat in stats]
             vals = [feat["properties"]["percentile_75"] for feat in stats]
-            gdf[col] = pd.Series(vals, index=ids)
+            gdf.loc[ids, col] = vals
 
-        missing = gdf[[c for c in temp_cols if c in gdf.columns]].isna().any(axis=1)
-        if missing.any() and fp_map:
-            buffered = (
-                gdf.loc[missing]
-                .to_crs(epsg=32651)
-                .geometry.buffer(1000, cap_style="square", join_style="mitre")
-                .to_crs("EPSG:4326")
-            )
-            geojson_buf = gpd.GeoSeries(buffered, crs="EPSG:4326").__geo_interface__
-            for tf, fp in fp_map.items():
-                col = f"n>35degC_ssp585_{tf}"
+        mask = gdf[cols_35].isna().any(axis=1)
+        if mask.any():
+            buf = gdf.loc[mask].geometry.buffer(1000, cap_style=3).to_crs(epsg=4326)
+            for col, fp in zip(cols_35, fps):
                 stats = rstat.zonal_stats(
-                    geojson_buf,
+                    buf,
                     str(fp),
                     stats="percentile_75",
                     all_touched=True,
@@ -91,18 +86,21 @@ def generate_heat_future_analysis(df):
                 )
                 ids = [int(feat["id"]) for feat in stats]
                 vals = [feat["properties"]["percentile_75"] for feat in stats]
-                gdf.loc[missing, col] = pd.Series(vals, index=ids)
+                gdf.loc[mask, col] = vals
 
-        for col in temp_cols:
-            gdf[col] = gdf[col].apply(lambda v: int(np.ceil(v)) if pd.notnull(v) else np.nan)
+        for col in cols_35:
+            gdf[col] = gdf[col].apply(
+                lambda v: int(np.ceil(float(v))) if pd.notnull(v) else np.nan
+            )
 
         try:
             df_out = gdf.drop(columns=["geometry"])
-            df_out.to_excel(idir / "HeatExposure_ssp585_AllTimeframes.xlsx", index=False)
-        except Exception as exc:  # e.g., openpyxl not installed
+            df_out.to_excel(idir / "HeatExposure_future_all.xlsx", index=False)
+        except Exception as exc:
             logger.warning("Could not export future heat Excel file: %s", exc)
 
-        df[temp_cols] = gdf[temp_cols]
+        df[cols_35] = gdf[cols_35]
+        
     except Exception as e:
         logger.exception("Error in generate_heat_future_analysis: %s", e)
 
