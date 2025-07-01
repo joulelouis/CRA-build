@@ -59,7 +59,7 @@ def generate_heat_future_analysis(df):
             crs="EPSG:4326",
         ).to_crs(epsg=32651)
 
-        for col in cols_35:
+        for col, fp in zip(cols_35, fps):
             gdf[col] = np.nan
        
             stats = rstat.zonal_stats(
@@ -100,7 +100,7 @@ def generate_heat_future_analysis(df):
             logger.warning("Could not export future heat Excel file: %s", exc)
 
         df[cols_35] = gdf[cols_35]
-        
+
     except Exception as e:
         logger.exception("Error in generate_heat_future_analysis: %s", e)
 
