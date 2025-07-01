@@ -99,24 +99,6 @@ Climate Hazard Analysis Results
         margin-top: 5px;
     }
 
-    .progress-line {
-        position: absolute;
-        height: 3px;
-        background-color: #e9ecef;
-        top: 25px;
-        width: 100%;
-        z-index: 1;
-    }
-
-    .active-progress {
-        position: absolute;
-        height: 3px;
-        background-color: #F1D500;
-        top: 25px;
-        z-index: 2;
-        transition: width 0.5s ease;
-    }
-
     /* Custom Table Styling */
     .custom-table {
         background-color: white;
@@ -433,12 +415,7 @@ Climate Hazard Analysis Results
                     <div id="impact-header" class="step-header text-center" style="width:10%;">Impact Assessment</div>
                     </div>
                     <div class="steps-container d-flex justify-content-between position-relative">
-                        <!-- Progress Line -->
-                        <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
-                        
-                        <!-- Active Progress (60% for step 3 completion) -->
-                        <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 60%; z-index: 2; transition: width 0.5s ease;"></div>
-                        
+                    
                         <!-- Step 1 (completed) -->
                         <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
                             <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; background-color: #F1D500; color: #000; font-weight: bold; margin-bottom: 10px;">

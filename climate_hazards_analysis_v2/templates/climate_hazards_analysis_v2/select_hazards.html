@@ -189,11 +189,6 @@
                     <div id="impact-header" class="step-header text-center" style="width:10%;">Impact Assessment</div>
                     </div>
                     <div class="steps-container d-flex justify-content-between position-relative">
-                        <!-- Progress Line -->
-                        <div class="progress-line position-absolute" style="height: 3px; background-color: #e9ecef; top: 25px; width: 100%; z-index: 1;"></div>
-                        
-                        <!-- Active Progress (60% for step 3 completion) -->
-                        <div class="active-progress position-absolute" style="height: 3px; background-color: #F1D500; top: 25px; width: 60%; z-index: 2; transition: width 0.5s ease;"></div>
                         
                         <!-- Step 1 (completed) -->
                         <div class="step-item d-flex flex-column align-items-center position-relative" style="z-index: 3; width: 20%;">
@@ -348,37 +343,6 @@
         }
     }
 
-    // Function to update the steps progress
-    function updateStepProgress(currentStep) {
-       const totalSteps = 5;
-       const progressPercentage = (currentStep / totalSteps) * 100;
-        
-        // Update progress bar width
-        document.querySelector('.active-progress').style.width = progressPercentage + '%';
-        
-        // Update step circles and labels
-        for (let i = 1; i <= totalSteps; i++) {
-            const stepItem = document.querySelectorAll('.step-item')[i-1];
-            const stepCircle = stepItem.querySelector('.step-circle');
-            const stepLabel = stepItem.querySelector('.step-label');
-            
-            if (i <= currentStep) {
-                // Completed or current step
-                stepCircle.style.backgroundColor = '#F1D500';
-                stepCircle.style.color = '#000';
-                stepLabel.style.color = '#000';
-                stepLabel.style.fontWeight = '500';
-            } else {
-                // Upcoming step
-                stepCircle.style.backgroundColor = '#e9ecef';
-                stepCircle.style.color = '#6c757d';
-                stepLabel.style.color = '#6c757d';
-            }
-       }
-
-        highlightHeaders(currentStep);
-   }
-
     function highlightHeaders(currentStep) {
         const overlay = document.getElementById('overlay-header');
         const override = document.getElementById('override-header');
@@ -414,7 +378,7 @@
             currentStep = 5;
         }
         
-        updateStepProgress(currentStep);
+        highlightHeaders(currentStep);
     });
 
     // Function to show loading overlay with simulated progress
