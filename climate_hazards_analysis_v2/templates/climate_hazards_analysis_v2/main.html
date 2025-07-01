@@ -531,15 +531,15 @@
         // Determine which page we're on and set the current step
         const path = window.location.pathname;
         let currentStep = 1; // Default to step 1
-        
-        if (path.includes('select-hazards')) {
-            currentStep = 2;
-        } else if (path.includes('results')) {
-            currentStep = 3;
+
+        if (path.includes('sensitivity-results')) {
+            currentStep = 5;
         } else if (path.includes('sensitivity-parameters')) {
             currentStep = 4;
-        } else if (path.includes('sensitivity-results')) {
-            currentStep = 5;
+        } else if (path.includes('results')) {
+            currentStep = 3;
+        } else if (path.includes('select-hazards')) {
+            currentStep = 2;
         }
         
         highlightHeaders(currentStep);
