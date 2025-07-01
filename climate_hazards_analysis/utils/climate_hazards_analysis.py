@@ -597,39 +597,46 @@ def process_nan_values(df):
     """
     print(f"Processing NaN values for {len(df)} rows and {len(df.columns)} columns")
     
-    for col in df.columns:
+    # Iterate using column positions to avoid pandas returning DataFrames when
+    # duplicate column names exist. This ensures we always work with a Series
+    # which avoids ambiguous truth value errors when checking for NaN.
+    for idx, col in enumerate(df.columns):
         if col in ['Facility', 'Lat', 'Long']:
             continue
             
         print(f"Processing column: {col}")
+
+        col_series = df.iloc[:, idx]
         
-        # Count initial NaN values
-        initial_nan_count = df[col].isna().sum()
+        # Count initial NaN values. When duplicate column names exist pandas
+        # returns a DataFrame instead of a Series, so sum across all columns
+        # to avoid ambiguous truth-value errors
+        initial_nan_count = col_series.isna().sum()
         if initial_nan_count > 0:
-            print(f"  Found {initial_nan_count} NaN values in {col}")
+            print(f"  Found {int(initial_nan_count)} NaN values in {col}")
         
         # Apply column-specific replacements
         if 'Sea Level Rise' in col or col == 'Elevation (meter above sea level)':
-            df[col] = df[col].apply(
+            col_series = col_series.apply(
                 lambda v: "Little to no effect" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
         elif 'Extreme Windspeed' in col or 'Tropical Cyclone' in col:
-            df[col] = df[col].apply(
+            col_series = col_series.apply(
                 lambda v: "Data not available" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
         elif 'Flood Depth' in col:
             # Special handling for flood data - use simplified categories
-            df[col] = df[col].apply(
+            col_series = col_series.apply(
                 lambda v: "0.1 to 0.5" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
         elif 'Water Stress' in col:
             # Water stress should be numeric or N/A
-            df[col] = df[col].apply(
+            col_series = col_series.apply(
                 lambda v: "N/A" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
         elif any(temp in col for temp in ['Days over', 'Heat']):
             # Heat data should be numeric or N/A
-            df[col] = df[col].apply(
+            col_series = col_series.apply(
                 lambda v: "N/A" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
         else:
@@ -637,13 +644,16 @@ def process_nan_values(df):
             df[col] = df[col].apply(
                 lambda v: "N/A" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
+
+        # Assign the processed series back to the DataFrame
+        df.iloc[:, idx] = col_series
         
         # Verify no NaN values remain
-        final_nan_count = df[col].isna().sum()
+        final_nan_count = col_series.isna().sum()
         if final_nan_count > 0:
-            print(f"  WARNING: {final_nan_count} NaN values still remain in {col}")
+            print(f"  WARNING: {int(final_nan_count)} NaN values still remain in {col}")
             # Force replace any remaining NaN
-            df[col].fillna("N/A", inplace=True)
+            df.iloc[:, idx].fillna("N/A", inplace=True)
         else:
             print(f"  ✓ All NaN values processed in {col}")
     
@@ -787,7 +797,17 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                         cols.insert(insert_pos, col)
                         insert_pos += 1
                     combined_df = combined_df[cols]
-                logger.info('Future heat exposure columns added')
+                rename_map = {
+                    'DaysOver35C_ssp245_2630': 'Days over 35 Celsius (2026 - 2030)',
+                    'DaysOver35C_ssp245_3140': 'Days over 35 Celsius (2031 - 2040)',
+                    'DaysOver35C_ssp245_4150': 'Days over 35 Celsius (2041 - 2050)',
+                    'DaysOver35C_ssp585_2630': 'Days over 35 Celsius (2026 - 2030)',
+                    'DaysOver35C_ssp585_3140': 'Days over 35 Celsius (2031 - 2040)',
+                    'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050)'
+                }
+                combined_df.rename(columns=rename_map, inplace=True)
+                logger.info('Future heat exposure columns added and renamed')
+
             except Exception as e:
                 logger.warning(f'Failed to add future heat exposure values: {e}')
 
@@ -808,6 +828,17 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
 
         # Process NaN values
         combined_df = process_nan_values(combined_df)
+
+        # Rename future heat exposure columns for readability
+        rename_map = {
+            'DaysOver35C_ssp245_2630': 'Days over 35° Celsius (2026 - 2030)',
+            'DaysOver35C_ssp245_3140': 'Days over 35° Celsius (2031 - 2040)',
+            'DaysOver35C_ssp245_4150': 'Days over 35° Celsius (2041 - 2050)',
+            'DaysOver35C_ssp585_2630': 'Days over 35° Celsius (2026 - 2030)',
+            'DaysOver35C_ssp585_3140': 'Days over 35° Celsius (2031 - 2040)',
+            'DaysOver35C_ssp585_4150': 'Days over 35° Celsius (2041 - 2050)'
+        }
+        combined_df.rename(columns=rename_map, inplace=True)
 
         # Write combined output CSV with parameters in filename if sensitivity analysis
         if sensitivity_params and buffer_size != 0.0045:

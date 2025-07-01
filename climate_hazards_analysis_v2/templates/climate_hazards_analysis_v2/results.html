@@ -296,6 +296,14 @@ Climate Hazard Analysis Results
         background-color: #e2e3e5; /* Rainfall-Induced Landslide - light gray */
     }
 
+    .sub-group-header th {
+        background-color: #fafafa;
+        font-weight: bold;
+        text-align: center;
+        border: 1px solid #ddd;
+        padding: 6px;
+    }
+
     /* Improved table layout for proportionate columns */
     .dataTables_wrapper {
         overflow-x: auto;
@@ -557,6 +565,17 @@ Climate Hazard Analysis Results
                                             {% for group, count in groups.items %}
                                                 {% if count > 0 %}
                                                     <th colspan="{{ count }}" class="text-center">{{ group }}</th>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tr>
+                                        <tr class="sub-group-header">
+                                            {% for group, count in groups.items %}
+                                                {% if group == 'Heat' %}
+                                                    <th colspan="3" class="text-center">Baseline/Current</th>
+                                                    <th colspan="3" class="text-center">Future (Base Case)</th>
+                                                    <th colspan="3" class="text-center">Future (Worst Case)</th>
+                                                {% else %}
+                                                    <th colspan="{{ count }}"></th>
                                                 {% endif %}
                                             {% endfor %}
                                         </tr>
@@ -832,7 +851,8 @@ $(document).ready(function() {
                             const editableColumns = [
                                 'Flood Depth (meters)', 'Water Stress Exposure (%)',
                                 'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                                'n>35degC_ssp585_2630', 'n>35degC_ssp585_3140', 'n>35degC_ssp585_4150',
+                                'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
+                                'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
                                 '2030 Sea Level Rise (in meters)', '2040 Sea Level Rise (in meters)',
                                 '2050 Sea Level Rise (in meters)', '2060 Sea Level Rise (in meters)',
                                 'Elevation (meter above sea level)',
@@ -966,7 +986,8 @@ function getInputType(columnName) {
     const percentageColumns = ['Water Stress Exposure (%)'];
     const numberColumns = [
         'Flood Depth (meters)', 'Days over 30° Celsius', 'Days over 33° Celsius',
-        'Days over 35° Celsius', 'n>35degC_ssp585_2630', 'n>35degC_ssp585_3140', 'n>35degC_ssp585_4150', '2030 Sea Level Rise (in meters)',
+        'Days over 35° Celsius', 'Days over 35° Celsius (2026 - 2030)', 'Days over 35°Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
+        'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)', '2030 Sea Level Rise (in meters)',
         '2040 Sea Level Rise (in meters)', '2050 Sea Level Rise (in meters)',
         '2060 Sea Level Rise (in meters)', 'Elevation (meter above sea level)',
         'Extreme Windspeed 10 year Return Period (km/h)',
@@ -1211,7 +1232,8 @@ function validateCellValue(value, columnName) {
     const numberColumns = [
         'Flood Depth (meters)', 'Water Stress Exposure (%)',
         'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-        'n>35degC_ssp585_2630', 'n>35degC_ssp585_3140', 'n>35degC_ssp585_4150',
+        'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
+        'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
         '2030 Sea Level Rise (in meters)', '2040 Sea Level Rise (in meters)',
         '2050 Sea Level Rise (in meters)', '2060 Sea Level Rise (in meters)',
         'Elevation (meter above sea level)',
