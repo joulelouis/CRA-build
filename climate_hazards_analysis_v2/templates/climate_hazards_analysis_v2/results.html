@@ -848,23 +848,8 @@ $(document).ready(function() {
                     createdCell: function(td, cellData, rowData, row, col) {
                         setTimeout(function() {
                             const columnName = dataTable.column(col).header().textContent.trim();
-                            const editableColumns = [
-                                'Flood Depth (meters)', 'Water Stress Exposure (%)',
-                                'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                                'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)',
-                                'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)',
-                                '2030 Sea Level Rise (in meters)', '2040 Sea Level Rise (in meters)',
-                                '2050 Sea Level Rise (in meters)', '2060 Sea Level Rise (in meters)',
-                                'Elevation (meter above sea level)',
-                                'Extreme Windspeed 10 year Return Period (km/h)',
-                                'Extreme Windspeed 20 year Return Period (km/h)',
-                                'Extreme Windspeed 50 year Return Period (km/h)',
-                                'Extreme Windspeed 100 year Return Period (km/h)',
-                                'Storm Surge Flood Depth (meters)',
-                                'Rainfall Induced Landslide Factor of Safety'
-                            ];
-
-                            if (editableColumns.includes(columnName)) {
+                            const nonEditableColumns = ['Facility', 'Lat', 'Long'];
+                            if (!nonEditableColumns.includes(columnName)) {
                                 $(td).addClass('editable-cell');
                                 $(td).attr('data-original-value', cellData);
                                 $(td).attr('data-column', columnName);
@@ -933,7 +918,7 @@ function editCell($cell) {
     const columnName = $cell.attr('data-column');
     const rowIndex = parseInt($cell.attr('data-row'));
     
-    const inputType = getInputType(columnName);
+    const inputType = getInputType(columnName, currentValue);
     let $input;
     if (inputType === 'select') {
         $input = $('<select class="form-control edit-input"></select>');
@@ -982,7 +967,7 @@ function editCell($cell) {
     });
 }
 
-function getInputType(columnName) {
+function getInputType(columnName, currentValue) {
     const percentageColumns = ['Water Stress Exposure (%)'];
     const numberColumns = [
         'Flood Depth (meters)', 'Days over 30° Celsius', 'Days over 33° Celsius',
@@ -1002,6 +987,11 @@ function getInputType(columnName) {
     }
     
     if (percentageColumns.includes(columnName) || numberColumns.includes(columnName)) {
+        return 'number';
+    }
+
+    const numericValue = parseFloat(currentValue);
+    if (!isNaN(numericValue)) {
         return 'number';
     }
     return 'text';
