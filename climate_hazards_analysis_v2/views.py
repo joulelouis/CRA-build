@@ -564,8 +564,8 @@ def show_results(request):
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
                                 'Extreme Windspeed 100 year Return Period (km/h)'],
             'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
-                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)'],
+                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)',
+                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)'],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
             'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
         }
@@ -1218,8 +1218,8 @@ def sensitivity_results(request):
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
                                 'Extreme Windspeed 100 year Return Period (km/h)'],
             'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
-                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)'],
+                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)',
+                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)'],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
             'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
         }

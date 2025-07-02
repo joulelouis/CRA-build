@@ -831,12 +831,12 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
 
         # Rename future heat exposure columns for readability
         rename_map = {
-            'DaysOver35C_ssp245_2630': 'Days over 35° Celsius (2026 - 2030)',
-            'DaysOver35C_ssp245_3140': 'Days over 35° Celsius (2031 - 2040)',
-            'DaysOver35C_ssp245_4150': 'Days over 35° Celsius (2041 - 2050)',
-            'DaysOver35C_ssp585_2630': 'Days over 35° Celsius (2026 - 2030)',
-            'DaysOver35C_ssp585_3140': 'Days over 35° Celsius (2031 - 2040)',
-            'DaysOver35C_ssp585_4150': 'Days over 35° Celsius (2041 - 2050)'
+            'DaysOver35C_ssp245_2630': 'Days over 35 Celsius (2026 - 2030)',
+            'DaysOver35C_ssp245_3140': 'Days over 35 Celsius (2031 - 2040)',
+            'DaysOver35C_ssp245_4150': 'Days over 35 Celsius (2041 - 2050)',
+            'DaysOver35C_ssp585_2630': 'Days over 35 Celsius (2026 - 2030)',
+            'DaysOver35C_ssp585_3140': 'Days over 35 Celsius (2031 - 2040)',
+            'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050)'
         }
         combined_df.rename(columns=rename_map, inplace=True)
 
