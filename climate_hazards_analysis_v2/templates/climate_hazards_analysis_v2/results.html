@@ -574,6 +574,10 @@ Climate Hazard Analysis Results
                                                     <th colspan="{{ heat_baseline_count }}" class="text-center">Baseline/Current</th>
                                                     <th colspan="{{ heat_basecase_count }}" class="text-center">Future (Base Case)</th>
                                                     <th colspan="{{ heat_worstcase_count }}" class="text-center">Future (Worst Case)</th>
+                                                {% elif group == 'Tropical Cyclones' %}
+                                                    <th colspan="{{ tc_baseline_count }}" class="text-center">Baseline/Current</th>
+                                                    <th colspan="{{ tc_basecase_count }}" class="text-center">Future (Base Case)</th>
+                                                    <th colspan="{{ tc_worstcase_count }}" class="text-center">Future (Worst Case)</th>
                                                 {% else %}
                                                     <th colspan="{{ count }}"></th>
                                                 {% endif %}
