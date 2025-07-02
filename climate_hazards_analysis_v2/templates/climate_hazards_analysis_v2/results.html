@@ -574,10 +574,7 @@ Climate Hazard Analysis Results
                                                     <th colspan="{{ heat_baseline_count }}" class="text-center">Baseline/Current</th>
                                                     <th colspan="{{ heat_basecase_count }}" class="text-center">Future (Base Case)</th>
                                                     <th colspan="{{ heat_worstcase_count }}" class="text-center">Future (Worst Case)</th>
-                                                {% elif group == 'Tropical Cyclones' %}
-                                                    <th colspan="{{ tc_baseline_count }}" class="text-center">Baseline/Current</th>
-                                                    <th colspan="{{ tc_basecase_count }}" class="text-center">Future (Base Case)</th>
-                                                    <th colspan="{{ tc_worstcase_count }}" class="text-center">Future (Worst Case)</th>
+                                                
                                                 {% else %}
                                                     <th colspan="{{ count }}"></th>
                                                 {% endif %}
@@ -812,6 +809,7 @@ Climate Hazard Analysis Results
 
 let dataTable;
 let cellChanges = {};
+let columnIndexMap = {};
 $(document).ready(function() {
     try {
         console.log('Initializing Adjust Magnitude with Local Conditions...');
@@ -867,6 +865,7 @@ $(document).ready(function() {
             initComplete: function() {
                 console.log('DataTable initialization complete');
                 setTimeout(() => {
+                    buildColumnIndexMap();
                     setupColumnSelector();
                     updateColumnVisibility();
                     setTimeout(() => {
@@ -918,9 +917,9 @@ function editCell($cell) {
         return;
     }
     
-    const currentValue = $cell.text().trim();
+    const currentValue = $cell.attr('data-original-value') || $cell.text().trim();
     const columnName = $cell.attr('data-column');
-    const rowIndex = parseInt($cell.attr('data-row'));
+    const rowIndex = parseInt($cell.attr('data-row'), 10);
     
     const inputType = getInputType(columnName, currentValue);
     let $input;
@@ -948,7 +947,12 @@ function editCell($cell) {
         }
         $input.val(selected);
     } else {
-        $input = $(`<input type="${inputType}" class="form-control edit-input" value="${currentValue}">`);
+        let valueForInput = currentValue;
+        if (inputType === 'number' && isNaN(parseFloat(currentValue))) {
+            valueForInput = '';
+        }
+        $input = $(`<input type="${inputType}" step="any" class="form-control edit-input" value="${valueForInput}">`);
+        
     }
     
     $input.css({
@@ -1332,23 +1336,29 @@ function setupColumnSelector() {
     });
 }
 
+function buildColumnIndexMap() {
+    columnIndexMap = {};
+    dataTable.columns().every(function(index) {
+        const headerText = $(this.header()).text().trim();
+        if (!(headerText in columnIndexMap)) {
+            columnIndexMap[headerText] = index;
+        }
+    });
+}
+
 // FIXED: Improved column visibility update function
 function updateColumnVisibility() {
     if (!dataTable) {
         console.error("DataTable not initialized");
         return;
     }
+
+    if (Object.keys(columnIndexMap).length === 0) {
+        buildColumnIndexMap();
+    }
     
     try {
         console.log('Updating column visibility...');
-        
-        // Create column mapping more reliably
-        const columnMap = {};
-        dataTable.columns().every(function(index) {
-            const headerText = $(this.header()).text().trim();
-            columnMap[headerText] = index;
-            console.log(`Column ${index}: "${headerText}"`);
-        });
         
         // Always show Facility column
         const visibleColumns = new Set(['Facility']);
@@ -1358,7 +1368,7 @@ function updateColumnVisibility() {
             const columnName = $(this).data('column');
             const isChecked = $(this).prop('checked');
             
-            if (isChecked && columnMap.hasOwnProperty(columnName)) {
+            if (isChecked && columnIndexMap.hasOwnProperty(columnName)) {
                 visibleColumns.add(columnName);
                 console.log(`Will show base column: ${columnName}`);
             }
@@ -1371,7 +1381,7 @@ function updateColumnVisibility() {
             
             console.log(`Checkbox for "${columnName}": ${isChecked}`);
             
-            if (isChecked && columnMap.hasOwnProperty(columnName)) {
+            if (isChecked && columnIndexMap.hasOwnProperty(columnName)) {
                 visibleColumns.add(columnName);
                 console.log(`Will show hazard column: ${columnName}`);
             }

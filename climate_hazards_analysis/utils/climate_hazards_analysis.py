@@ -26,9 +26,7 @@ from water_stress.utils.water_stress_analysis import generate_water_stress_analy
 from heat_exposure_analysis.utils.heat_exposure_analysis import generate_heat_exposure_analysis
 from heat_exposure_analysis.utils.heat_future_analysis import generate_heat_future_analysis
 from flood_exposure_analysis.utils.flood_exposure_analysis import generate_flood_exposure_analysis
-from tropical_cyclone_analysis.utils.tropical_cyclone_future_analysis import (
-    generate_tropical_cyclone_future_analysis,
-)
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -835,13 +833,6 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             except Exception as e:
                 logger.warning(f'Failed to add future heat exposure values: {e}')
 
-        # Add future tropical cyclone values using site conditions
-        if 'Tropical Cyclones' in selected_fields:
-            try:
-                combined_df = generate_tropical_cyclone_future_analysis(combined_df)
-                logger.info('Future tropical cyclone columns added')
-            except Exception as e:
-                logger.warning(f'Failed to add future tropical cyclone values: {e}')
 
         # VERIFICATION: Check if flood column exists
         logger.info("=== FINAL VERIFICATION ===")
@@ -871,41 +862,6 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050) - Worst Case'
         }
         combined_df.rename(columns=rename_map, inplace=True)
-
-        # Reorder columns for final output
-        desired_order = [
-            'Facility', 'Lat', 'Long',
-            'Flood Depth (meters)', 'Water Stress Exposure (%)',
-            'Elevation (meter above sea level)',
-            '2030 Sea Level Rise (in meters)',
-            '2040 Sea Level Rise (in meters)',
-            '2050 Sea Level Rise (in meters)',
-            '2060 Sea Level Rise (in meters)',
-            'Extreme Windspeed 10 year Return Period (km/h)',
-            'Extreme Windspeed 20 year Return Period (km/h)',
-            'Extreme Windspeed 50 year Return Period (km/h)',
-            'Extreme Windspeed 100 year Return Period (km/h)',
-            'Extreme Windspeed 10 year return period (km/h) - Base Case',
-            'Extreme Windspeed 20 year return period (km/h) - Base Case',
-            'Extreme Windspeed 50 year return period (km/h) - Base Case',
-            'Extreme Windspeed 100 year return period (km/h) - Base Case',
-            'Extreme Windspeed 10 year return period (km/h) - Worst Case',
-            'Extreme Windspeed 20 year return period (km/h) - Worst Case',
-            'Extreme Windspeed 50 year return period (km/h) - Worst Case',
-            'Extreme Windspeed 100 year return period (km/h) - Worst Case',
-            'Days over 35 Celsius (2026 - 2030) - Base Case',
-            'Days over 35 Celsius (2031 - 2040) - Base Case',
-            'Days over 35 Celsius (2041 - 2050) - Base Case',
-            'Days over 35 Celsius (2026 - 2030) - Worst Case',
-            'Days over 35 Celsius (2031 - 2040) - Worst Case',
-            'Days over 35 Celsius (2041 - 2050) - Worst Case',
-            'Storm Surge Flood Depth (meters)',
-            'Rainfall Induced Landslide Factor of Safety',
-        ]
-        for col in desired_order:
-            if col not in combined_df.columns:
-                combined_df[col] = np.nan
-        combined_df = combined_df[[c for c in desired_order if c in combined_df.columns]]
 
         # Write combined output CSV with parameters in filename if sensitivity analysis
         if sensitivity_params and buffer_size != 0.0045:
