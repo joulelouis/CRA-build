@@ -1,6 +1,8 @@
 import logging
 import re
 from pathlib import Path
+
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -45,8 +47,14 @@ def generate_tropical_cyclone_future_analysis(df: pd.DataFrame) -> pd.DataFrame:
         worst_col = f"{col} - Worst Case"
 
         numeric_col = df[col]
-        df[base_col] = (numeric_col * (1 + pct_base) * base_factor).round(1)
-        df[worst_col] = (numeric_col * (1 + pct_worst) * worst_factor).round(1)
+        df[base_col] = (
+            np.ceil(numeric_col * (1 + pct_base) * base_factor)
+            .astype("Int64")
+        )
+        df[worst_col] = (
+            np.ceil(numeric_col * (1 + pct_worst) * worst_factor)
+            .astype("Int64")
+        )
 
     future_cols = [f"{c} - Base Case" for c in ew_cols] + [f"{c} - Worst Case" for c in ew_cols]
 
