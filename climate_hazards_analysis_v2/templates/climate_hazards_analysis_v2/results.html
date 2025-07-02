@@ -571,9 +571,9 @@ Climate Hazard Analysis Results
                                         <tr class="sub-group-header">
                                             {% for group, count in groups.items %}
                                                 {% if group == 'Heat' %}
-                                                    <th colspan="3" class="text-center">Baseline/Current</th>
-                                                    <th colspan="3" class="text-center">Future (Base Case)</th>
-                                                    <th colspan="3" class="text-center">Future (Worst Case)</th>
+                                                    <th colspan="{{ heat_baseline_count }}" class="text-center">Baseline/Current</th>
+                                                    <th colspan="{{ heat_basecase_count }}" class="text-center">Future (Base Case)</th>
+                                                    <th colspan="{{ heat_worstcase_count }}" class="text-center">Future (Worst Case)</th>
                                                 {% else %}
                                                     <th colspan="{{ count }}"></th>
                                                 {% endif %}
@@ -581,7 +581,7 @@ Climate Hazard Analysis Results
                                         </tr>
                                         <tr class="custom-table-header">
                                             {% for column in columns %}
-                                                <th>{{ column }}</th>
+                                                <th>{{ column|cut:' - Base Case'|cut:' - Worst Case' }}</th>
                                             {% endfor %}
                                         </tr>
                                     </thead>

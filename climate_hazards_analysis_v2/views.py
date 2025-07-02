@@ -563,9 +563,15 @@ def show_results(request):
                                 'Extreme Windspeed 20 year Return Period (km/h)', 
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
                                 'Extreme Windspeed 100 year Return Period (km/h)'],
-            'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)',
-                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)'],
+            'Heat': [
+                'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
+                'Days over 35 Celsius (2026 - 2030) - Base Case',
+                'Days over 35 Celsius (2031 - 2040) - Base Case',
+                'Days over 35 Celsius (2041 - 2050) - Base Case',
+                'Days over 35 Celsius (2026 - 2030) - Worst Case',
+                'Days over 35 Celsius (2031 - 2040) - Worst Case',
+                'Days over 35 Celsius (2041 - 2050) - Worst Case'
+            ],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
             'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
         }
@@ -585,6 +591,14 @@ def show_results(request):
         logger.info("=== DEBUG: Column Detection ===")
         logger.info(f"Final columns list: {columns}")
         logger.info(f"Groups created: {groups}")
+
+        heat_basecase_count = sum(1 for c in columns if c.endswith(' - Base Case'))
+        heat_worstcase_count = sum(1 for c in columns if c.endswith(' - Worst Case'))
+        heat_baseline_cols = ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius']
+        heat_baseline_count = sum(1 for c in heat_baseline_cols if c in columns)
+
+        if 'Heat' in groups:
+            groups['Heat'] = heat_baseline_count + heat_basecase_count + heat_worstcase_count
         
         if 'Flood' in selected_hazards:
             flood_col_exists = 'Flood Depth (meters)' in columns
@@ -647,6 +661,9 @@ def show_results(request):
             'plot_path': plot_path,
             'all_plots': all_plots,
             'selected_hazards': selected_hazards,
+            'heat_basecase_count': heat_basecase_count,
+            'heat_worstcase_count': heat_worstcase_count,
+            'heat_baseline_count': heat_baseline_count,
             'success_message': f"Successfully analyzed {len(data)} facilities for {len(selected_hazards)} hazard types."
         }
         
