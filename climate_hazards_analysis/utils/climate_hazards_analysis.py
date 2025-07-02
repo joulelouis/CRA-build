@@ -806,6 +806,27 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                     'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050) - Worst Case'
                 }
                 combined_df.rename(columns=rename_map, inplace=True)
+
+                heat_order = [
+                    'Days over 30° Celsius',
+                    'Days over 33° Celsius',
+                    'Days over 35° Celsius',
+                    'Days over 35 Celsius (2026 - 2030) - Base Case',
+                    'Days over 35 Celsius (2031 - 2040) - Base Case',
+                    'Days over 35 Celsius (2041 - 2050) - Base Case',
+                    'Days over 35 Celsius (2026 - 2030) - Worst Case',
+                    'Days over 35 Celsius (2031 - 2040) - Worst Case',
+                    'Days over 35 Celsius (2041 - 2050) - Worst Case',
+                ]
+                existing_heat = [c for c in heat_order if c in combined_df.columns]
+                if existing_heat:
+                    cols = combined_df.columns.tolist()
+                    first_idx = min(cols.index(c) for c in existing_heat)
+                    for c in existing_heat:
+                        cols.remove(c)
+                    cols[first_idx:first_idx] = existing_heat
+                    combined_df = combined_df[cols]
+                    
                 logger.info('Future heat exposure columns added and renamed')
 
             except Exception as e:
