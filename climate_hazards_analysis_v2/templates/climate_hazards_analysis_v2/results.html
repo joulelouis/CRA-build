@@ -1312,14 +1312,19 @@ function setupColumnSelector() {
         updateColumnVisibility();
     });
 
-    $('#show-all-columns').on('click', function () {
+    // Delegated events bound to the document so replacements still work
+    $(document).off('click', '#show-all-columns');
+    $(document).on('click', '#show-all-columns', function (e) {
+        e.preventDefault();
         $('.hazard-column').prop('checked', true);
         $('.base-column:not([disabled])').prop('checked', true);
         updateParentCheckboxes();
         updateColumnVisibility();
     });
 
-    $('#hide-all-columns').on('click', function () {
+    $(document).off('click', '#hide-all-columns');
+    $(document).on('click', '#hide-all-columns', function (e) {
+        e.preventDefault();
         $('.hazard-column').prop('checked', false);
         $('.base-column:not([disabled])').prop('checked', false);
         updateParentCheckboxes();
