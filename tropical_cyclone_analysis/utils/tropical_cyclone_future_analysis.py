@@ -1,4 +1,6 @@
 import logging
+import re
+from pathlib import Path
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -57,3 +59,28 @@ def generate_tropical_cyclone_future_analysis(df: pd.DataFrame) -> pd.DataFrame:
         df = df[cols]
 
     return df
+
+def apply_future_windspeeds_to_csv(input_csv: str, output_csv: str | None = None) -> str:
+    """Apply future windspeed calculations to an existing CSV.
+
+    Parameters
+    ----------
+    input_csv : str
+        Path to ``combined_output.csv`` or similar file.
+    output_csv : str, optional
+        Where to write the file with additional future windspeed columns. If not
+        provided, ``_v2`` is appended to the input filename.
+
+    Returns
+    -------
+    str
+        Path to the written CSV file.
+    """
+    in_path = Path(input_csv)
+    if output_csv is None:
+        output_csv = str(in_path.with_name(f"{in_path.stem}_v2.csv"))
+
+    df = pd.read_csv(in_path)
+    df = generate_tropical_cyclone_future_analysis(df)
+    df.to_csv(output_csv, index=False)
+    return output_csv
