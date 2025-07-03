@@ -574,7 +574,7 @@ Climate Hazard Analysis Results
                                                 {% endif %}
                                             {% endfor %}
                                         </tr>
-                                        <tr class="sub-group-header">
+                                        {% comment %} <tr class="sub-group-header">
                                             {% for group, count in groups.items %}
                                                 {% if group == 'Heat' %}
                                                     {% if heat_baseline_count %}
@@ -601,7 +601,7 @@ Climate Hazard Analysis Results
                                                     <th colspan="{{ count }}"></th>
                                                 {% endif %}
                                             {% endfor %}
-                                        </tr>
+                                        </tr> {% endcomment %}
                                         <tr class="custom-table-header">
                                             {% for column in columns %}
                                                 <th>{{ column }}</th>
@@ -833,13 +833,6 @@ let dataTable;
 let cellChanges = {};
 let columnIndexMap = {};
 
-if (typeof window.jQuery === 'undefined') {
-    console.error('jQuery failed to load');
-    if (typeof showError === 'function') {
-        showError('jQuery failed to load. Page functionality will be limited.');
-    }
-}
-
 function showError(message) {
     const container = document.getElementById('js-error');
     const textEl = document.getElementById('js-error-text');
@@ -851,13 +844,16 @@ function showError(message) {
     }
 }
 
-window.addEventListener('error', function (event) {
-    showError('JavaScript error: ' + event.message);
-});
-
-$(document).ready(function() {
-    try {
-        console.log('Initializing Adjust Magnitude with Local Conditions...');
+if (typeof window.jQuery === 'undefined') {
+    console.error('jQuery failed to load for column selector');
+    showError('jQuery failed to load. Page functionality will be limited.');
+} else {
+    $(document).ready(function() {
+        try {
+            if (!$.fn.DataTable) {
+                throw new Error('DataTables library not loaded');
+            }
+            console.log('Initializing Adjust Magnitude with Local Conditions...');
 
         dataTable = $('#data-table').DataTable({
             scrollX: true,
@@ -942,6 +938,11 @@ $(document).ready(function() {
             }, 250);
         }
     });
+    });
+}
+
+window.addEventListener('error', function (event) {
+    showError('JavaScript error: ' + event.message);
 });
 
 // FIXED: Improved editable table functionality
@@ -1508,6 +1509,12 @@ function updateParentCheckboxes() {
 }
 
 function autoSaveChange(change) {
+
+    if (!change || typeof change.column === 'undefined') {
+        console.error('autoSaveChange called with invalid change:', change);
+        updateChangeIndicator();
+        return;
+    }
     
     const changesData = {
         changes: [change],
