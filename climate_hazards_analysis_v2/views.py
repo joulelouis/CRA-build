@@ -602,6 +602,29 @@ def show_results(request):
         if 'Heat' in groups:
             groups['Heat'] = heat_baseline_count + heat_basecase_count + heat_worstcase_count
 
+        # Tropical Cyclone column counts
+        tc_basecase_count = sum(
+            1 for c in columns
+            if c.endswith(' - Base Case') and 'Windspeed' in c
+        )
+        tc_worstcase_count = sum(
+            1 for c in columns
+            if c.endswith(' - Worst Case') and 'Windspeed' in c
+        )
+        tc_baseline_cols = [
+            'Extreme Windspeed 10 year Return Period (km/h)',
+            'Extreme Windspeed 20 year Return Period (km/h)',
+            'Extreme Windspeed 50 year Return Period (km/h)',
+            'Extreme Windspeed 100 year Return Period (km/h)'
+        ]
+        tc_baseline_count = sum(1 for c in tc_baseline_cols if c in columns)
+
+        if 'Tropical Cyclones' in groups:
+            groups['Tropical Cyclones'] = (
+                tc_baseline_count + tc_basecase_count + tc_worstcase_count
+            )
+
+
         
         if 'Flood' in selected_hazards:
             flood_col_exists = 'Flood Depth (meters)' in columns
@@ -667,9 +690,9 @@ def show_results(request):
             'heat_basecase_count': heat_basecase_count,
             'heat_worstcase_count': heat_worstcase_count,
             'heat_baseline_count': heat_baseline_count,
-            # 'tc_basecase_count': tc_basecase_count,
-            # 'tc_worstcase_count': tc_worstcase_count,
-            # 'tc_baseline_count': tc_baseline_count,
+            'tc_basecase_count': tc_basecase_count,
+            'tc_worstcase_count': tc_worstcase_count,
+            'tc_baseline_count': tc_baseline_count,
             'success_message': f"Successfully analyzed {len(data)} facilities for {len(selected_hazards)} hazard types."
         }
         
