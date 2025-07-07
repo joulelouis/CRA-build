@@ -890,8 +890,28 @@ if (typeof window.jQuery === 'undefined') {
                 {
                     targets: '_all',
                     createdCell: function(td, cellData, rowData, row, col) {
+                        console.log("this line has been parsed")
                         setTimeout(function() {
-                            const columnName = dataTable.column(col).header().textContent.trim();
+                            const tableApi = $(td).closest('table').DataTable();
+                            if (!tableApi || typeof tableApi.column !== 'function') {
+                                return;
+                            }
+
+                            const columnApi = tableApi.column(col);
+                            let headerEl = (columnApi && typeof columnApi.header === 'function')
+                                ? columnApi.header()
+                                : null;
+
+                            if (!headerEl) {
+                                const fallback = $(td).closest('table').find('thead th').eq(col);
+                                if (fallback.length) {
+                                    headerEl = fallback[0];
+                                } else {
+                                    return;
+                                }
+                            }
+
+                            const columnName = headerEl.textContent.trim();
                             const nonEditableColumns = ['Facility', 'Lat', 'Long'];
                             if (!nonEditableColumns.includes(columnName)) {
                                 $(td).addClass('editable-cell');
