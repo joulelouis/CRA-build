@@ -892,23 +892,10 @@ if (typeof window.jQuery === 'undefined') {
                     createdCell: function(td, cellData, rowData, row, col) {
                         console.log("this line has been parsed")
                         setTimeout(function() {
-                            const tableApi = $(td).closest('table').DataTable();
-                            if (!tableApi || typeof tableApi.column !== 'function') {
-                                return;
-                            }
-
-                            const columnApi = tableApi.column(col);
-                            let headerEl = (columnApi && typeof columnApi.header === 'function')
-                                ? columnApi.header()
-                                : null;
+                            const headerEl = $('#data-table thead th').eq(col)[0];
 
                             if (!headerEl) {
-                                const fallback = $(td).closest('table').find('thead th').eq(col);
-                                if (fallback.length) {
-                                    headerEl = fallback[0];
-                                } else {
-                                    return;
-                                }
+                                return;
                             }
 
                             const columnName = headerEl.textContent.trim();
