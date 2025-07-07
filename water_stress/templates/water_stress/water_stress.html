@@ -162,11 +162,17 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>window.jQuery || document.write('<script src="{% static "js/jquery-3.6.0.min.js" %}"><\\/script>')</script>
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script>if (!window.jQuery || !$.fn.DataTable) document.write('<script src="{% static "js/jquery.dataTables.min.js" %}"><\\/script>')</script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script>if (!($.fn && $.fn.dataTable && $.fn.dataTable.Buttons)) document.write('<script src="{% static "js/dataTables.buttons.min.js" %}"><\\/script>')</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script>window.JSZip || document.write('<script src="{% static "js/jszip.min.js" %}"><\\/script>')</script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script>if (!($.fn && $.fn.dataTable && $.fn.dataTable.Buttons)) document.write('<script src="{% static "js/buttons.html5.min.js" %}"><\\/script>')</script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+<script>if (!($.fn && $.fn.dataTable && $.fn.dataTable.Buttons)) document.write('<script src="{% static "js/buttons.print.min.js" %}"><\\/script>')</script>
 
 <!-- Bootstrap Tabs JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
