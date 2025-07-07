@@ -74,24 +74,20 @@ def generate_heat_future_analysis(df):
                 fp_map.append(fp)
 
         gdf = gpd.GeoDataFrame(
-            df,
+            df.reset_index(drop=True),
             geometry=gpd.points_from_xy(df["Long"], df["Lat"]),
             crs="EPSG:4326",
         ).to_crs(epsg=32651)
 
         for col, fp in zip(cols_35, fp_map):
-            gdf[col] = np.nan
-       
             stats = rstat.zonal_stats(
                 gdf.to_crs(epsg=4326),
                 str(fp),
                 stats="percentile_75",
                 all_touched=True,
-                geojson_out=True,
             )
-            ids = [int(feat["id"]) for feat in stats]
-            vals = [feat["properties"]["percentile_75"] for feat in stats]
-            gdf.loc[ids, col] = vals
+            vals = [feat["percentile_75"] for feat in stats]
+            gdf[col] = vals
 
         mask = gdf[cols_35].isna().any(axis=1)
         if mask.any():
@@ -102,10 +98,8 @@ def generate_heat_future_analysis(df):
                     str(fp),
                     stats="percentile_75",
                     all_touched=True,
-                    geojson_out=True,
                 )
-                ids = [int(feat["id"]) for feat in stats]
-                vals = [feat["properties"]["percentile_75"] for feat in stats]
+                vals = [feat["percentile_75"] for feat in stats]
                 gdf.loc[mask, col] = vals
 
         for col in cols_35:
