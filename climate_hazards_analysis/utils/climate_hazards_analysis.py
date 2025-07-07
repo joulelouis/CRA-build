@@ -575,8 +575,8 @@ def process_storm_surge_landslide_analysis(df_fac, selected_fields):
             hazard_cols.append('Storm Surge Flood Depth (meters)')
         
         if 'Rainfall Induced Landslide' in selected_fields and 'landslide_raster' in gdf_a.columns:
-            gdf_a.rename(columns={'landslide_raster': 'Rainfall Induced Landslide Factor of Safety'}, inplace=True)
-            hazard_cols.append('Rainfall Induced Landslide Factor of Safety')
+            gdf_a.rename(columns={'landslide_raster': 'Rainfall-Induced Landslide (factor of safety)'}, inplace=True)
+            hazard_cols.append('Rainfall-Induced Landslide (factor of safety)')
             
         if not hazard_cols:
             return None

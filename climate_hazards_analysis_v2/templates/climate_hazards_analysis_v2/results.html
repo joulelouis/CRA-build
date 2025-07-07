@@ -1034,7 +1034,7 @@ function getInputType(columnName, currentValue) {
         'Extreme Windspeed 20 year Return Period (km/h)',
         'Extreme Windspeed 50 year Return Period (km/h)',
         'Extreme Windspeed 100 year Return Period (km/h)',
-        'Storm Surge Flood Depth (meters)', 'Rainfall Induced Landslide Factor of Safety'
+        'Storm Surge Flood Depth (meters)', 'Rainfall-Induced Landslide (factor of safety)'
     ];
 
     if (columnName === 'Flood Depth (meters)' || columnName === 'Storm Surge Flood Depth (meters)') {
@@ -1230,7 +1230,7 @@ function saveCell($cell, $input, rowIndex, columnName) {
         displayHTML = `<span style="color: ${hd.color}; font-weight: bold;">${hd.text}</span>`;
     }
 
-    if (columnName === 'Rainfall Induced Landslide Factor of Safety' && newValue !== 'N/A') {
+    if (columnName === 'Rainfall-Induced Landslide (factor of safety)' && newValue !== 'N/A') {
         const ls = categorizeLandslideFOS(newValue);
         displayHTML = `<span style="color: ${ls.color}; font-weight: bold;">${ls.text}</span>`;
         newValue = ls.text;
@@ -1287,7 +1287,7 @@ function validateCellValue(value, columnName) {
         'Extreme Windspeed 50 year Return Period (km/h)',
         'Extreme Windspeed 100 year Return Period (km/h)',
         'Storm Surge Flood Depth (meters)',
-        'Rainfall Induced Landslide Factor of Safety'
+        'Rainfall-Induced Landslide (factor of safety)'
     ];
 
     if (columnName === 'Flood Depth (meters)') {
@@ -1308,7 +1308,7 @@ function validateCellValue(value, columnName) {
         return ['little to none', '0.1 to 0.5', '0.5 to 1.5', '≥ 1.5', '>= 1.5', '>1.5', 'greater than 1.5'].includes(normalized);
     }
 
-    if (columnName === 'Rainfall Induced Landslide Factor of Safety') {
+    if (columnName === 'Rainfall-Induced Landslide (factor of safety)') {
         const numValue = parseFloat(value);
         if (!isNaN(numValue) && isFinite(numValue)) {
             return true;

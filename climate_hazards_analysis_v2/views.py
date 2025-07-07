@@ -528,6 +528,8 @@ def show_results(request):
             df = df.loc[:, ~df.columns.duplicated()]
 
         
+
+        
         # Convert to dict for template
         data = df.to_dict(orient="records")
         columns = df.columns.tolist()
@@ -573,7 +575,7 @@ def show_results(request):
                 'Days over 35 Celsius (2041 - 2050) - Worst Case'
             ],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
-            'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
+            'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
         }
         
         # Add column groups for each hazard type that has columns in the data
@@ -779,7 +781,7 @@ def identify_high_risk_assets(data, selected_hazards):
             'criteria': lambda v: isinstance(v, (int, float)) and v >= 1.5
         },
         'Rainfall Induced Landslide': {
-            'column': 'Rainfall Induced Landslide Factor of Safety',
+            'column': 'Rainfall-Induced Landslide (factor of safety)',
             'criteria': lambda v: isinstance(v, (int, float)) and v < 1
         }
     }
@@ -1242,7 +1244,7 @@ def sensitivity_results(request):
                      'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)',
                      'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)'],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
-            'Rainfall-Induced Landslide': ['Rainfall Induced Landslide Factor of Safety']
+            'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
         }
         
         # Add column groups for each hazard type that has columns in the data
@@ -1392,7 +1394,7 @@ def convert_table_value(value, column_name):
         'Extreme Windspeed 50 year Return Period (km/h)',
         'Extreme Windspeed 100 year Return Period (km/h)',
         'Storm Surge Flood Depth (meters)',
-        'Rainfall Induced Landslide Factor of Safety',
+        'Rainfall-Induced Landslide (factor of safety)',
         'Elevation (meter above sea level)'
     ]
     
