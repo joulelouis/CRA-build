@@ -41,8 +41,23 @@ def generate_heat_future_analysis(df):
             if "2125" not in f.stem
         )
 
+        # Pre-create all expected columns so they exist even if data files are
+        # missing. This ensures the combined output always contains the future
+        # heat exposure columns.
+        expected_cols = [
+            f"DaysOver35C_{scn}_{tf}"
+            for scn in ["ssp245", "ssp585"]
+            for tf in ["2630", "3140", "4150"]
+        ]
+        for col in expected_cols:
+            if col not in df.columns:
+                df[col] = np.nan
+
         if not fps:
             logger.warning("No matching GeoTIFFs found in %s", grid_dir)
+            for scn in ["ssp245", "ssp585"]:
+                for tf in ["2630", "3140", "4150"]:
+                    df[f"DaysOver35C_{scn}_{tf}"] = np.nan
             return df
 
         
