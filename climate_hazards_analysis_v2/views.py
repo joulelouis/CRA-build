@@ -594,8 +594,19 @@ def show_results(request):
         logger.info(f"Final columns list: {columns}")
         logger.info(f"Groups created: {groups}")
 
-        heat_basecase_count = sum(1 for c in columns if c.endswith(' - Base Case'))
-        heat_worstcase_count = sum(1 for c in columns if c.endswith(' - Worst Case'))
+        # Only count heat-related future scenario columns that start with
+        # "Days over 35 Celsius" for Base Case and Worst Case scenarios
+        heat_basecase_count = sum(
+            1
+            for c in columns
+            if c.startswith('Days over 35 Celsius') and c.endswith(' - Base Case')
+        )
+        heat_worstcase_count = sum(
+            1
+            for c in columns
+            if c.startswith('Days over 35 Celsius') and c.endswith(' - Worst Case')
+        )
+        
         heat_baseline_cols = ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius']
         heat_baseline_count = sum(1 for c in heat_baseline_cols if c in columns)
 
