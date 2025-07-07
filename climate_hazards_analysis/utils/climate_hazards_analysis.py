@@ -823,6 +823,9 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             try:
                 combined_df = generate_heat_future_analysis(combined_df)
 
+                if 'DaysOver35C_base_2125' in combined_df.columns:
+                    combined_df.drop(columns=['DaysOver35C_base_2125'], inplace=True)
+
                 future_cols = [c for c in combined_df.columns if c.startswith('DaysOver35C_ssp')]
                 if 'Days over 35° Celsius' in combined_df.columns and future_cols:
                     cols = [c for c in combined_df.columns if c not in future_cols]
@@ -884,6 +887,9 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
 
         # Process NaN values
         combined_df = process_nan_values(combined_df)
+
+        if 'DaysOver35C_base_2125' in combined_df.columns:
+            combined_df.drop(columns=['DaysOver35C_base_2125'], inplace=True)
 
         # Rename future heat exposure columns for readability
         rename_map = {

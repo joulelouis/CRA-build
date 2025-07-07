@@ -34,24 +34,29 @@ def generate_heat_future_analysis(df):
 
         grid_dir = idir
         fps = sorted(
-            grid_dir.glob(
+            f
+            for f in grid_dir.glob(
                 "PH_DaysOver35degC_ANN_*_20[2-4][1|6]-20[2-5][0|5].tif"
             )
+            if "2125" not in f.stem
         )
 
         if not fps:
             logger.warning("No matching GeoTIFFs found in %s", grid_dir)
             return df
 
-        timeframes = sorted({fp.stem[-9:] for fp in fps})
+        
         cols_35 = []
-        for tf in timeframes:
+        fp_map = []
+        for fp in fps:
+            tf = fp.stem[-9:]
             short_tf = tf[2:4] + tf[-2:]
-            if short_tf == "2125":
-                cols_35.append(f"DaysOver35C_base_{short_tf}")
-            else:
+            if "ssp245" in fp.stem:
                 cols_35.append(f"DaysOver35C_ssp245_{short_tf}")
+                fp_map.append(fp)
+            elif "ssp585" in fp.stem:
                 cols_35.append(f"DaysOver35C_ssp585_{short_tf}")
+                fp_map.append(fp)
 
         gdf = gpd.GeoDataFrame(
             df,
@@ -59,7 +64,7 @@ def generate_heat_future_analysis(df):
             crs="EPSG:4326",
         ).to_crs(epsg=32651)
 
-        for col, fp in zip(cols_35, fps):
+        for col, fp in zip(cols_35, fp_map):
             gdf[col] = np.nan
        
             stats = rstat.zonal_stats(
@@ -76,7 +81,7 @@ def generate_heat_future_analysis(df):
         mask = gdf[cols_35].isna().any(axis=1)
         if mask.any():
             buf = gdf.loc[mask].geometry.buffer(1000, cap_style=3).to_crs(epsg=4326)
-            for col, fp in zip(cols_35, fps):
+            for col, fp in zip(cols_35, fp_map):
                 stats = rstat.zonal_stats(
                     buf,
                     str(fp),
