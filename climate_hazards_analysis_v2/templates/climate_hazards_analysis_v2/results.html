@@ -901,7 +901,7 @@ if (typeof window.jQuery === 'undefined') {
                     createdCell: function(td, cellData, rowData, row, col) {
                         console.log("this line has been parsed")
                         setTimeout(function() {
-                            const headerEl = $('#data-table thead th').eq(col)[0];
+                            
                             const headerEl = $('#data-table thead tr.custom-table-header th').eq(col)[0];
 
                             if (!headerEl) {
