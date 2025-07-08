@@ -24,7 +24,7 @@ from sea_level_rise_analysis.utils.sea_level_rise_analysis import generate_sea_l
 from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
 from water_stress.utils.water_stress_analysis import generate_water_stress_analysis
 from heat_exposure_analysis.utils.heat_exposure_analysis import generate_heat_exposure_analysis
-from heat_exposure_analysis.utils.heat_future_analysis import generate_heat_future_analysis
+
 from tropical_cyclone_analysis.utils.tropical_cyclone_future_analysis import (
     generate_tropical_cyclone_future_analysis,
 )
@@ -650,7 +650,9 @@ def process_nan_values(df):
             )
 
         # Assign the processed series back to the DataFrame
-        df.iloc[:, idx] = col_series
+        # Cast to object to avoid dtype incompatibility warnings when assigning
+        # strings such as "N/A" into numeric columns
+        df.iloc[:, idx] = col_series.astype(object)
         
         # Verify no NaN values remain
         final_nan_count = col_series.isna().sum()
