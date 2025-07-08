@@ -4,7 +4,9 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import rasterio
 import rasterstats as rstat
+from shapely.geometry import Point, box
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -34,91 +36,125 @@ def generate_heat_future_analysis(df):
 
         grid_dir = idir
         fps = sorted(
-            f
-            for f in grid_dir.glob("PH_DaysOver35degC_ANN_*_20??-20??.tif")
-            if "2021-2025" not in f.name
+            grid_dir.glob("PH_DaysOver35degC_ANN_*_20[2-4][1|6]-20[2-5][0|5].tif")
         )
 
-        # Pre-create all expected columns so they exist even if data files are
-        # missing. This ensures the combined output always contains the future
-        # heat exposure columns.
-        expected_cols = [
-            f"DaysOver35C_{scn}_{tf}"
-            for scn in ["ssp245", "ssp585"]
-            for tf in ["2630", "3140", "4150"]
-        ]
+        if not fps:
+            logger.error("No matching GeoTIFFs found in %s", grid_dir)
+            return df
+
+        logger.debug("Found %d GeoTIFF files", len(fps))
+
+        # Ensure CRS match between input points and rasters
+        with rasterio.open(fps[0]) as src:
+            raster_crs = src.crs
+            raster_bounds = box(*src.bounds)
+
+        if raster_crs is None:
+            logger.error("Raster %s lacks CRS information", fps[0])
+            return df
+
+        # quick check that the site locations overlap the raster extent
+        bounds = gpd.GeoSeries([raster_bounds], crs=raster_crs)
+        gdf = gpd.GeoDataFrame(
+            df.reset_index(drop=True),
+            geometry=gpd.points_from_xy(df["Long"], df["Lat"]),
+            crs="EPSG:4326",
+        )
+        gdf_raster = gdf.to_crs(raster_crs)
+        if not bounds.intersects(gdf_raster.unary_union.envelope).bool():
+            logger.error(
+                "Input locations do not overlap the raster extent. Check CRS or data coordinates"
+            )
+            return df
+
+        timeframes = sorted({fp.stem[-9:] for fp in fps})
+
+        # Determine expected output columns based on available timeframes
+        expected_cols = []
+        for tf in timeframes:
+            short_tf = tf[2:4] + tf[-2:]
+            if short_tf == "2125":
+                expected_cols.append(f"DaysOver35C_base_{short_tf}")
+            else:
+                expected_cols.extend(
+                    [
+                        f"DaysOver35C_ssp245_{short_tf}",
+                        f"DaysOver35C_ssp585_{short_tf}",
+                    ]
+                )
+
         for col in expected_cols:
             if col not in df.columns:
                 df[col] = np.nan
 
-        if not fps:
-            logger.warning("No matching GeoTIFFs found in %s", grid_dir)
-            for scn in ["ssp245", "ssp585"]:
-                for tf in ["2630", "3140", "4150"]:
-                    df[f"DaysOver35C_{scn}_{tf}"] = np.nan
-            return df
-
         
+        # Map each raster file to its corresponding column name in a list
         cols_35 = []
-        fp_map = []
+        fp_order = []
         for fp in fps:
             tf = fp.stem[-9:]
             short_tf = tf[2:4] + tf[-2:]
             if "ssp245" in fp.stem:
                 cols_35.append(f"DaysOver35C_ssp245_{short_tf}")
-                fp_map.append(fp)
+                fp_order.append(fp)
             elif "ssp585" in fp.stem:
                 cols_35.append(f"DaysOver35C_ssp585_{short_tf}")
-                fp_map.append(fp)
+        
+                fp_order.append(fp)
+            else:
+                cols_35.append(f"DaysOver35C_base_{short_tf}")
+                fp_order.append(fp)
 
-        gdf = gpd.GeoDataFrame(
-            df.reset_index(drop=True),
-            geometry=gpd.points_from_xy(df["Long"], df["Lat"]),
-            crs="EPSG:4326",
-        ).to_crs(epsg=32651)
+        gdf_metric = gdf.to_crs(epsg=32651)
 
-        for col, fp in zip(cols_35, fp_map):
-            temp_geo = Path("temp.future.geojson")
-            try:
-                gdf.to_crs("EPSG:4326").to_file(temp_geo, driver="GeoJSON")
+        if gdf.crs != raster_crs:
+            logger.warning(
+                "Reprojecting points from %s to %s to match rasters",
+                gdf.crs,
+                raster_crs,
+            )
+        gdf = gdf_raster
+
+        for col, fp in zip(cols_35, fp_order):
+            stats = rstat.zonal_stats(
+                gdf,
+                str(fp),
+                stats="percentile_75",
+                all_touched=True,
+                geojson_out=True,
+            )
+            if stats:
+                ids = [int(feat["id"]) for feat in stats]
+                vals = [feat["properties"]["percentile_75"] for feat in stats]
+                gdf.loc[ids, col] = vals
+
+        mask = gdf[cols_35].isna().any(axis=1)
+        if mask.any():
+            buf_metric = gdf_metric.loc[mask].geometry.buffer(1000, cap_style=3)
+            buf = gpd.GeoSeries(buf_metric, crs=gdf_metric.crs).to_crs(raster_crs)
+            for col, fp in zip(cols_35, fp_order):
                 stats = rstat.zonal_stats(
-                    str(temp_geo),
+                    buf,
                     str(fp),
                     stats="percentile_75",
                     all_touched=True,
                     geojson_out=True,
                 )
                 if stats:
-                    ids = [int(feat["id"]) for feat in stats]
                     vals = [feat["properties"]["percentile_75"] for feat in stats]
-                    gdf.loc[ids, col] = vals
-            finally:
-                if temp_geo.exists():
-                    temp_geo.unlink()
-
-        mask = gdf[cols_35].isna().any(axis=1)
-        if mask.any():
-            buf_geo = Path("temp.future_buf.geojson")
-            try:
-                gdf.loc[mask].geometry.buffer(1000, cap_style=3).to_crs("EPSG:4326").to_file(buf_geo, driver="GeoJSON")
-                for col, fp in zip(cols_35, fp_map):
-                    stats = rstat.zonal_stats(
-                        str(buf_geo),
-                        str(fp),
-                        stats="percentile_75",
-                        all_touched=True,
-                        geojson_out=True,
-                    )
-                    if stats:
-                        vals = [feat["properties"]["percentile_75"] for feat in stats]
-                        gdf.loc[mask, col] = vals
-            finally:
-                if buf_geo.exists():
-                    buf_geo.unlink()
+                    
+                    gdf.loc[mask, col] = vals
 
         for col in cols_35:
             gdf[col] = gdf[col].apply(
                 lambda v: int(np.ceil(float(v))) if pd.notnull(v) else np.nan
+            )
+
+        missing = int(gdf[cols_35].isna().sum().sum())
+        if missing:
+            logger.warning(
+                "%d future heat values remain missing after processing", missing
             )
 
         try:
@@ -127,7 +163,8 @@ def generate_heat_future_analysis(df):
         except Exception as exc:
             logger.warning("Could not export future heat Excel file: %s", exc)
 
-        df[cols_35] = gdf[cols_35]
+        
+        df[expected_cols] = gdf[expected_cols]
 
     except Exception as e:
         logger.exception("Error in generate_heat_future_analysis: %s", e)
