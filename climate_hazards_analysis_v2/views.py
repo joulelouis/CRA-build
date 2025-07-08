@@ -567,9 +567,9 @@ def show_results(request):
                                 'Extreme Windspeed 100 year Return Period (km/h)'],
             'Heat': [
                 'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                'Days over 35 Celsius (2026 - 2030) - Base Case',
-                'Days over 35 Celsius (2031 - 2040) - Base Case',
-                'Days over 35 Celsius (2041 - 2050) - Base Case',
+                'Days over 35° Celsius (2026 - 2030) - Moderate Case',
+                'Days over 35° Celsius (2031 - 2040) - Moderate Case',
+                'Days over 35° Celsius (2041 - 2050) - Moderate Case',
                 'Days over 35 Celsius (2026 - 2030) - Worst Case',
                 'Days over 35 Celsius (2031 - 2040) - Worst Case',
                 'Days over 35 Celsius (2041 - 2050) - Worst Case'
@@ -595,11 +595,11 @@ def show_results(request):
         logger.info(f"Groups created: {groups}")
 
         # Only count heat-related future scenario columns that start with
-        # "Days over 35 Celsius" for Base Case and Worst Case scenarios
+        # "Days over 35 Celsius" for Moderate and Worst Case scenarios
         heat_basecase_count = sum(
             1
             for c in columns
-            if c.startswith('Days over 35 Celsius') and c.endswith(' - Base Case')
+            if c.startswith('Days over 35 Celsius') and c.endswith(' - Moderate Case')
         )
         heat_worstcase_count = sum(
             1

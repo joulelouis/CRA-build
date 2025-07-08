@@ -24,7 +24,7 @@ from sea_level_rise_analysis.utils.sea_level_rise_analysis import generate_sea_l
 from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
 from water_stress.utils.water_stress_analysis import generate_water_stress_analysis
 from heat_exposure_analysis.utils.heat_exposure_analysis import generate_heat_exposure_analysis
-
+from heat_exposure_analysis.utils.heat_future_analysis import generate_heat_future_analysis
 from tropical_cyclone_analysis.utils.tropical_cyclone_future_analysis import (
     generate_tropical_cyclone_future_analysis,
 )
@@ -821,17 +821,21 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                 logger.warning(f'Failed to add future tropical cyclone values: {e}')
 
         # Add future heat exposure values if heat analysis was performed.
-        # The dedicated future analysis module has been removed, so this block
-        # now only attempts to rename any pre-existing future columns if they
-        # are present in the combined dataframe.
         if 'Heat' in selected_fields:
+            try:
+                tiff_dir = Path(settings.BASE_DIR) / 'climate_hazards_analysis' / 'static' / 'input_files'
+                combined_df = generate_heat_future_analysis(combined_df, tiff_dir)
+                logger.info('Future heat exposure columns added')
+            except Exception as e:
+                logger.warning(f'Failed to add future heat exposure values: {e}')
+
             rename_map = {
-                'DaysOver35C_ssp245_2630': 'Days over 35 Celsius (2026 - 2030) - Base Case',
-                'DaysOver35C_ssp245_3140': 'Days over 35 Celsius (2031 - 2040) - Base Case',
-                'DaysOver35C_ssp245_4150': 'Days over 35 Celsius (2041 - 2050) - Base Case',
-                'DaysOver35C_ssp585_2630': 'Days over 35 Celsius (2026 - 2030) - Worst Case',
-                'DaysOver35C_ssp585_3140': 'Days over 35 Celsius (2031 - 2040) - Worst Case',
-                'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050) - Worst Case'
+                'DaysOver35C_ssp245_2630': 'Days over 35° Celsius (2026 - 2030) - Moderate Case',
+                'DaysOver35C_ssp245_3140': 'Days over 35° Celsius (2031 - 2040) - Moderate Case',
+                'DaysOver35C_ssp245_4150': 'Days over 35° Celsius (2041 - 2050) - Moderate Case',
+                'DaysOver35C_ssp585_2630': 'Days over 35° Celsius (2026 - 2030) - Worst Case',
+                'DaysOver35C_ssp585_3140': 'Days over 35° Celsius (2031 - 2040) - Worst Case',
+                'DaysOver35C_ssp585_4150': 'Days over 35° Celsius (2041 - 2050) - Worst Case'
             }
             combined_df.rename(columns=rename_map, inplace=True)
 
@@ -839,9 +843,9 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                 'Days over 30° Celsius',
                 'Days over 33° Celsius',
                 'Days over 35° Celsius',
-                'Days over 35 Celsius (2026 - 2030) - Base Case',
-                'Days over 35 Celsius (2031 - 2040) - Base Case',
-                'Days over 35 Celsius (2041 - 2050) - Base Case',
+                'Days over 35° Celsius (2026 - 2030) - Moderate Case',
+                'Days over 35° Celsius (2031 - 2040) - Moderate Case',
+                'Days over 35° Celsius (2041 - 2050) - Moderate Case',
                 'Days over 35 Celsius (2026 - 2030) - Worst Case',
                 'Days over 35 Celsius (2031 - 2040) - Worst Case',
                 'Days over 35 Celsius (2041 - 2050) - Worst Case',
@@ -879,12 +883,12 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
 
         # Rename future heat exposure columns for readability
         rename_map = {
-            'DaysOver35C_ssp245_2630': 'Days over 35 Celsius (2026 - 2030) - Base Case',
-            'DaysOver35C_ssp245_3140': 'Days over 35 Celsius (2031 - 2040) - Base Case',
-            'DaysOver35C_ssp245_4150': 'Days over 35 Celsius (2041 - 2050) - Base Case',
-            'DaysOver35C_ssp585_2630': 'Days over 35 Celsius (2026 - 2030) - Worst Case',
-            'DaysOver35C_ssp585_3140': 'Days over 35 Celsius (2031 - 2040) - Worst Case',
-            'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050) - Worst Case'
+            'DaysOver35C_ssp245_2630': 'Days over 35° Celsius (2026 - 2030) - Moderate Case',
+            'DaysOver35C_ssp245_3140': 'Days over 35° Celsius (2031 - 2040) - Moderate Case',
+            'DaysOver35C_ssp245_4150': 'Days over 35° Celsius (2041 - 2050) - Moderate Case',
+            'DaysOver35C_ssp585_2630': 'Days over 35° Celsius (2026 - 2030) - Worst Case',
+            'DaysOver35C_ssp585_3140': 'Days over 35° Celsius (2031 - 2040) - Worst Case',
+            'DaysOver35C_ssp585_4150': 'Days over 35° Celsius (2041 - 2050) - Worst Case'
         }
         combined_df.rename(columns=rename_map, inplace=True)
 
