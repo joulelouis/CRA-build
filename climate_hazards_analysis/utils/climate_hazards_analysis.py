@@ -846,9 +846,9 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                 'Days over 35° Celsius (2026 - 2030) - Moderate Case',
                 'Days over 35° Celsius (2031 - 2040) - Moderate Case',
                 'Days over 35° Celsius (2041 - 2050) - Moderate Case',
-                'Days over 35 Celsius (2026 - 2030) - Worst Case',
-                'Days over 35 Celsius (2031 - 2040) - Worst Case',
-                'Days over 35 Celsius (2041 - 2050) - Worst Case',
+                'Days over 35° Celsius (2026 - 2030) - Worst Case',
+                'Days over 35° Celsius (2031 - 2040) - Worst Case',
+                'Days over 35° Celsius (2041 - 2050) - Worst Case',
             ]
             existing_heat = [c for c in heat_order if c in combined_df.columns]
             if existing_heat:
@@ -891,6 +891,46 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'DaysOver35C_ssp585_4150': 'Days over 35° Celsius (2041 - 2050) - Worst Case'
         }
         combined_df.rename(columns=rename_map, inplace=True)
+
+        # Final desired column order for output CSV
+        final_order = [
+            'Facility',
+            'Lat',
+            'Long',
+            'Flood Depth (meters)',
+            'Water Stress Exposure (%)',
+            'Elevation (meter above sea level)',
+            '2030 Sea Level Rise (in meters)',
+            '2040 Sea Level Rise (in meters)',
+            '2050 Sea Level Rise (in meters)',
+            '2060 Sea Level Rise (in meters)',
+            'Extreme Windspeed 10 year Return Period (km/h)',
+            'Extreme Windspeed 20 year Return Period (km/h)',
+            'Extreme Windspeed 50 year Return Period (km/h)',
+            'Extreme Windspeed 100 year Return Period (km/h)',
+            'Extreme Windspeed 10 year Return Period (km/h) - Base Case',
+            'Extreme Windspeed 20 year Return Period (km/h) - Base Case',
+            'Extreme Windspeed 50 year Return Period (km/h) - Base Case',
+            'Extreme Windspeed 100 year Return Period (km/h) - Base Case',
+            'Extreme Windspeed 10 year Return Period (km/h) - Worst Case',
+            'Extreme Windspeed 20 year Return Period (km/h) - Worst Case',
+            'Extreme Windspeed 50 year Return Period (km/h) - Worst Case',
+            'Extreme Windspeed 100 year Return Period (km/h) - Worst Case',
+            'Days over 30° Celsius',
+            'Days over 33° Celsius',
+            'Days over 35° Celsius',
+            'Days over 35° Celsius (2026 - 2030) - Moderate Case',
+            'Days over 35° Celsius (2031 - 2040) - Moderate Case',
+            'Days over 35° Celsius (2041 - 2050) - Moderate Case',
+            'Days over 35° Celsius (2026 - 2030) - Worst Case',
+            'Days over 35° Celsius (2031 - 2040) - Worst Case',
+            'Days over 35° Celsius (2041 - 2050) - Worst Case',
+            'Storm Surge Flood Depth (meters)',
+            'Rainfall-Induced Landslide (factor of safety)'
+        ]
+        existing_cols = [c for c in final_order if c in combined_df.columns]
+        remaining_cols = [c for c in combined_df.columns if c not in final_order]
+        combined_df = combined_df[existing_cols + remaining_cols]
 
         # Write combined output CSV with parameters in filename if sensitivity analysis
         if sensitivity_params and buffer_size != 0.0045:
