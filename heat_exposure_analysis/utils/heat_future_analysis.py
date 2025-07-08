@@ -35,10 +35,8 @@ def generate_heat_future_analysis(df):
         grid_dir = idir
         fps = sorted(
             f
-            for f in grid_dir.glob(
-                "PH_DaysOver35degC_ANN_*_20[2-4][1|6]-20[2-5][0|5].tif"
-            )
-            if "2125" not in f.stem
+            for f in grid_dir.glob("PH_DaysOver35degC_ANN_*_20??-20??.tif")
+            if "2021-2025" not in f.name
         )
 
         # Pre-create all expected columns so they exist even if data files are
@@ -80,27 +78,43 @@ def generate_heat_future_analysis(df):
         ).to_crs(epsg=32651)
 
         for col, fp in zip(cols_35, fp_map):
-            stats = rstat.zonal_stats(
-                gdf.to_crs(epsg=4326),
-                str(fp),
-                stats="percentile_75",
-                all_touched=True,
-            )
-            vals = [feat["percentile_75"] for feat in stats]
-            gdf[col] = vals
-
-        mask = gdf[cols_35].isna().any(axis=1)
-        if mask.any():
-            buf = gdf.loc[mask].geometry.buffer(1000, cap_style=3).to_crs(epsg=4326)
-            for col, fp in zip(cols_35, fp_map):
+            temp_geo = Path("temp.future.geojson")
+            try:
+                gdf.to_crs("EPSG:4326").to_file(temp_geo, driver="GeoJSON")
                 stats = rstat.zonal_stats(
-                    buf,
+                    str(temp_geo),
                     str(fp),
                     stats="percentile_75",
                     all_touched=True,
+                    geojson_out=True,
                 )
-                vals = [feat["percentile_75"] for feat in stats]
-                gdf.loc[mask, col] = vals
+                if stats:
+                    ids = [int(feat["id"]) for feat in stats]
+                    vals = [feat["properties"]["percentile_75"] for feat in stats]
+                    gdf.loc[ids, col] = vals
+            finally:
+                if temp_geo.exists():
+                    temp_geo.unlink()
+
+        mask = gdf[cols_35].isna().any(axis=1)
+        if mask.any():
+            buf_geo = Path("temp.future_buf.geojson")
+            try:
+                gdf.loc[mask].geometry.buffer(1000, cap_style=3).to_crs("EPSG:4326").to_file(buf_geo, driver="GeoJSON")
+                for col, fp in zip(cols_35, fp_map):
+                    stats = rstat.zonal_stats(
+                        str(buf_geo),
+                        str(fp),
+                        stats="percentile_75",
+                        all_touched=True,
+                        geojson_out=True,
+                    )
+                    if stats:
+                        vals = [feat["properties"]["percentile_75"] for feat in stats]
+                        gdf.loc[mask, col] = vals
+            finally:
+                if buf_geo.exists():
+                    buf_geo.unlink()
 
         for col in cols_35:
             gdf[col] = gdf[col].apply(
