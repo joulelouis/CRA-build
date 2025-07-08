@@ -570,9 +570,9 @@ def show_results(request):
                 'Days over 35° Celsius (2026 - 2030) - Moderate Case',
                 'Days over 35° Celsius (2031 - 2040) - Moderate Case',
                 'Days over 35° Celsius (2041 - 2050) - Moderate Case',
-                'Days over 35 Celsius (2026 - 2030) - Worst Case',
-                'Days over 35 Celsius (2031 - 2040) - Worst Case',
-                'Days over 35 Celsius (2041 - 2050) - Worst Case'
+                'Days over 35° Celsius (2026 - 2030) - Worst Case',
+                'Days over 35° Celsius (2031 - 2040) - Worst Case',
+                'Days over 35° Celsius (2041 - 2050) - Worst Case'
             ],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
             'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
@@ -599,12 +599,12 @@ def show_results(request):
         heat_basecase_count = sum(
             1
             for c in columns
-            if c.startswith('Days over 35 Celsius') and c.endswith(' - Moderate Case')
+            if c.startswith('Days over 35° Celsius') and c.endswith(' - Moderate Case')
         )
         heat_worstcase_count = sum(
             1
             for c in columns
-            if c.startswith('Days over 35 Celsius') and c.endswith(' - Worst Case')
+            if c.startswith('Days over 35° Celsius') and c.endswith(' - Worst Case')
         )
         
         heat_baseline_cols = ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius']
@@ -1275,8 +1275,8 @@ def sensitivity_results(request):
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
                                 'Extreme Windspeed 100 year Return Period (km/h)'],
             'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)',
-                     'Days over 35 Celsius (2026 - 2030)', 'Days over 35 Celsius (2031 - 2040)', 'Days over 35 Celsius (2041 - 2050)'],
+                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
+                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)'],
             'Storm Surge': ['Storm Surge Flood Depth (meters)'],
             'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
         }
