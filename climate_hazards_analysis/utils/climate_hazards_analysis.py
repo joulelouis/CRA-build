@@ -820,56 +820,40 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             except Exception as e:
                 logger.warning(f'Failed to add future tropical cyclone values: {e}')
 
-        # Add future heat exposure values if heat analysis was performed
+        # Add future heat exposure values if heat analysis was performed.
+        # The dedicated future analysis module has been removed, so this block
+        # now only attempts to rename any pre-existing future columns if they
+        # are present in the combined dataframe.
         if 'Heat' in selected_fields:
-            try:
-                combined_df = generate_heat_future_analysis(combined_df)
+            rename_map = {
+                'DaysOver35C_ssp245_2630': 'Days over 35 Celsius (2026 - 2030) - Base Case',
+                'DaysOver35C_ssp245_3140': 'Days over 35 Celsius (2031 - 2040) - Base Case',
+                'DaysOver35C_ssp245_4150': 'Days over 35 Celsius (2041 - 2050) - Base Case',
+                'DaysOver35C_ssp585_2630': 'Days over 35 Celsius (2026 - 2030) - Worst Case',
+                'DaysOver35C_ssp585_3140': 'Days over 35 Celsius (2031 - 2040) - Worst Case',
+                'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050) - Worst Case'
+            }
+            combined_df.rename(columns=rename_map, inplace=True)
 
-                if 'DaysOver35C_base_2125' in combined_df.columns:
-                    combined_df.drop(columns=['DaysOver35C_base_2125'], inplace=True)
-
-                future_cols = [c for c in combined_df.columns if c.startswith('DaysOver35C_ssp')]
-                if 'Days over 35° Celsius' in combined_df.columns and future_cols:
-                    cols = [c for c in combined_df.columns if c not in future_cols]
-                    insert_pos = cols.index('Days over 35° Celsius') + 1
-                    for col in future_cols:
-                        cols.insert(insert_pos, col)
-                        insert_pos += 1
-                    combined_df = combined_df[cols]
-                rename_map = {
-                    'DaysOver35C_ssp245_2630': 'Days over 35 Celsius (2026 - 2030) - Base Case',
-                    'DaysOver35C_ssp245_3140': 'Days over 35 Celsius (2031 - 2040) - Base Case',
-                    'DaysOver35C_ssp245_4150': 'Days over 35 Celsius (2041 - 2050) - Base Case',
-                    'DaysOver35C_ssp585_2630': 'Days over 35 Celsius (2026 - 2030) - Worst Case',
-                    'DaysOver35C_ssp585_3140': 'Days over 35 Celsius (2031 - 2040) - Worst Case',
-                    'DaysOver35C_ssp585_4150': 'Days over 35 Celsius (2041 - 2050) - Worst Case'
-                }
-                combined_df.rename(columns=rename_map, inplace=True)
-
-                heat_order = [
-                    'Days over 30° Celsius',
-                    'Days over 33° Celsius',
-                    'Days over 35° Celsius',
-                    'Days over 35 Celsius (2026 - 2030) - Base Case',
-                    'Days over 35 Celsius (2031 - 2040) - Base Case',
-                    'Days over 35 Celsius (2041 - 2050) - Base Case',
-                    'Days over 35 Celsius (2026 - 2030) - Worst Case',
-                    'Days over 35 Celsius (2031 - 2040) - Worst Case',
-                    'Days over 35 Celsius (2041 - 2050) - Worst Case',
-                ]
-                existing_heat = [c for c in heat_order if c in combined_df.columns]
-                if existing_heat:
-                    cols = combined_df.columns.tolist()
-                    first_idx = min(cols.index(c) for c in existing_heat)
-                    for c in existing_heat:
-                        cols.remove(c)
-                    cols[first_idx:first_idx] = existing_heat
-                    combined_df = combined_df[cols]
-
-                logger.info('Future heat exposure columns added and renamed')
-
-            except Exception as e:
-                logger.warning(f'Failed to add future heat exposure values: {e}')
+            heat_order = [
+                'Days over 30° Celsius',
+                'Days over 33° Celsius',
+                'Days over 35° Celsius',
+                'Days over 35 Celsius (2026 - 2030) - Base Case',
+                'Days over 35 Celsius (2031 - 2040) - Base Case',
+                'Days over 35 Celsius (2041 - 2050) - Base Case',
+                'Days over 35 Celsius (2026 - 2030) - Worst Case',
+                'Days over 35 Celsius (2031 - 2040) - Worst Case',
+                'Days over 35 Celsius (2041 - 2050) - Worst Case',
+            ]
+            existing_heat = [c for c in heat_order if c in combined_df.columns]
+            if existing_heat:
+                cols = combined_df.columns.tolist()
+                first_idx = min(cols.index(c) for c in existing_heat)
+                for c in existing_heat:
+                    cols.remove(c)
+                cols[first_idx:first_idx] = existing_heat
+                combined_df = combined_df[cols]
 
 
         # VERIFICATION: Check if flood column exists
