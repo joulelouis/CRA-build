@@ -25,9 +25,8 @@ from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_t
 from water_stress.utils.water_stress_analysis import generate_water_stress_analysis
 from heat_exposure_analysis.utils.heat_exposure_analysis import generate_heat_exposure_analysis
 from heat_exposure_analysis.utils.heat_future_analysis import generate_heat_future_analysis
-from tropical_cyclone_analysis.utils.tropical_cyclone_future_analysis import (
-    generate_tropical_cyclone_future_analysis,
-)
+from tropical_cyclone_analysis.utils.tropical_cyclone_future_analysis import generate_tropical_cyclone_future_analysis
+from climate_hazards_analysis.utils.storm_surge_future_analysis import generate_storm_surge_future_analysis
 from flood_exposure_analysis.utils.flood_exposure_analysis import generate_flood_exposure_analysis
 
 
@@ -859,6 +858,21 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                 cols[first_idx:first_idx] = existing_heat
                 combined_df = combined_df[cols]
 
+        # Add future storm surge flood depth values if storm surge analysis was performed
+        if 'Storm Surge' in selected_fields:
+            try:
+                tif_path = (
+                    Path(settings.BASE_DIR)
+                    / 'climate_hazards_analysis'
+                    / 'static'
+                    / 'input_files'
+                    / 'PH_StormSurge_Advisory4_Future_UTM_ProjectNOAH-GIRI_Unmasked.tif'
+                )
+                combined_df = generate_storm_surge_future_analysis(combined_df, tif_path)
+                logger.info('Future storm surge column added')
+            except Exception as e:
+                logger.warning(f'Failed to add future storm surge values: {e}')
+
 
         # VERIFICATION: Check if flood column exists
         logger.info("=== FINAL VERIFICATION ===")
@@ -926,6 +940,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'Days over 35° Celsius (2031 - 2040) - Worst Case',
             'Days over 35° Celsius (2041 - 2050) - Worst Case',
             'Storm Surge Flood Depth (meters)',
+            'Storm Surge Flood Depth (meters) - Moderate Case',
             'Rainfall-Induced Landslide (factor of safety)'
         ]
         existing_cols = [c for c in final_order if c in combined_df.columns]
