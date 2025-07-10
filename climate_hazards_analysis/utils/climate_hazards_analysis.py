@@ -799,7 +799,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
                     c
                     for c in combined_df.columns
                     if c.startswith('Extreme Windspeed')
-                    and ('Base Case' in c or 'Worst Case' in c)
+                    and ('Moderate Case' in c or 'Worst Case' in c)
                 ]
                 if (
                     'Extreme Windspeed 100 year Return Period (km/h)' in combined_df.columns
@@ -939,10 +939,10 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'Extreme Windspeed 20 year Return Period (km/h)',
             'Extreme Windspeed 50 year Return Period (km/h)',
             'Extreme Windspeed 100 year Return Period (km/h)',
-            'Extreme Windspeed 10 year Return Period (km/h) - Base Case',
-            'Extreme Windspeed 20 year Return Period (km/h) - Base Case',
-            'Extreme Windspeed 50 year Return Period (km/h) - Base Case',
-            'Extreme Windspeed 100 year Return Period (km/h) - Base Case',
+            'Extreme Windspeed 10 year Return Period (km/h) - Moderate Case',
+            'Extreme Windspeed 20 year Return Period (km/h) - Moderate Case',
+            'Extreme Windspeed 50 year Return Period (km/h) - Moderate Case',
+            'Extreme Windspeed 100 year Return Period (km/h) - Moderate Case',
             'Extreme Windspeed 10 year Return Period (km/h) - Worst Case',
             'Extreme Windspeed 20 year Return Period (km/h) - Worst Case',
             'Extreme Windspeed 50 year Return Period (km/h) - Worst Case',

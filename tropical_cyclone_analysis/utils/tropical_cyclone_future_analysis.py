@@ -43,7 +43,7 @@ def generate_tropical_cyclone_future_analysis(df: pd.DataFrame) -> pd.DataFrame:
         worst_factor = 1 + (elev / 1000) * 0.10
 
     for col in ew_cols:
-        base_col = f"{col} - Base Case"
+        base_col = f"{col} - Moderate Case"
         worst_col = f"{col} - Worst Case"
 
         numeric_col = df[col]
@@ -56,7 +56,7 @@ def generate_tropical_cyclone_future_analysis(df: pd.DataFrame) -> pd.DataFrame:
             .astype("Int64")
         )
 
-    future_cols = [f"{c} - Base Case" for c in ew_cols] + [f"{c} - Worst Case" for c in ew_cols]
+    future_cols = [f"{c} - Moderate Case" for c in ew_cols] + [f"{c} - Worst Case" for c in ew_cols]
 
     if "Extreme Windspeed 100 year Return Period (km/h)" in df.columns:
         cols = [c for c in df.columns if c not in future_cols]

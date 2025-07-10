@@ -623,7 +623,7 @@ def show_results(request):
         # Tropical Cyclone column counts
         tc_basecase_count = sum(
             1 for c in columns
-            if c.endswith(' - Base Case') and 'Windspeed' in c
+            if c.endswith(' - Moderate Case') and 'Windspeed' in c
         )
         tc_worstcase_count = sum(
             1 for c in columns
