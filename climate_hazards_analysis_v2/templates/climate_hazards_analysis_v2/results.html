@@ -597,6 +597,14 @@ Climate Hazard Analysis Results
                                                     {% if tc_worstcase_count %}
                                                         <th colspan="{{ tc_worstcase_count }}" class="text-center">Tropical Cyclones Future (Worst Case)</th>
                                                     {% endif %}
+
+                                                {% elif group == 'Storm Surge' %}
+                                                    {% if ss_baseline_count %}
+                                                        <th colspan="{{ ss_baseline_count }}" class="text-center">Storm Surge Baseline/Current</th>
+                                                    {% endif %}
+                                                    {% if ss_moderatecase_count %}
+                                                        <th colspan="{{ ss_moderatecase_count }}" class="text-center">Storm Surge Future (Moderate Case)</th>
+                                                    {% endif %}
                                                 
                                                 {% else %}
                                                     <th colspan="{{ count }}"></th>

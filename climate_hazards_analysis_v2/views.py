@@ -574,7 +574,10 @@ def show_results(request):
                 'Days over 35° Celsius (2031 - 2040) - Worst Case',
                 'Days over 35° Celsius (2041 - 2050) - Worst Case'
             ],
-            'Storm Surge': ['Storm Surge Flood Depth (meters)'],
+            'Storm Surge': [
+                'Storm Surge Flood Depth (meters)',
+                'Storm Surge Flood Depth (meters) - Moderate Case'
+            ],
             'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
         }
         
@@ -634,6 +637,17 @@ def show_results(request):
             groups['Tropical Cyclones'] = (
                 tc_baseline_count + tc_basecase_count + tc_worstcase_count
             )
+
+        # Storm Surge column counts
+        ss_moderatecase_count = sum(
+            1 for c in columns
+            if c.endswith(' - Moderate Case') and 'Storm Surge Flood Depth' in c
+        )
+        ss_baseline_cols = ['Storm Surge Flood Depth (meters)']
+        ss_baseline_count = sum(1 for c in ss_baseline_cols if c in columns)
+
+        if 'Storm Surge' in groups:
+            groups['Storm Surge'] = ss_baseline_count + ss_moderatecase_count
 
 
         
@@ -704,6 +718,8 @@ def show_results(request):
             'tc_basecase_count': tc_basecase_count,
             'tc_worstcase_count': tc_worstcase_count,
             'tc_baseline_count': tc_baseline_count,
+            'ss_baseline_count': ss_baseline_count,
+            'ss_moderatecase_count': ss_moderatecase_count,
             'success_message': f"Successfully analyzed {len(data)} facilities for {len(selected_hazards)} hazard types."
         }
         
@@ -1277,7 +1293,10 @@ def sensitivity_results(request):
             'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
                      'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
                      'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)'],
-            'Storm Surge': ['Storm Surge Flood Depth (meters)'],
+            'Storm Surge': [
+                'Storm Surge Flood Depth (meters)',
+                'Storm Surge Flood Depth (meters) - Moderate Case'
+            ],
             'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
         }
         
@@ -1428,6 +1447,7 @@ def convert_table_value(value, column_name):
         'Extreme Windspeed 50 year Return Period (km/h)',
         'Extreme Windspeed 100 year Return Period (km/h)',
         'Storm Surge Flood Depth (meters)',
+        'Storm Surge Flood Depth (meters) - Moderate Case',
         'Rainfall-Induced Landslide (factor of safety)',
         'Elevation (meter above sea level)'
     ]
