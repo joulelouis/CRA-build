@@ -958,9 +958,9 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'Days over 35° Celsius (2041 - 2050) - Worst Case',
             'Storm Surge Flood Depth (meters)',
             'Storm Surge Flood Depth (meters) - Moderate Case',
+            'Rainfall-Induced Landslide (factor of safety)',
             'Rainfall-Induced Landslide (factor of safety) - Moderate Case',
             'Rainfall-Induced Landslide (factor of safety) - Worst Case',
-            'Rainfall-Induced Landslide (factor of safety)'
         ]
         existing_cols = [c for c in final_order if c in combined_df.columns]
         remaining_cols = [c for c in combined_df.columns if c not in final_order]
