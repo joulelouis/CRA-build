@@ -578,7 +578,11 @@ def show_results(request):
                 'Storm Surge Flood Depth (meters)',
                 'Storm Surge Flood Depth (meters) - Moderate Case'
             ],
-            'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
+            'Rainfall-Induced Landslide': [
+                'Rainfall-Induced Landslide (factor of safety)',
+                'Rainfall-Induced Landslide (factor of safety) - Moderate Case',
+                'Rainfall-Induced Landslide (factor of safety) - Worst Case'
+            ]
         }
         
         # Add column groups for each hazard type that has columns in the data
@@ -648,6 +652,23 @@ def show_results(request):
 
         if 'Storm Surge' in groups:
             groups['Storm Surge'] = ss_baseline_count + ss_moderatecase_count
+
+        # Rainfall-Induced Landslide column counts
+        ls_moderatecase_count = sum(
+            1 for c in columns
+            if c.endswith(' - Moderate Case') and 'Landslide' in c
+        )
+        ls_worstcase_count = sum(
+            1 for c in columns
+            if c.endswith(' - Worst Case') and 'Landslide' in c
+        )
+        ls_baseline_cols = ['Rainfall-Induced Landslide (factor of safety)']
+        ls_baseline_count = sum(1 for c in ls_baseline_cols if c in columns)
+
+        if 'Rainfall-Induced Landslide' in groups:
+            groups['Rainfall-Induced Landslide'] = (
+                ls_baseline_count + ls_moderatecase_count + ls_worstcase_count
+            )
 
 
         
@@ -720,6 +741,9 @@ def show_results(request):
             'tc_baseline_count': tc_baseline_count,
             'ss_baseline_count': ss_baseline_count,
             'ss_moderatecase_count': ss_moderatecase_count,
+            'ls_baseline_count': ls_baseline_count,
+            'ls_moderatecase_count': ls_moderatecase_count,
+            'ls_worstcase_count': ls_worstcase_count,
             'success_message': f"Successfully analyzed {len(data)} facilities for {len(selected_hazards)} hazard types."
         }
         
@@ -1297,7 +1321,11 @@ def sensitivity_results(request):
                 'Storm Surge Flood Depth (meters)',
                 'Storm Surge Flood Depth (meters) - Moderate Case'
             ],
-            'Rainfall-Induced Landslide': ['Rainfall-Induced Landslide (factor of safety)']
+            'Rainfall-Induced Landslide': [
+                'Rainfall-Induced Landslide (factor of safety)',
+                'Rainfall-Induced Landslide (factor of safety) - Moderate Case',
+                'Rainfall-Induced Landslide (factor of safety) - Worst Case'
+            ]
         }
         
         # Add column groups for each hazard type that has columns in the data
