@@ -921,13 +921,14 @@ if (typeof window.jQuery === 'undefined') {
                         console.log("this line has been parsed")
                         setTimeout(function() {
                             
-                            const headerEl = $('#data-table thead tr.custom-table-header th').eq(col)[0];
+                            const dt = $('#data-table').DataTable();
+                            const headerEl = dt.column(col).header();
 
                             if (!headerEl) {
                                 return;
                             }
 
-                            const columnName = headerEl.textContent.trim();
+                            const columnName = $(headerEl).data('column-name') || headerEl.textContent.trim();
                             const nonEditableColumns = [
                                 'Facility',
                                 'Lat',
@@ -939,7 +940,7 @@ if (typeof window.jQuery === 'undefined') {
                             ];
                             if (!nonEditableColumns.includes(columnName)) {
                                 $(td).addClass('editable-cell');
-                                $(td).attr('data-original-value', cellData);
+                                $(td).attr('data-original-value', $(td).text().trim());
                                 $(td).attr('data-column', columnName);
                                 $(td).attr('data-row', row);
                                 $(td).attr('title', 'Click to edit');
