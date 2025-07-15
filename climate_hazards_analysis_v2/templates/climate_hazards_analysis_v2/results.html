@@ -1410,6 +1410,7 @@ function setupColumnSelector() {
         const group = $(this).data('hazard');
         const isChecked = $(this).is(':checked');
         $(`.hazard-column.${group}`).prop('checked', isChecked);
+        updateParentCheckboxes();
         updateColumnVisibility();
     });
 
@@ -1526,23 +1527,20 @@ function updateColumnVisibility() {
 // Helper function to update a specific parent checkbox state
 function updateParentCheckboxState(changedCheckbox) {
     const classes = changedCheckbox.attr('class').split(' ');
-    const hazardClass = classes.find(cls => 
+    const hazardClasses = classes.filter(cls =>
         cls !== 'form-check-input' && cls !== 'hazard-column' && cls !== 'facility-info');
     
-    if (!hazardClass) {
-        console.log('No hazard class found for checkbox');
-        return;
-    }
-    
-    const parentCheckbox = $(`.hazard-group[data-hazard="${hazardClass}"]`);
-    const childCheckboxes = $(`.hazard-column.${hazardClass}`);
-    const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
-    
-    if (parentCheckbox.length > 0) {
-        parentCheckbox.prop('checked', checkedChilds.length > 0);
-        parentCheckbox.prop('indeterminate', 
-            checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
-    }
+    hazardClasses.forEach(function(hazardClass) {
+        const parentCheckbox = $(`.hazard-group[data-hazard="${hazardClass}"]`);
+        const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+        const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+
+        if (parentCheckbox.length > 0) {
+            parentCheckbox.prop('checked', checkedChilds.length > 0);
+            parentCheckbox.prop('indeterminate',
+                checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+        }
+    });
 }
 
 // Helper function to update all parent checkbox states

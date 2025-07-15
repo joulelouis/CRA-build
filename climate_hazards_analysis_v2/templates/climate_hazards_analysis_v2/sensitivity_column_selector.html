@@ -176,41 +176,64 @@
                     <label class="form-check-label fw-bold" for="col-heat">Heat</label>
                 </div>
                 <div class="ms-4">
+                    <!-- Baseline Group -->
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-30c" data-column="Days over 30° Celsius">
-                        <label class="form-check-label" for="col-heat-30c">Days over 30° Celsius</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="heat-baseline-group" data-hazard="heat-baseline">
+                        <label class="form-check-label" for="heat-baseline-group">Baseline</label>
                     </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-33c" data-column="Days over 33° Celsius">
-                        <label class="form-check-label" for="col-heat-33c">Days over 33° Celsius</label>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-baseline heat" id="col-heat-30c" data-column="Days over 30° Celsius">
+                            <label class="form-check-label" for="col-heat-30c">Days over 30° Celsius</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-baseline heat" id="col-heat-33c" data-column="Days over 33° Celsius">
+                            <label class="form-check-label" for="col-heat-33c">Days over 33° Celsius</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-baseline heat" id="col-heat-35c" checked data-column="Days over 35° Celsius">
+                            <label class="form-check-label" for="col-heat-35c">Days over 35° Celsius</label>
+                        </div>
                     </div>
+
+                    <!-- Future Moderate Case Group -->
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-35c" checked data-column="Days over 35° Celsius">
-                        <label class="form-check-label" for="col-heat-35c">Days over 35° Celsius</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="heat-moderate-group" data-hazard="heat-moderate">
+                        <label class="form-check-label" for="heat-moderate-group">Future (Moderate Case)</label>
                     </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-ssp245-2630" data-column="Days over 35° Celsius (2026 - 2030) - Moderate Case">
-                        <label class="form-check-label" for="col-heat-ssp245-2630">Days over 35° Celsius (2026 - 2030)</label>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-moderate heat" id="col-heat-ssp245-2630" data-column="Days over 35° Celsius (2026 - 2030) - Moderate Case">
+                            <label class="form-check-label" for="col-heat-ssp245-2630">Days over 35° Celsius (2026 - 2030)</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-moderate heat" id="col-heat-ssp245-3140" data-column="Days over 35° Celsius (2031 - 2040) - Moderate Case">
+                            <label class="form-check-label" for="col-heat-ssp245-3140">Days over 35° Celsius (2031 - 2040)</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-moderate heat" id="col-heat-ssp245-4150" data-column="Days over 35° Celsius (2041 - 2050) - Moderate Case">
+                            <label class="form-check-label" for="col-heat-ssp245-4150">Days over 35° Celsius (2041 - 2050)</label>
+                        </div>
                     </div>
+
+                    <!-- Future Worst Case Group -->
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-ssp245-3140" data-column="Days over 35° Celsius (2031 - 2040) - Moderate Case">
-                        <label class="form-check-label" for="col-heat-ssp245-3140">Days over 35° Celsius (2031 - 2040)</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="heat-worst-group" data-hazard="heat-worst">
+                        <label class="form-check-label" for="heat-worst-group">Future (Worst Case)</label>
                     </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-ssp245-4150" data-column="Days over 35° Celsius (2041 - 2050) - Moderate Case">
-                        <label class="form-check-label" for="col-heat-ssp245-4150">Days over 35° Celsius (2041 - 2050)</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-ssp585-2630" data-column="Days over 35° Celsius (2026 - 2030) - Worst Case">
-                        <label class="form-check-label" for="col-heat-ssp585-2630">Days over 35° Celsius (2026 - 2030)</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-ssp585-3140" data-column="Days over 35° Celsius (2031 - 2040) - Worst Case">
-                        <label class="form-check-label" for="col-heat-ssp585-3140">Days over 35° Celsius (2031 - 2040)</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column heat" id="col-heat-ssp585-4150" data-column="Days over 35° Celsius (2041 - 2050) - Worst Case">
-                        <label class="form-check-label" for="col-heat-ssp585-4150">Days over 35° Celsius (2041 - 2050)</label>
+                    <div class="ms-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-worst heat" id="col-heat-ssp585-2630" data-column="Days over 35° Celsius (2026 - 2030) - Worst Case">
+                            <label class="form-check-label" for="col-heat-ssp585-2630">Days over 35° Celsius (2026 - 2030)</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-worst heat" id="col-heat-ssp585-3140" data-column="Days over 35° Celsius (2031 - 2040) - Worst Case">
+                            <label class="form-check-label" for="col-heat-ssp585-3140">Days over 35° Celsius (2031 - 2040)</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column heat-worst heat" id="col-heat-ssp585-4150" data-column="Days over 35° Celsius (2041 - 2050) - Worst Case">
+                            <label class="form-check-label" for="col-heat-ssp585-4150">Days over 35° Celsius (2041 - 2050)</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -276,7 +299,8 @@ $(document).ready(function() {
         // Update all child checkboxes without triggering individual change events
         $(`.hazard-column.${hazardClass}`).prop('checked', isChecked);
         
-        // Do a single update to column visibility
+        // Update parent states and column visibility
+        updateParentCheckboxes();
         updateColumnVisibility();
     });
     
@@ -307,18 +331,18 @@ $(document).ready(function() {
     
     // Helper function to update a specific parent checkbox state
     function updateParentCheckboxState(changedCheckbox) {
-        const hazardClass = changedCheckbox.attr('class').split(' ').find(cls => 
+        const hazardClasses = changedCheckbox.attr('class').split(' ').filter(cls =>
             cls !== 'form-check-input' && cls !== 'hazard-column');
         
-        if (!hazardClass) return;
-        
-        const parentCheckbox = $(`[data-hazard="${hazardClass}"]`);
-        const childCheckboxes = $(`.hazard-column.${hazardClass}`);
-        const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
-        
-        parentCheckbox.prop('checked', checkedChilds.length > 0);
-        parentCheckbox.prop('indeterminate', 
-            checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+        hazardClasses.forEach(function(hazardClass) {
+            const parentCheckbox = $(`[data-hazard="${hazardClass}"]`);
+            const childCheckboxes = $(`.hazard-column.${hazardClass}`);
+            const checkedChilds = $(`.hazard-column.${hazardClass}:checked`);
+
+            parentCheckbox.prop('checked', checkedChilds.length > 0);
+            parentCheckbox.prop('indeterminate',
+                checkedChilds.length > 0 && checkedChilds.length < childCheckboxes.length);
+        });
     }
 
     // Helper function to update all parent checkbox states
