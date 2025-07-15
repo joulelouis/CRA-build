@@ -105,8 +105,11 @@
             <!-- Tropical Cyclone -->
             {% if 'Tropical Cyclones' in selected_hazards %}
             <div class="mb-3">
-                <label class="form-label fw-bold">Tropical Cyclone</label>
-                <div class="ms-2">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-tropical-cyclone" data-hazard="tropical-cyclone">
+                    <label class="form-check-label fw-bold" for="col-tropical-cyclone">Tropical Cyclone</label>
+                </div>
+                <div class="ms-4">
                     <!-- Baseline Columns -->
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input hazard-group" id="tc-baseline-group" data-hazard="tc-baseline">
@@ -114,15 +117,15 @@
                     </div>
                     <div class="ms-4 mb-2">
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-baseline" id="col-tc-10yr" data-column="Extreme Windspeed 10 year Return Period (km/h)">
+                            <input type="checkbox" class="form-check-input hazard-column tc-baseline tropical-cyclone" id="col-tc-10yr" data-column="Extreme Windspeed 10 year Return Period (km/h)">
                             <label class="form-check-label" for="col-tc-10yr">Extreme Windspeed 10 year Return Period (km/h)</label>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-baseline" id="col-tc-20yr" data-column="Extreme Windspeed 20 year Return Period (km/h)">
+                            <input type="checkbox" class="form-check-input hazard-column tc-baseline tropical-cyclone" id="col-tc-20yr" data-column="Extreme Windspeed 20 year Return Period (km/h)">
                             <label class="form-check-label" for="col-tc-20yr">Extreme Windspeed 20 year Return Period (km/h)</label>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-baseline" id="col-tc-50yr" data-column="Extreme Windspeed 50 year Return Period (km/h)">
+                            <input type="checkbox" class="form-check-input hazard-column tc-baseline tropical-cyclone" id="col-tc-50yr" data-column="Extreme Windspeed 50 year Return Period (km/h)">
                             <label class="form-check-label" for="col-tc-50yr">Extreme Windspeed 50 year Return Period (km/h)</label>
                         </div>
                     </div>
@@ -133,15 +136,15 @@
                     </div>
                     <div class="ms-4 mb-2">
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-moderate" id="col-tc-10yr-base" data-column="Extreme Windspeed 10 year Return Period (km/h) - Base Case">
+                            <input type="checkbox" class="form-check-input hazard-column tc-moderate tropical-cyclone" id="col-tc-10yr-base" data-column="Extreme Windspeed 10 year Return Period (km/h) - Base Case">
                             <label class="form-check-label" for="col-tc-10yr-base">Extreme Windspeed 10 year Return Period (km/h) - Moderate Case</label>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-moderate" id="col-tc-20yr-base" data-column="Extreme Windspeed 20 year Return Period (km/h) - Base Case">
+                            <input type="checkbox" class="form-check-input hazard-column tc-moderate tropical-cyclone" id="col-tc-20yr-base" data-column="Extreme Windspeed 20 year Return Period (km/h) - Base Case">
                             <label class="form-check-label" for="col-tc-20yr-base">Extreme Windspeed 20 year Return Period (km/h) - Moderate Case</label>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-moderate" id="col-tc-50yr-base" data-column="Extreme Windspeed 50 year Return Period (km/h) - Base Case">
+                            <input type="checkbox" class="form-check-input hazard-column tc-moderate tropical-cyclone" id="col-tc-50yr-base" data-column="Extreme Windspeed 50 year Return Period (km/h) - Base Case">
                             <label class="form-check-label" for="col-tc-50yr-base">Extreme Windspeed 50 year Return Period (km/h) - Moderate Case</label>
                         </div>
                     </div>
@@ -152,15 +155,15 @@
                     </div>
                     <div class="ms-4">
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-worst" id="col-tc-10yr-worst" data-column="Extreme Windspeed 10 year Return Period (km/h) - Worst Case">
+                            <input type="checkbox" class="form-check-input hazard-column tc-worst tropical-cyclone" id="col-tc-10yr-worst" data-column="Extreme Windspeed 10 year Return Period (km/h) - Worst Case">
                             <label class="form-check-label" for="col-tc-10yr-worst">Extreme Windspeed 10 year Return Period (km/h) - Worst Case</label>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-worst" id="col-tc-20yr-worst" data-column="Extreme Windspeed 20 year Return Period (km/h) - Worst Case">
+                            <input type="checkbox" class="form-check-input hazard-column tc-worst tropical-cyclone" id="col-tc-20yr-worst" data-column="Extreme Windspeed 20 year Return Period (km/h) - Worst Case">
                             <label class="form-check-label" for="col-tc-20yr-worst">Extreme Windspeed 20 year Return Period (km/h) - Worst Case</label>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input hazard-column tc-worst" id="col-tc-50yr-worst" data-column="Extreme Windspeed 50 year Return Period (km/h) - Worst Case">
+                            <input type="checkbox" class="form-check-input hazard-column tc-worst tropical-cyclone" id="col-tc-50yr-worst" data-column="Extreme Windspeed 50 year Return Period (km/h) - Worst Case">
                             <label class="form-check-label" for="col-tc-50yr-worst">Extreme Windspeed 50 year Return Period (km/h) - Worst Case</label>
                         </div>
                     </div>
