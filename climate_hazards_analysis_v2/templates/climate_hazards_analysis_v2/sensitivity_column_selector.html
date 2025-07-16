@@ -279,21 +279,45 @@
             {% if 'Rainfall Induced Landslide' in selected_hazards %}
             <div class="mb-3">
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input hazard-group" id="col-landslide" checked data-hazard="landslide">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-landslide" data-hazard="landslide">
                     <label class="form-check-label fw-bold" for="col-landslide">Rainfall Induced Landslide</label>
                 </div>
                 <div class="ms-4">
+
+                    <!-- Baseline Group -->
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column landslide" id="col-landslide-rating" checked data-column="Rainfall-Induced Landslide (factor of safety)">
-                        <label class="form-check-label" for="col-landslide-rating">Rainfall-Induced Landslide (factor of safety)</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="landslide-baseline-group" data-hazard="landslide-baseline">
+                        <label class="form-check-label" for="landslide-baseline-group">Baseline</label>
                     </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column landslide" id="col-landslide-moderate" data-column="Rainfall-Induced Landslide (factor of safety) - Moderate Case">
-                        <label class="form-check-label" for="col-landslide-moderate">Rainfall-Induced Landslide (factor of safety) - Moderate Case</label>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column landslide-baseline landslide" id="col-landslide-baseline" checked data-column="Rainfall-Induced Landslide (factor of safety)">
+                            <label class="form-check-label" for="col-landslide-baseline">Rainfall-Induced Landslide (factor of safety)</label>
+                        </div>
                     </div>
+
+                    <!-- Future Moderate Case Group -->
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column landslide" id="col-landslide-worst" data-column="Rainfall-Induced Landslide (factor of safety) - Worst Case">
-                        <label class="form-check-label" for="col-landslide-worst">Rainfall-Induced Landslide (factor of safety) - Worst Case</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="landslide-moderate-group" data-hazard="landslide-moderate">
+                        <label class="form-check-label" for="landslide-moderate-group">Future (Moderate Case)</label>
+                    </div>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column landslide-moderate landslide" id="col-landslide-moderate" data-column="Rainfall-Induced Landslide (factor of safety) - Moderate Case">
+                            <label class="form-check-label" for="col-landslide-moderate">Rainfall-Induced Landslide (factor of safety) - Moderate Case</label>
+                        </div>
+                    </div>
+
+                    <!-- Future Worst Case Group -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-group" id="landslide-worst-group" data-hazard="landslide-worst">
+                        <label class="form-check-label" for="landslide-worst-group">Future (Worst Case)</label>
+                    </div>
+                    <div class="ms-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column landslide-worst landslide" id="col-landslide-worst" data-column="Rainfall-Induced Landslide (factor of safety) - Worst Case">
+                            <label class="form-check-label" for="col-landslide-worst">Rainfall-Induced Landslide (factor of safety) - Worst Case</label>
+                        </div>
                     </div>
                 </div>
             </div>
