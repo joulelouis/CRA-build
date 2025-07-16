@@ -576,7 +576,7 @@ def show_results(request):
             ],
             'Storm Surge': [
                 'Storm Surge Flood Depth (meters)',
-                'Storm Surge Flood Depth (meters) - Moderate Case'
+                'Storm Surge Flood Depth (meters) - Worst Case'
             ],
             'Rainfall-Induced Landslide': [
                 'Rainfall-Induced Landslide (factor of safety)',
@@ -643,15 +643,15 @@ def show_results(request):
             )
 
         # Storm Surge column counts
-        ss_moderatecase_count = sum(
+        ss_worstcase_count = sum(
             1 for c in columns
-            if c.endswith(' - Moderate Case') and 'Storm Surge Flood Depth' in c
+            if c.endswith(' - Worst Case') and 'Storm Surge Flood Depth' in c
         )
         ss_baseline_cols = ['Storm Surge Flood Depth (meters)']
         ss_baseline_count = sum(1 for c in ss_baseline_cols if c in columns)
 
         if 'Storm Surge' in groups:
-            groups['Storm Surge'] = ss_baseline_count + ss_moderatecase_count
+            groups['Storm Surge'] = ss_baseline_count + ss_worstcase_count
 
         # Rainfall-Induced Landslide column counts
         ls_moderatecase_count = sum(
@@ -740,7 +740,7 @@ def show_results(request):
             'tc_worstcase_count': tc_worstcase_count,
             'tc_baseline_count': tc_baseline_count,
             'ss_baseline_count': ss_baseline_count,
-            'ss_moderatecase_count': ss_moderatecase_count,
+            'ss_worstcase_count': ss_worstcase_count,
             'ls_baseline_count': ls_baseline_count,
             'ls_moderatecase_count': ls_moderatecase_count,
             'ls_worstcase_count': ls_worstcase_count,
@@ -1319,7 +1319,7 @@ def sensitivity_results(request):
                      'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)'],
             'Storm Surge': [
                 'Storm Surge Flood Depth (meters)',
-                'Storm Surge Flood Depth (meters) - Moderate Case'
+                'Storm Surge Flood Depth (meters) - Worst Case'
             ],
             'Rainfall-Induced Landslide': [
                 'Rainfall-Induced Landslide (factor of safety)',
@@ -1475,7 +1475,7 @@ def convert_table_value(value, column_name):
         'Extreme Windspeed 50 year Return Period (km/h)',
         'Extreme Windspeed 100 year Return Period (km/h)',
         'Storm Surge Flood Depth (meters)',
-        'Storm Surge Flood Depth (meters) - Moderate Case',
+        'Storm Surge Flood Depth (meters) - Worst Case'
         'Rainfall-Induced Landslide (factor of safety)',
         'Elevation (meter above sea level)'
     ]

@@ -246,13 +246,30 @@
             {% if 'Storm Surge' in selected_hazards %}
             <div class="mb-3">
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input hazard-group" id="col-storm-surge" checked data-hazard="storm-surge">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-storm-surge" data-hazard="storm-surge">
                     <label class="form-check-label fw-bold" for="col-storm-surge">Storm Surge</label>
                 </div>
                 <div class="ms-4">
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column storm-surge" id="col-storm-surge-rating" checked data-column="Storm Surge Flood Depth (meters)">
-                        <label class="form-check-label" for="col-storm-surge-rating">Storm Surge Flood Depth (meters)</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="ss-baseline-group" data-hazard="ss-baseline">
+                        <label class="form-check-label fw-bold" for="ss-baseline-group">Baseline</label>
+                    </div>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column ss-baseline storm-surge" id="col-ss-depth" data-column="Storm Surge Flood Depth (meters)">
+                            <label class="form-check-label" for="col-ss-depth">Storm Surge Flood Depth (meters)</label>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-group" id="ss-worst-group" data-hazard="ss-worst">
+                        <label class="form-check-label fw-bold" for="ss-worst-group">Future (Worst Case)</label>
+                    </div>
+                    <div class="ms-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column ss-worst storm-surge" id="col-ss-depth-worst" data-column="Storm Surge Flood Depth (meters) - Worst Case">
+                            <label class="form-check-label" for="col-ss-depth-worst">Storm Surge Flood Depth (meters)</label>
+                        </div>
                     </div>
                 </div>
             </div>

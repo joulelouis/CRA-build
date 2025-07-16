@@ -957,7 +957,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'Days over 35° Celsius (2031 - 2040) - Worst Case',
             'Days over 35° Celsius (2041 - 2050) - Worst Case',
             'Storm Surge Flood Depth (meters)',
-            'Storm Surge Flood Depth (meters) - Moderate Case',
+            'Storm Surge Flood Depth (meters) - Worst Case',
             'Rainfall-Induced Landslide (factor of safety)',
             'Rainfall-Induced Landslide (factor of safety) - Moderate Case',
             'Rainfall-Induced Landslide (factor of safety) - Worst Case',

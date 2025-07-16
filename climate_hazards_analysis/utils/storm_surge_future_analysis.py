@@ -36,7 +36,7 @@ def generate_storm_surge_future_analysis(
     -------
     DataFrame
         Input dataframe with an additional
-        ``Storm Surge Flood Depth (meters) - Moderate Case`` column.
+        ``Storm Surge Flood Depth (meters) - Worst Case`` column.
     """
     if tif_path is None:
         tif = DEFAULT_TIF
@@ -45,7 +45,7 @@ def generate_storm_surge_future_analysis(
 
     if not tif.exists():
         logger.warning("Future storm surge raster not found: %s", tif)
-        df["Storm Surge Flood Depth (meters) - Moderate Case"] = pd.NA
+        df["Storm Surge Flood Depth (meters) - Worst Case"] = pd.NA
         return df
 
     gdf = gpd.GeoDataFrame(
@@ -56,7 +56,7 @@ def generate_storm_surge_future_analysis(
 
     stats = rstat.zonal_stats(gdf, str(tif), stats="max", nodata=255)
     vals = pd.DataFrame(stats)["max"].fillna(0).astype(int)
-    gdf["Storm Surge Flood Depth (meters) - Moderate Case"] = vals
+    gdf["Storm Surge Flood Depth (meters) - Worst Case"] = vals
 
     return gdf.drop(columns="geometry")
 
