@@ -671,6 +671,40 @@ Adjust Sensitivity Thresholds
                         </div>
                         {% endif %}
 
+                        <!-- Rainfall-Induced Landslide Thresholds -->
+                        {% if 'Rainfall Induced Landslide' in selected_hazards %}
+                        <div class="accordion" id="landslideAccordion">
+                            <div class="accordion-item parameter-card">
+                                <h2 class="accordion-header d-flex align-items-center" id="landslideHeader">
+                                    <button class="accordion-button flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#landslideCollapse" aria-expanded="true" aria-controls="landslideCollapse">
+                                        <strong>Rainfall-Induced Landslide Thresholds</strong>
+                                        <div class="form-check position-absolute end-0 top-50 translate-middle-y me-5">
+                                            <input class="form-check-input" type="checkbox" id="landslideNotMaterial" name="landslide_not_material">
+                                            <label class="form-check-label" for="landslideNotMaterial">This hazard is not material to the asset</label>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="landslideCollapse" class="accordion-collapse collapse show" aria-labelledby="landslideHeader" data-bs-parent="#landslideAccordion">
+                                    <div class="accordion-body">
+                                        <div class="parameter-description">Set factor of safety thresholds for risk levels for the selected asset archetype</div>
+                                        <div class="parameter-control">
+                                            <div id="landslideSlider" class="multi-range-slider">
+                                                <div id="landslideTrack" class="slider-track"></div>
+                                                <input type="range" id="landslideLow" name="landslide_low" min="0" max="3" step="0.1" value="1" oninput="updateAllDisplayValues()">
+                                                <input type="range" id="landslideHigh" name="landslide_high" min="0" max="3" step="0.1" value="1.5" oninput="updateAllDisplayValues()">
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <div>High: 0 to <span class="range-value" id="landslideLowValue">1</span></div>
+                                                <div>Medium: <span class="range-value" id="landslideMediumLow">1</span> to <span class="range-value" id="landslideMediumHigh">1.5</span></div>
+                                                <div>Low: &gt; <span class="range-value" id="landslideHighValue">1.5</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                         <input type="hidden" id="submit-type" name="submit_type" value="">
                         
                         <!-- Action Buttons -->
@@ -713,7 +747,8 @@ Adjust Sensitivity Thresholds
         flood: 'flood',
         heat: 'heat',
         tropicalCyclone: 'tropical_cyclone',
-        stormSurge: 'storm_surge'
+        stormSurge: 'storm_surge',
+        landslide: 'landslide'
     };
 
     // Function to capture current parameters for all hazards
@@ -743,6 +778,11 @@ Adjust Sensitivity Thresholds
             params.storm_surge_low = document.getElementById('stormSurgeLow').value;
             params.storm_surge_high = document.getElementById('stormSurgeHigh').value;
             params.storm_surge_not_material = document.getElementById('stormSurgeNotMaterial').checked ? 1 : 0;
+        }
+        if (document.getElementById('landslideLow')) {
+            params.landslide_low = document.getElementById('landslideLow').value;
+            params.landslide_high = document.getElementById('landslideHigh').value;
+            params.landslide_not_material = document.getElementById('landslideNotMaterial').checked ? 1 : 0;
         }
         return params;
     }
@@ -776,6 +816,11 @@ Adjust Sensitivity Thresholds
             document.getElementById('stormSurgeHigh').value = params.storm_surge_high !== undefined ? params.storm_surge_high : 1.5;
             document.getElementById('stormSurgeNotMaterial').checked = !!params.storm_surge_not_material;
         }
+        if (document.getElementById('landslideLow')) {
+            document.getElementById('landslideLow').value = params.landslide_low !== undefined ? params.landslide_low : 1;
+            document.getElementById('landslideHigh').value = params.landslide_high !== undefined ? params.landslide_high : 1.5;
+            document.getElementById('landslideNotMaterial').checked = !!params.landslide_not_material;
+        }
 
         updateAllDisplayValues();
         toggleHazard('flood');
@@ -783,6 +828,7 @@ Adjust Sensitivity Thresholds
         toggleHazard('tropicalCyclone');
         toggleHazard('heat');
         toggleHazard('stormSurge');
+        toggleHazard('landslide');
     }
 
     // Ensure slider handles remain in logical order
@@ -808,12 +854,14 @@ Adjust Sensitivity Thresholds
         const lowPct = ((low - min) / (max - min)) * 100;
         const highPct = ((high - min) / (max - min)) * 100;
         document.getElementById(prefix + 'Track').style.background =
-            `linear-gradient(to right, green 0%, green ${lowPct}%, orange ${lowPct}%, orange ${highPct}%, red ${highPct}%, red 100%)`;
+            prefix === 'landslide'
+                ? `linear-gradient(to right, red 0%, red ${lowPct}%, orange ${lowPct}%, orange ${highPct}%, green ${highPct}%, green 100%)`
+                : `linear-gradient(to right, green 0%, green ${lowPct}%, orange ${lowPct}%, orange ${highPct}%, red ${highPct}%, red 100%)`;
     }
 
     // Function to update all range value displays
     function updateAllDisplayValues() {
-        ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge'].forEach(prefix => {
+        ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge', 'landslide'].forEach(prefix => {
             const lowEl = document.getElementById(prefix + 'Low');
             if (!lowEl) return;
             enforceSliderOrder(prefix);
@@ -890,7 +938,7 @@ Adjust Sensitivity Thresholds
     // Update accordion state based on whether the hazard is marked not material
     // and whether an archetype has been selected
     function updateAccordionState() {
-        ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge'].forEach(prefix => {
+        ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge', 'landslide'].forEach(prefix => {
             const checkbox = document.getElementById(prefix + 'NotMaterial');
             const accordionButton = document.querySelector('#' + prefix + 'Header button');
             const collapseEl = document.getElementById(prefix + 'Collapse');
@@ -931,7 +979,7 @@ Adjust Sensitivity Thresholds
 
     // Function to reset all parameters to defaults
     function resetToDefaults() {
-        if (confirm('Are you sure you want to reset all Water Stress, Flood, Tropical Cyclones, Heat, and Storm Surge parameters to their default values?')) {
+        if (confirm('Are you sure you want to reset all Water Stress, Flood, Tropical Cyclones, Heat, Storm Surge, and Rainfall-Induced Landslide parameters to their default values?')) {
                         if (document.getElementById('waterStressLow')) {
                 document.getElementById('waterStressLow').value = 10;
                 document.getElementById('waterStressHigh').value = 31;
@@ -956,6 +1004,11 @@ Adjust Sensitivity Thresholds
                 document.getElementById('stormSurgeLow').value = 0.5;
                 document.getElementById('stormSurgeHigh').value = 1.5;
                 document.getElementById('stormSurgeNotMaterial').checked = false;
+            }
+            if (document.getElementById('landslideLow')) {
+                document.getElementById('landslideLow').value = 1;
+                document.getElementById('landslideHigh').value = 1.5;
+                document.getElementById('landslideNotMaterial').checked = false;
             }
 
 
@@ -989,7 +1042,7 @@ Adjust Sensitivity Thresholds
 
         // Initially keep the accordion disabled until an archetype is selected
         updateAccordionState();
-        ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge'].forEach(prefix => {
+        ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge', 'landslide'].forEach(prefix => {
             const el = document.getElementById(prefix + 'NotMaterial');
             if (el) {
                 el.addEventListener('change', () => toggleHazard(prefix));

@@ -1014,6 +1014,13 @@ def sensitivity_parameters(request):
                 'storm_surge_high': parse_numeric(request.POST.get('storm_surge_high', 1.5)),
                 'storm_surge_not_material': int(request.POST.get('storm_surge_not_material', 0)),
             }
+
+            # Extract Rainfall-Induced Landslide sensitivity parameters from the form
+            landslide_params = {
+                'landslide_low': parse_numeric(request.POST.get('landslide_low', 1)),
+                'landslide_high': parse_numeric(request.POST.get('landslide_high', 1.5)),
+                'landslide_not_material': int(request.POST.get('landslide_not_material', 0)),
+            }
             
             logger.info(f"Water Stress parameters received: {water_stress_params}")
             logger.info(f"Heat parameters received: {heat_params}")
@@ -1041,6 +1048,7 @@ def sensitivity_parameters(request):
                 **flood_params,
                 **tropical_cyclone_params,
                 **storm_surge_params,
+                **landslide_params,
             }
             
             # Use collected parameters if they exist, otherwise use current form values
@@ -1226,6 +1234,8 @@ def sensitivity_results(request):
                     'water_stress_high': 31,
                     'storm_surge_low': 0.5,
                     'storm_surge_high': 1.5,
+                    'landslide_low': 1,
+                    'landslide_high': 1.5,
                 }))
                 
                 # Store the archetype and parameters used for this facility (for template access)
