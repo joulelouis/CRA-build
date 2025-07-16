@@ -495,6 +495,7 @@ Adjust Sensitivity Thresholds
                         <input type="hidden" id="selected-archetype-input" name="selected_archetype" value="">
 
                         <!-- Flood Thresholds -->
+                        {% if 'Flood' in selected_hazards %}
                         <div class="accordion" id="floodAccordion">
                             <div class="accordion-item parameter-card">
                                 <h2 class="accordion-header d-flex align-items-center" id="floodHeader">
@@ -526,9 +527,11 @@ Adjust Sensitivity Thresholds
 
                             </div>
                         </div>
+                        {% endif %}
+
                         
                         <!-- Water Stress Thresholds -->
-
+                        {% if 'Water Stress' in selected_hazards %}
                         <div class="accordion" id="waterStressAccordion">
                             <div class="accordion-item parameter-card">
                                 <h2 class="accordion-header d-flex align-items-center" id="waterStressHeader">
@@ -561,8 +564,10 @@ Adjust Sensitivity Thresholds
                             
                             </div>
                         </div>
+                        {% endif %}
 
                         <!-- Tropical Cyclones Thresholds -->
+                        {% if 'Tropical Cyclones' in selected_hazards %}
                         <div class="accordion" id="tropicalCycloneAccordion">
                             <div class="accordion-item parameter-card">
                                 <h2 class="accordion-header d-flex align-items-center" id="tropicalCycloneHeader">
@@ -593,10 +598,13 @@ Adjust Sensitivity Thresholds
                                 </div>
                             </div>
                         </div>
+
+                        {% endif %}
                         
                         <!-- Hidden field to track which button was clicked -->
 
                         <!-- Heat Thresholds -->
+                        {% if 'Heat' in selected_hazards %}
                         <div class="accordion" id="heatAccordion">
                             <div class="accordion-item parameter-card">
                                 <h2 class="accordion-header d-flex align-items-center" id="heatHeader">
@@ -627,8 +635,10 @@ Adjust Sensitivity Thresholds
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
 
                         <!-- Storm Surge Thresholds -->
+                        {% if 'Storm Surge' in selected_hazards %}
                         <div class="accordion" id="stormSurgeAccordion">
                             <div class="accordion-item parameter-card">
                                 <h2 class="accordion-header d-flex align-items-center" id="stormSurgeHeader">
@@ -659,6 +669,7 @@ Adjust Sensitivity Thresholds
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
 
                         <input type="hidden" id="submit-type" name="submit_type" value="">
                         
@@ -707,44 +718,64 @@ Adjust Sensitivity Thresholds
 
     // Function to capture current parameters for all hazards
     function getCurrentParameters() {
-        return {
-            flood_low: document.getElementById('floodLow').value,
-            flood_high: document.getElementById('floodHigh').value,
-            flood_not_material: document.getElementById('floodNotMaterial').checked ? 1 : 0,
-            water_stress_low: document.getElementById('waterStressLow').value,
-            water_stress_high: document.getElementById('waterStressHigh').value,
-            water_stress_not_material: document.getElementById('waterStressNotMaterial').checked ? 1 : 0,
-            tropical_cyclone_low: document.getElementById('tropicalCycloneLow').value,
-            tropical_cyclone_high: document.getElementById('tropicalCycloneHigh').value,
-            tropical_cyclone_not_material: document.getElementById('tropicalCycloneNotMaterial').checked ? 1 : 0,
-            heat_low: document.getElementById('heatLow').value,
-            heat_high: document.getElementById('heatHigh').value,
-            heat_not_material: document.getElementById('heatNotMaterial').checked ? 1 : 0,
-            storm_surge_low: document.getElementById('stormSurgeLow').value,
-            storm_surge_high: document.getElementById('stormSurgeHigh').value,
-            storm_surge_not_material: document.getElementById('stormSurgeNotMaterial').checked ? 1 : 0
-        };
+        const params = {};
+        if (document.getElementById('floodLow')) {
+            params.flood_low = document.getElementById('floodLow').value;
+            params.flood_high = document.getElementById('floodHigh').value;
+            params.flood_not_material = document.getElementById('floodNotMaterial').checked ? 1 : 0;
+        }
+        if (document.getElementById('waterStressLow')) {
+            params.water_stress_low = document.getElementById('waterStressLow').value;
+            params.water_stress_high = document.getElementById('waterStressHigh').value;
+            params.water_stress_not_material = document.getElementById('waterStressNotMaterial').checked ? 1 : 0;
+        }
+        if (document.getElementById('tropicalCycloneLow')) {
+            params.tropical_cyclone_low = document.getElementById('tropicalCycloneLow').value;
+            params.tropical_cyclone_high = document.getElementById('tropicalCycloneHigh').value;
+            params.tropical_cyclone_not_material = document.getElementById('tropicalCycloneNotMaterial').checked ? 1 : 0;
+        }
+        if (document.getElementById('heatLow')) {
+            params.heat_low = document.getElementById('heatLow').value;
+            params.heat_high = document.getElementById('heatHigh').value;
+            params.heat_not_material = document.getElementById('heatNotMaterial').checked ? 1 : 0;
+        }
+        if (document.getElementById('stormSurgeLow')) {
+            params.storm_surge_low = document.getElementById('stormSurgeLow').value;
+            params.storm_surge_high = document.getElementById('stormSurgeHigh').value;
+            params.storm_surge_not_material = document.getElementById('stormSurgeNotMaterial').checked ? 1 : 0;
+        }
+        return params;
     }
 
     // Function to apply parameters to form
     function applyParameters(params) {
         if (!params) return;
 
-        document.getElementById('floodLow').value = params.flood_low !== undefined ? params.flood_low : 0.5;
-        document.getElementById('floodHigh').value = params.flood_high !== undefined ? params.flood_high : 1.5;
-        document.getElementById('floodNotMaterial').checked = !!params.flood_not_material;
-        document.getElementById('waterStressLow').value = params.water_stress_low !== undefined ? params.water_stress_low : 10;
-        document.getElementById('waterStressHigh').value = params.water_stress_high !== undefined ? params.water_stress_high : 31;
-        document.getElementById('waterStressNotMaterial').checked = !!params.water_stress_not_material;
-        document.getElementById('tropicalCycloneLow').value = params.tropical_cyclone_low !== undefined ? params.tropical_cyclone_low : 119;
-        document.getElementById('tropicalCycloneHigh').value = params.tropical_cyclone_high !== undefined ? params.tropical_cyclone_high : 178;
-        document.getElementById('tropicalCycloneNotMaterial').checked = !!params.tropical_cyclone_not_material;
-        document.getElementById('heatLow').value = params.heat_low !== undefined ? params.heat_low : 10;
-        document.getElementById('heatHigh').value = params.heat_high !== undefined ? params.heat_high : 45;
-        document.getElementById('heatNotMaterial').checked = !!params.heat_not_material;
-        document.getElementById('stormSurgeLow').value = params.storm_surge_low !== undefined ? params.storm_surge_low : 0.5;
-        document.getElementById('stormSurgeHigh').value = params.storm_surge_high !== undefined ? params.storm_surge_high : 1.5;
-        document.getElementById('stormSurgeNotMaterial').checked = !!params.storm_surge_not_material;
+        if (document.getElementById('floodLow')) {
+            document.getElementById('floodLow').value = params.flood_low !== undefined ? params.flood_low : 0.5;
+            document.getElementById('floodHigh').value = params.flood_high !== undefined ? params.flood_high : 1.5;
+            document.getElementById('floodNotMaterial').checked = !!params.flood_not_material;
+        }
+        if (document.getElementById('waterStressLow')) {
+            document.getElementById('waterStressLow').value = params.water_stress_low !== undefined ? params.water_stress_low : 10;
+            document.getElementById('waterStressHigh').value = params.water_stress_high !== undefined ? params.water_stress_high : 31;
+            document.getElementById('waterStressNotMaterial').checked = !!params.water_stress_not_material;
+        }
+        if (document.getElementById('tropicalCycloneLow')) {
+            document.getElementById('tropicalCycloneLow').value = params.tropical_cyclone_low !== undefined ? params.tropical_cyclone_low : 119;
+            document.getElementById('tropicalCycloneHigh').value = params.tropical_cyclone_high !== undefined ? params.tropical_cyclone_high : 178;
+            document.getElementById('tropicalCycloneNotMaterial').checked = !!params.tropical_cyclone_not_material;
+        }
+        if (document.getElementById('heatLow')) {
+            document.getElementById('heatLow').value = params.heat_low !== undefined ? params.heat_low : 10;
+            document.getElementById('heatHigh').value = params.heat_high !== undefined ? params.heat_high : 45;
+            document.getElementById('heatNotMaterial').checked = !!params.heat_not_material;
+        }
+        if (document.getElementById('stormSurgeLow')) {
+            document.getElementById('stormSurgeLow').value = params.storm_surge_low !== undefined ? params.storm_surge_low : 0.5;
+            document.getElementById('stormSurgeHigh').value = params.storm_surge_high !== undefined ? params.storm_surge_high : 1.5;
+            document.getElementById('stormSurgeNotMaterial').checked = !!params.storm_surge_not_material;
+        }
 
         updateAllDisplayValues();
         toggleHazard('flood');
@@ -901,21 +932,32 @@ Adjust Sensitivity Thresholds
     // Function to reset all parameters to defaults
     function resetToDefaults() {
         if (confirm('Are you sure you want to reset all Water Stress, Flood, Tropical Cyclones, Heat, and Storm Surge parameters to their default values?')) {
-            document.getElementById('waterStressLow').value = 10;
-            document.getElementById('waterStressHigh').value = 31;
-            document.getElementById('waterStressNotMaterial').checked = false;
-            document.getElementById('floodLow').value = 0.5;
-            document.getElementById('floodHigh').value = 1.5;
-            document.getElementById('floodNotMaterial').checked = false;
-            document.getElementById('heatLow').value = 10;
-            document.getElementById('heatHigh').value = 45;
-            document.getElementById('heatNotMaterial').checked = false;
-            document.getElementById('tropicalCycloneLow').value = 119;
-            document.getElementById('tropicalCycloneHigh').value = 178;
-            document.getElementById('tropicalCycloneNotMaterial').checked = false;
-            document.getElementById('stormSurgeLow').value = 0.5;
-            document.getElementById('stormSurgeHigh').value = 1.5;
-            document.getElementById('stormSurgeNotMaterial').checked = false;
+                        if (document.getElementById('waterStressLow')) {
+                document.getElementById('waterStressLow').value = 10;
+                document.getElementById('waterStressHigh').value = 31;
+                document.getElementById('waterStressNotMaterial').checked = false;
+            }
+            if (document.getElementById('floodLow')) {
+                document.getElementById('floodLow').value = 0.5;
+                document.getElementById('floodHigh').value = 1.5;
+                document.getElementById('floodNotMaterial').checked = false;
+            }
+            if (document.getElementById('heatLow')) {
+                document.getElementById('heatLow').value = 10;
+                document.getElementById('heatHigh').value = 45;
+                document.getElementById('heatNotMaterial').checked = false;
+            }
+            if (document.getElementById('tropicalCycloneLow')) {
+                document.getElementById('tropicalCycloneLow').value = 119;
+                document.getElementById('tropicalCycloneHigh').value = 178;
+                document.getElementById('tropicalCycloneNotMaterial').checked = false;
+            }
+            if (document.getElementById('stormSurgeLow')) {
+                document.getElementById('stormSurgeLow').value = 0.5;
+                document.getElementById('stormSurgeHigh').value = 1.5;
+                document.getElementById('stormSurgeNotMaterial').checked = false;
+            }
+
 
             updateAllDisplayValues();
             
