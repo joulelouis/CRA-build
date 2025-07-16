@@ -620,7 +620,11 @@ def process_nan_values(df):
             print(f"  Found {int(initial_nan_count)} NaN values in {col}")
         
         # Apply column-specific replacements
-        if 'Sea Level Rise' in col or col == 'Elevation (meter above sea level)':
+        if 'Sea Level Rise' in col:
+            col_series = col_series.apply(
+                lambda v: "Little to none" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
+            )
+        elif col == 'Elevation (meter above sea level)':
             col_series = col_series.apply(
                 lambda v: "Little to no effect" if pd.isna(v) or v == '' or str(v).lower() == 'nan' else v
             )
@@ -1058,7 +1062,9 @@ def validate_and_clean_dataframe(df, analysis_name=""):
                     df[col].fillna('0.1 to 0.5', inplace=True)  # Use simplified category
                 elif 'Water Stress' in col:
                     df[col].fillna('N/A', inplace=True)
-                elif 'Sea Level' in col or 'Elevation' in col:
+                elif 'Sea Level Rise' in col:
+                    df[col].fillna('Little to none', inplace=True)
+                elif 'Elevation' in col:
                     df[col].fillna('Little to no effect', inplace=True)
                 elif 'Windspeed' in col or 'Tropical' in col:
                     df[col].fillna('Data not available', inplace=True)

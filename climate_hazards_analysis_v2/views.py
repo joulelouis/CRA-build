@@ -844,7 +844,7 @@ def identify_high_risk_assets(data, selected_hazards):
         },
         'Sea Level Rise': {
             'column': '2050 Sea Level Rise (in meters)',
-            'criteria': lambda v: v != 'Little to no effect' and isinstance(v, (int, float)) and v > 0.5
+            'criteria': lambda v: v != 'Little to none' and isinstance(v, (int, float)) and v > 0.5
         },
         'Tropical Cyclones': {
             'column': 'Extreme Windspeed 100 year Return Period (km/h)',
@@ -887,7 +887,7 @@ def identify_high_risk_assets(data, selected_hazards):
                 value = asset[column]
                 try:
                     # Try to convert string values to numbers if possible
-                    if isinstance(value, str) and value not in ['N/A', 'Little to no effect', 'Data not available', 
+                    if isinstance(value, str) and value not in ['N/A', 'Little to none', 'Data not available',
                                                                '0.1 to 0.5', '0.5 to 1.5', 'Greater than 1.5', 'Unknown']:
                         try:
                             value = float(value)
