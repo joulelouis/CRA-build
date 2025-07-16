@@ -725,13 +725,13 @@ Climate Hazard Analysis Results
                     {% elif "Landslide (factor of safety" in key and value != "N/A" %}
                         {% with val=value|to_float %}
                             {% if value|lower == "generally stable" or val > 2.5 %}
-                                <span style="color: black; font-weight: bold;">Generally stable</span>
+                                <span style="color: black; font-weight: bold;">Generally Stable</span>
                             {% elif val > 1.5 %}
-                                <span style="color: green; font-weight: bold;">FoS &gt; 1.5</span>
+                                <span style="color: green; font-weight: bold;">&gt; 1.5</span>
                             {% elif val >= 1 %}
-                                <span style="color: orange; font-weight: bold;">FoS 1 &lt; FoS &lt; 1.5</span>
+                                <span style="color: orange; font-weight: bold;">1 to 1.5</span>
                             {% else %}
-                                <span style="color: red; font-weight: bold;">FoS &lt; 1</span>
+                                <span style="color: red; font-weight: bold;">&lt; 1</span>
                             {% endif %}
                         {% endwith %}
                     
@@ -1100,7 +1100,9 @@ function getInputType(columnName, currentValue) {
 }
 
 function categorizeFloodDepth(value) {
-    const num = parseFloat(value);
+    const match = String(value).match(/-?\d+(?:\.\d+)?/);
+    const num = match ? parseFloat(match[0]) : NaN;
+
     if (!isNaN(num)) {
         if (num >= 1.5) {
             return { text: '≥ 1.5', color: 'red' };
@@ -1213,32 +1215,29 @@ function categorizeHeatDays(value) {
 }
 
 function categorizeLandslideFOS(value) {
-    const num = parseFloat(value);
+    const match = String(value).match(/-?\d+(?:\.\d+)?/);
+    const num = match ? parseFloat(match[0]) : NaN;
+
     if (!isNaN(num)) {
         if (num > 2.5) {
-            return { text: 'Generally stable', color: 'black' };
+            return { text: 'Generally Stable', color: 'black' };
+        } else if (num > 1.5) {
+            return { text: '> 1.5', color: 'green' };
+        } else if (num >= 1) {
+            return { text: '1 to 1.5', color: 'orange' };
         }
-        if (num > 1.5) {
-            return { text: 'FoS > 1.5', color: 'green' };
-        }
-        if (num >= 1) {
-            return { text: 'FoS 1 < FoS < 1.5', color: 'orange' };
-        }
-        return { text: 'FoS < 1', color: 'red' };
+        return { text: '< 1', color: 'red' };
     }
 
-    const normalized = String(value).toLowerCase();
+    const normalized = String(value).toLowerCase().trim();
     if (normalized.includes('generally')) {
-        return { text: 'Generally stable', color: 'black' };
-    }
-    if (normalized.includes('> 1.5')) {
-        return { text: 'FoS > 1.5', color: 'green' };
-    }
-    if (normalized.includes('1 <') || normalized.includes('1<')) {
-        return { text: 'FoS 1 < FoS < 1.5', color: 'orange' };
-    }
-    if (normalized.includes('< 1')) {
-        return { text: 'FoS < 1', color: 'red' };
+        return { text: 'Generally Stable', color: 'black' };
+    } else if (normalized.includes('> 1.5')) {
+        return { text: '> 1.5', color: 'green' };
+    } else if (normalized.includes('1 to 1.5')) {
+        return { text: '1 to 1.5', color: 'orange' };
+    } else if (normalized.includes('< 1')) {
+        return { text: '< 1', color: 'red' };
     }
 
     return { text: value, color: 'black' };
@@ -1364,7 +1363,7 @@ function validateCellValue(value, columnName) {
             return true;
         }
         const normalized = String(value).toLowerCase();
-        return ['fos < 1', 'fos 1 < fos < 1.5', 'fos > 1.5', 'generally stable'].includes(normalized);
+        return ['generally stable', '< 1', '1 to 1.5', '> 1.5'].includes(normalized);
     }
     
     if (numberColumns.includes(columnName)) {
