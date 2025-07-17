@@ -719,8 +719,52 @@ View Sensitivity Results
 
 <script>
     // Column visibility management (similar to results.html but for sensitivity data)
+
+    let sensitivityDataTable;
+
+    function updateColumnVisibility() {
+        if (!sensitivityDataTable) {
+            console.error("Sensitivity DataTable not initialized");
+            return;
+        }
+
+        try {
+            const columnMap = {};
+            sensitivityDataTable.columns().every(function(index) {
+                columnMap[$(this.header()).text().trim()] = index;
+            });
+
+            const visibleColumns = new Set(['Facility']);
+
+            $('.hazard-column').each(function() {
+                const columnName = $(this).data('column');
+                if ($(this).prop('checked') && columnMap.hasOwnProperty(columnName)) {
+                    visibleColumns.add(columnName);
+                }
+            });
+
+            sensitivityDataTable.columns().every(function() {
+                const headerText = $(this.header()).text().trim();
+                const shouldBeVisible = visibleColumns.has(headerText);
+
+                if (this.visible() !== shouldBeVisible) {
+                    this.visible(shouldBeVisible, false);
+                }
+            });
+
+            sensitivityDataTable.columns.adjust().draw(false);
+
+            setTimeout(function() {
+                $(window).trigger('resize');
+                sensitivityDataTable.columns.adjust();
+            }, 50);
+
+        } catch (error) {
+            console.error("Error updating column visibility:", error);
+        }
+    }
+
     $(document).ready(function() {
-        let sensitivityDataTable;
         
         // Initialize DataTable with column visibility support
         function initializeSensitivityDataTable() {
@@ -771,49 +815,6 @@ View Sensitivity Results
                     }, 100);
                 }
             });
-        }
-        
-        // Update column visibility (reuse logic from results page)
-        function updateColumnVisibility() {
-            if (!sensitivityDataTable) {
-                console.error("Sensitivity DataTable not initialized");
-                return;
-            }
-            
-            try {
-                const columnMap = {};
-                sensitivityDataTable.columns().every(function(index) {
-                    columnMap[$(this.header()).text().trim()] = index;
-                });
-                
-                const visibleColumns = new Set(['Facility']); // Always show Facility
-                
-                $('.hazard-column').each(function() {
-                    const columnName = $(this).data('column');
-                    if ($(this).prop('checked') && columnMap.hasOwnProperty(columnName)) {
-                        visibleColumns.add(columnName);
-                    }
-                });
-                
-                sensitivityDataTable.columns().every(function() {
-                    const headerText = $(this.header()).text().trim();
-                    const shouldBeVisible = visibleColumns.has(headerText);
-                    
-                    if (this.visible() !== shouldBeVisible) {
-                        this.visible(shouldBeVisible, false);
-                    }
-                });
-                
-                sensitivityDataTable.columns.adjust().draw(false);
-                
-                setTimeout(function() {
-                    $(window).trigger('resize');
-                    sensitivityDataTable.columns.adjust();
-                }, 50);
-                
-            } catch (error) {
-                console.error("Error updating column visibility:", error);
-            }
         }
         
         // Initialize the DataTable
