@@ -15,6 +15,9 @@ Climate Hazard Analysis Results
     /* Progress Steps Styling */
     .steps-container {
         padding-bottom: 90px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
     .step-group-headers {
         display: flex;
@@ -71,6 +74,7 @@ Climate Hazard Analysis Results
 
     .step-item {
         transition: all 0.3s ease;
+        flex: 1 0 20%;
     }
 
     .step-circle {
@@ -101,6 +105,11 @@ Climate Hazard Analysis Results
         .step-circle {
             width: 40px !important;
             height: 40px !important;
+        }
+
+        .step-item {
+            flex: 1 0 45%;
+            margin-bottom: 1rem;
         }
     }
 
@@ -402,15 +411,15 @@ Climate Hazard Analysis Results
         <div class="card">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between mb-2 step-group-headers">
-                    <div id="overlay-header" class="step-header arrow text-center" style="width:35%;">Exposure Overlay</div>
-                    <div id="override-header" class="step-header arrow text-center" style="width:40%;">Exposure Override</div>
-                    <div id="sensitivity-header" class="step-header arrow text-center" style="width: 35%;">Sensitivity Analysis</div>
+                    <div id="overlay-header" class="step-header arrow text-center" style="width:25%;">Exposure Overlay</div>
+                    <div id="override-header" class="step-header arrow text-center" style="width:25%;">Exposure Override</div>
+                    <div id="sensitivity-header" class="step-header arrow text-center" style="width:25%;">Sensitivity Analysis</div>
                     <div id="impact-header" class="step-header text-center" style="width:25%;">Impact Assessment</div>
                 </div>
-                <div class="steps-container d-flex justify-content-between position-relative">
+                <div class="steps-container">
                     
                     <!-- Step 1 (completed) -->
-                    <div class="step-item d-flex flex-column align-items-center position-absolute" style="z-index: 3; width: 10%;">
+                    <div class="step-item d-flex flex-column align-items-center" style="z-index: 3;">
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; font-weight: bold; margin-bottom: 10px;">
                             1
                         </div>
@@ -418,7 +427,7 @@ Climate Hazard Analysis Results
                     </div>
                     
                     <!-- Step 2 (completed) -->
-                    <div class="step-item d-flex flex-column align-items-center position-absolute" style="z-index: 3; width: 40%;">
+                    <div class="step-item d-flex flex-column align-items-center" style="z-index: 3;">
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; font-weight: bold; margin-bottom: 10px;">
                             2
                         </div>
@@ -426,7 +435,7 @@ Climate Hazard Analysis Results
                     </div>
                     
                     <!-- Step 3 (active) -->
-                    <div class="step-item d-flex flex-column align-items-center position-absolute" style="z-index: 3; width: 80%;">
+                    <div class="step-item d-flex flex-column align-items-center" style="z-index: 3;">
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; font-weight: bold; margin-bottom: 10px;">
                             3
                         </div>
@@ -434,7 +443,7 @@ Climate Hazard Analysis Results
                     </div>
                     
                     <!-- Step 4 (upcoming) -->
-                    <div class="step-item d-flex flex-column align-items-center position-absolute" style="z-index: 3; width: 125%;">
+                    <div class="step-item d-flex flex-column align-items-center" style="z-index: 3;">
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; font-weight: bold; margin-bottom: 10px;">
                             4
                         </div>
@@ -442,7 +451,7 @@ Climate Hazard Analysis Results
                     </div>
                     
                     <!-- Step 5 (upcoming) -->
-                    <div class="step-item d-flex flex-column align-items-center position-absolute" style="z-index: 3; width: 150%;">
+                    <div class="step-item d-flex flex-column align-items-center" style="z-index: 3;">
                         <div class="step-circle d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border-radius: 50%; font-weight: bold; margin-bottom: 10px;">
                             5
                         </div>
