@@ -1315,18 +1315,38 @@ def sensitivity_results(request):
         hazard_columns = {
             'Flood': ['Flood Depth (meters)'],
             'Water Stress': ['Water Stress Exposure (%)'],  # Only the original exposure column
-            'Sea Level Rise': ['Elevation (meter above sea level)', 
-                            '2030 Sea Level Rise (in meters)', 
-                            '2040 Sea Level Rise (in meters)', 
-                            '2050 Sea Level Rise (in meters)', 
-                            '2060 Sea Level Rise (in meters)'],
-            'Tropical Cyclones': ['Extreme Windspeed 10 year Return Period (km/h)', 
-                                'Extreme Windspeed 20 year Return Period (km/h)', 
-                                'Extreme Windspeed 50 year Return Period (km/h)', 
-                                'Extreme Windspeed 100 year Return Period (km/h)'],
-            'Heat': ['Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
-                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
-                     'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)'],
+            'Sea Level Rise': [
+                'Elevation (meter above sea level)',
+                '2030 Sea Level Rise (in meters)',
+                '2040 Sea Level Rise (in meters)',
+                '2050 Sea Level Rise (in meters)',
+                '2060 Sea Level Rise (in meters)'
+            ],
+            'Tropical Cyclones': [
+                'Extreme Windspeed 10 year Return Period (km/h)',
+                'Extreme Windspeed 20 year Return Period (km/h)',
+                'Extreme Windspeed 50 year Return Period (km/h)',
+                'Extreme Windspeed 100 year Return Period (km/h)',
+                'Extreme Windspeed 10 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 20 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 50 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 100 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 10 year Return Period (km/h) - Worst Case',
+                'Extreme Windspeed 20 year Return Period (km/h) - Worst Case',
+                'Extreme Windspeed 50 year Return Period (km/h) - Worst Case',
+                'Extreme Windspeed 100 year Return Period (km/h) - Worst Case'
+            ],
+            'Heat': [
+                'Days over 30° Celsius',
+                'Days over 33° Celsius',
+                'Days over 35° Celsius',
+                'Days over 35° Celsius (2026 - 2030) - Moderate Case',
+                'Days over 35° Celsius (2031 - 2040) - Moderate Case',
+                'Days over 35° Celsius (2041 - 2050) - Moderate Case',
+                'Days over 35° Celsius (2026 - 2030) - Worst Case',
+                'Days over 35° Celsius (2031 - 2040) - Worst Case',
+                'Days over 35° Celsius (2041 - 2050) - Worst Case'
+            ],
             'Storm Surge': [
                 'Storm Surge Flood Depth (meters)',
                 'Storm Surge Flood Depth (meters) - Worst Case'
@@ -1345,6 +1365,67 @@ def sensitivity_results(request):
                 groups[hazard] = count
                 logger.info(f"Added {hazard} group with {count} columns")
         
+        # Calculate sub-group column counts for header alignment
+        heat_basecase_count = sum(
+            1 for c in columns
+            if c.startswith('Days over 35° Celsius') and c.endswith(' - Moderate Case')
+        )
+        heat_worstcase_count = sum(
+            1 for c in columns
+            if c.startswith('Days over 35° Celsius') and c.endswith(' - Worst Case')
+        )
+        heat_baseline_cols = [
+            'Days over 30° Celsius',
+            'Days over 33° Celsius',
+            'Days over 35° Celsius'
+        ]
+        heat_baseline_count = sum(1 for c in heat_baseline_cols if c in columns)
+
+        if 'Heat' in groups:
+            groups['Heat'] = heat_baseline_count + heat_basecase_count + heat_worstcase_count
+
+        tc_basecase_count = sum(
+            1 for c in columns if c.endswith(' - Moderate Case') and 'Windspeed' in c
+        )
+        tc_worstcase_count = sum(
+            1 for c in columns if c.endswith(' - Worst Case') and 'Windspeed' in c
+        )
+        tc_baseline_cols = [
+            'Extreme Windspeed 10 year Return Period (km/h)',
+            'Extreme Windspeed 20 year Return Period (km/h)',
+            'Extreme Windspeed 50 year Return Period (km/h)',
+            'Extreme Windspeed 100 year Return Period (km/h)'
+        ]
+        tc_baseline_count = sum(1 for c in tc_baseline_cols if c in columns)
+
+        if 'Tropical Cyclones' in groups:
+            groups['Tropical Cyclones'] = (
+                tc_baseline_count + tc_basecase_count + tc_worstcase_count
+            )
+
+        ss_worstcase_count = sum(
+            1 for c in columns if c.endswith(' - Worst Case') and 'Storm Surge Flood Depth' in c
+        )
+        ss_baseline_cols = ['Storm Surge Flood Depth (meters)']
+        ss_baseline_count = sum(1 for c in ss_baseline_cols if c in columns)
+
+        if 'Storm Surge' in groups:
+            groups['Storm Surge'] = ss_baseline_count + ss_worstcase_count
+
+        ls_moderatecase_count = sum(
+            1 for c in columns if c.endswith(' - Moderate Case') and 'Landslide' in c
+        )
+        ls_worstcase_count = sum(
+            1 for c in columns if c.endswith(' - Worst Case') and 'Landslide' in c
+        )
+        ls_baseline_cols = ['Rainfall-Induced Landslide (factor of safety)']
+        ls_baseline_count = sum(1 for c in ls_baseline_cols if c in columns)
+
+        if 'Rainfall-Induced Landslide' in groups:
+            groups['Rainfall-Induced Landslide'] = (
+                ls_baseline_count + ls_moderatecase_count + ls_worstcase_count
+            )
+        
         # Store sensitivity results in session
         request.session['climate_hazards_v2_sensitivity_results'] = {
             'data': sensitivity_data,
@@ -1359,6 +1440,17 @@ def sensitivity_results(request):
             'groups': groups,
             'selected_hazards': selected_hazards,
             'archetype_params': archetype_params,
+            'heat_basecase_count': heat_basecase_count,
+            'heat_worstcase_count': heat_worstcase_count,
+            'heat_baseline_count': heat_baseline_count,
+            'tc_basecase_count': tc_basecase_count,
+            'tc_worstcase_count': tc_worstcase_count,
+            'tc_baseline_count': tc_baseline_count,
+            'ss_baseline_count': ss_baseline_count,
+            'ss_worstcase_count': ss_worstcase_count,
+            'ls_baseline_count': ls_baseline_count,
+            'ls_moderatecase_count': ls_moderatecase_count,
+            'ls_worstcase_count': ls_worstcase_count,
             'is_sensitivity_results': True,  # Flag to indicate this is sensitivity results
             'success_message': f"Successfully applied Water Stress sensitivity parameters to {len(sensitivity_data)} facilities. Water Stress Exposure (%) values now use archetype-specific color coding."
         }
