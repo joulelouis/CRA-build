@@ -1185,7 +1185,47 @@ def sensitivity_results(request):
                 logger.warning(f"No archetype column found. Available columns: {df.columns.tolist()}")
         else:
             logger.warning("Facility CSV file not found or doesn't exist")
-        
+
+        # Mapping of not-material flags to their corresponding result columns
+        hazard_to_columns = {
+            'water_stress_not_material': ['Water Stress Exposure (%)'],
+            'flood_not_material': ['Flood Depth (meters)'],
+            'heat_not_material': [
+                'Days over 30° Celsius',
+                'Days over 33° Celsius',
+                'Days over 35° Celsius',
+                'Days over 35° Celsius (2026 - 2030) - Moderate Case',
+                'Days over 35° Celsius (2031 - 2040) - Moderate Case',
+                'Days over 35° Celsius (2041 - 2050) - Moderate Case',
+                'Days over 35° Celsius (2026 - 2030) - Worst Case',
+                'Days over 35° Celsius (2031 - 2040) - Worst Case',
+                'Days over 35° Celsius (2041 - 2050) - Worst Case',
+            ],
+            'tropical_cyclone_not_material': [
+                'Extreme Windspeed 10 year Return Period (km/h)',
+                'Extreme Windspeed 20 year Return Period (km/h)',
+                'Extreme Windspeed 50 year Return Period (km/h)',
+                'Extreme Windspeed 100 year Return Period (km/h)',
+                'Extreme Windspeed 10 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 20 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 50 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 100 year Return Period (km/h) - Moderate Case',
+                'Extreme Windspeed 10 year Return Period (km/h) - Worst Case',
+                'Extreme Windspeed 20 year Return Period (km/h) - Worst Case',
+                'Extreme Windspeed 50 year Return Period (km/h) - Worst Case',
+                'Extreme Windspeed 100 year Return Period (km/h) - Worst Case',
+            ],
+            'storm_surge_not_material': [
+                'Storm Surge Flood Depth (meters)',
+                'Storm Surge Flood Depth (meters) - Worst Case',
+            ],
+            'landslide_not_material': [
+                'Rainfall-Induced Landslide (factor of safety)',
+                'Rainfall-Induced Landslide (factor of safety) - Moderate Case',
+                'Rainfall-Induced Landslide (factor of safety) - Worst Case',
+            ],
+        }
+
         # Apply archetype-specific Water Stress sensitivity parameters
         if 'Water Stress' in selected_hazards and 'Water Stress Exposure (%)' in columns:
             # Debug: log all facility names from sensitivity data
@@ -1245,7 +1285,17 @@ def sensitivity_results(request):
                 row['SS_Low_Threshold'] = params.get('storm_surge_low', 0.5)
                 row['SS_High_Threshold'] = params.get('storm_surge_high', 1.5)
                 
-                logger.info(f"Applied thresholds for '{facility_name}' ({archetype}): Low<{params['water_stress_low']}%, High>{params['water_stress_high']}%")
+                # Overwrite hazard values with "Not material" when flagged
+                for nm_key, cols in hazard_to_columns.items():
+                    if params.get(nm_key):
+                        for col in cols:
+                            if col in row:
+                                row[col] = 'Not material'
+
+                logger.info(
+                    f"Applied thresholds for '{facility_name}' ({archetype}): "
+                    f"Low<{params['water_stress_low']}%, High>{params['water_stress_high']}%"
+                )
         
         # Add new columns to the columns list and reorder to put Asset Archetype as 2nd column
         new_columns = ['Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold',
