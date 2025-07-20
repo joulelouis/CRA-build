@@ -202,13 +202,11 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body p-4">
-                <div class="d-flex justify-content-between mb-2 step-group-headers">
+                <!-- Exposure Overlay header and steps -->
+                <div class="d-flex justify-content-start mb-2 step-group-headers">
                     <div id="overlay-header" class="step-header arrow text-center" style="width:25%;">Exposure Overlay</div>
-                    <div id="override-header" class="step-header arrow text-center" style="width:25%;">Exposure Override</div>
-                    <div id="sensitivity-header" class="step-header arrow text-center" style="width:25%;">Sensitivity Analysis</div>
-                    <div id="impact-header" class="step-header text-center" style="width:25%;">Impact Assessment</div>
                 </div>
-                <div class="steps-container">
+                <div class="steps-container mb-3">
                     
                     <!-- Step 1 (completed) -->
                     <div class="step-item d-flex flex-column align-items-center" style="z-index: 3;">
@@ -225,6 +223,15 @@
                         </div>
                         <div class="step-label text-center" style="font-weight: 500;">Select Hazards and Scenarios</div>
                     </div>
+
+                    </div>
+                    <!-- Remaining headers -->
+                    <div class="d-flex justify-content-between mb-2 step-group-headers">
+                        <div id="override-header" class="step-header arrow text-center" style="width:25%;">Exposure Override</div>
+                        <div id="sensitivity-header" class="step-header arrow text-center" style="width:25%;">Sensitivity Analysis</div>
+                        <div id="impact-header" class="step-header text-center" style="width:25%;">Impact Assessment</div>
+                    </div>
+                    <div class="steps-container">
                     
                     <!-- Step 3 (active) -->
                     <div class="step-item d-flex flex-column align-items-center" style="z-index: 3;">
