@@ -18,11 +18,16 @@ def generate_tropical_cyclone_future_analysis(df: pd.DataFrame) -> pd.DataFrame:
     pattern = re.compile(r"Extreme\s+Windspeed.*return period.*\(km/h\)", re.IGNORECASE)
     ew_cols = [col for col in df.columns if pattern.search(col)]
 
+    if not ew_cols:
+        logger.warning(
+            "No extreme windspeed return period columns found."
+        )
+        return df
+
     if len(ew_cols) != 4:
         logger.warning(
             "Found %d return-period columns; expected 4. Matches: %s", len(ew_cols), ew_cols
         )
-        return df
 
     def extract_year(col: str) -> int:
         m = re.search(r"(\d+)", col)
