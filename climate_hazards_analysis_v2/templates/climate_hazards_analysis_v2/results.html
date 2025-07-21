@@ -578,7 +578,7 @@ Climate Hazard Analysis Results
                 {% with value=row|get_item:key %}
                 <td>
                     {# Water Stress Exposure styling #}
-                    {% if key == "Water Stress Exposure (%)" and value != "N/A" %}
+                    {% if key in ["Water Stress Exposure (%)", "Water Stress Exposure 2030 (%)", "Water Stress Exposure 2050 (%)"] and value != "N/A" %}
                         {% with val=value|to_float %}
                             {% if val < 10 %}
                                 <span style="color: green; font-weight: bold;">{{ value }}</span>
@@ -1011,7 +1011,11 @@ function editCell($cell) {
 }
 
 function getInputType(columnName, currentValue) {
-    const percentageColumns = ['Water Stress Exposure (%)'];
+    const percentageColumns = [
+        'Water Stress Exposure (%)',
+        'Water Stress Exposure 2030 (%)',
+        'Water Stress Exposure 2050 (%)'
+    ];
     const numberColumns = [
         'Flood Depth (meters)', 'Days over 30° Celsius', 'Days over 33° Celsius',
         'Days over 35° Celsius', 'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
@@ -1203,7 +1207,9 @@ function saveCell($cell, $input, rowIndex, columnName) {
         newValue = ss.text;
     }
 
-    if (columnName === 'Water Stress Exposure (%)' && newValue !== 'N/A') {
+    if ((columnName === 'Water Stress Exposure (%)' ||
+         columnName === 'Water Stress Exposure 2030 (%)' ||
+         columnName === 'Water Stress Exposure 2050 (%)') && newValue !== 'N/A') {
         const ws = categorizeWaterStress(newValue);
         displayHTML = `<span style="color: ${ws.color}; font-weight: bold;">${ws.text}</span>`;
     }
@@ -1264,6 +1270,7 @@ function validateCellValue(value, columnName) {
     
     const numberColumns = [
         'Flood Depth (meters)', 'Water Stress Exposure (%)',
+        'Water Stress Exposure 2030 (%)', 'Water Stress Exposure 2050 (%)',
         'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
         'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
         'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
