@@ -60,10 +60,7 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
             buffer_meters = int(buffer_size * 111000)
             output_filename = f'water_stress_analysis_output_buffer_{buffer_size:.4f}.csv'
             output_csv = os.path.join(output_dir, output_filename)
-            df_fac['pfaf_id'] = pd.NA
-            df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)', 'pfaf_id']].to_csv(
-                output_csv, index=False, encoding='utf-8'
-            )
+            df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False, encoding='utf-8')
             output_csv_files.append(output_csv)
             
             # Create a simple plot
@@ -166,24 +163,16 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
         # Define fields to use for water stress analysis
         dynamic_fields = ['bws_06_raw']
 
-        # Keep pfaf_id so we can merge with future projections later
-        join_fields = ['geometry', 'PFAF_ID'] + dynamic_fields
         
         # Spatial join to get water stress values for each facility
         facility_join = gpd.sjoin(
-            facility_gdf,
-            gdf[join_fields],
-            how='left',
-            predicate='intersects',
+            facility_gdf, gdf[['geometry'] + dynamic_fields],
+            how='left', predicate='intersects'
         ).reset_index(drop=True)
         
         # Add water stress values to facility data and rename to final column name
         for f in dynamic_fields:
             df_fac[f] = facility_join[f]
-
-        # Add pfaf_id column for future analysis
-        if 'PFAF_ID' in facility_join.columns:
-            df_fac['pfaf_id'] = facility_join['PFAF_ID']
         
         # Rename bws_06_raw to Water Stress Exposure (%)
         df_fac.rename(columns={'bws_06_raw': 'Water Stress Exposure (%)'}, inplace=True)
@@ -191,10 +180,7 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
         # Save the results to CSV with buffer size in filename for sensitivity analysis
         output_filename = f'water_stress_analysis_output_buffer_{buffer_size:.4f}.csv'
         output_csv = os.path.join(output_dir, output_filename)
-        out_cols = ['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']
-        if 'pfaf_id' in df_fac.columns:
-            out_cols.append('pfaf_id')
-        df_fac[out_cols].to_csv(output_csv, index=False)
+        df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False)
         output_csv_files.append(output_csv)
         
         # Generate a plot

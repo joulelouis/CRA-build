@@ -440,9 +440,7 @@ View Sensitivity Results
                                                     {% if value == "Not material" %}
                                                         <span class="text-muted">Not material</span>
                                                     {# Water Stress Exposure with CUSTOM coloring based on archetype thresholds #}
-                                                    {% elif key == "Water Stress Exposure (%)" and value != "N/A" or
-                                                              key == "Water Stress Exposure 2030 (%)" and value != "N/A" or
-                                                              key == "Water Stress Exposure 2050 (%)" and value != "N/A" %}
+                                                    {% elif key == "Water Stress Exposure (%)" and value != "N/A" %}
                                                         {% with val=value|to_float low_threshold=row.WS_Low_Threshold|default:10 high_threshold=row.WS_High_Threshold|default:31 %}
                                                             {% comment %}
                                                             Debug info: Value={{ val }}, Low={{ low_threshold }}, High={{ high_threshold }}
