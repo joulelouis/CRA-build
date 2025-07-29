@@ -138,26 +138,6 @@ View Sensitivity Results
         color: #333;
     }
 
-    .sub-group-header th {
-        background-color: #fafafa;
-        font-weight: bold;
-        text-align: center;
-        border: 1px solid #ddd;
-        padding: 6px;
-    }
-
-    .sub-group-header th.baseline-header {
-        background-color: #d4edda;
-    }
-
-    .sub-group-header th.moderate-header {
-        background-color: #ffe5b4;
-    }
-
-    .sub-group-header th.worstcase-header {
-        background-color: #f8d7da;
-    }
-
     /* Improved table layout for proportionate columns */
     .dataTables_wrapper {
         overflow-x: auto;
@@ -289,60 +269,7 @@ View Sensitivity Results
                                             {% endif %}
                                         {% endfor %}
                                     </tr>
-                                    <tr class="sub-group-header">
-                                        {% for group, count in groups.items %}
-                                            {% if group == 'Heat' %}
-                                                {% if heat_baseline_count %}
-                                                   <th colspan="{{ heat_baseline_count }}" class="text-center baseline-header">Current</th>
-                                                {% endif %}
-                                                {% if heat_basecase_count %}
-                                                    <th colspan="{{ heat_basecase_count }}" class="text-center moderate-header">Future (Moderate Case)</th>
-                                                {% endif %}
-                                                {% if heat_worstcase_count %}
-                                                    <th colspan="{{ heat_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
-                                                {% endif %}
-                                            {% elif group == 'Tropical Cyclones' %}
-                                                {% if tc_baseline_count %}
-                                                    <th colspan="{{ tc_baseline_count }}" class="text-center baseline-header">Current</th>
-                                                {% endif %}
-                                                {% if tc_basecase_count %}
-                                                    <th colspan="{{ tc_basecase_count }}" class="text-center moderate-header">Future (Moderate Case)</th>
-                                                {% endif %}
-                                                {% if tc_worstcase_count %}
-                                                    <th colspan="{{ tc_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
-                                                {% endif %}
-                                            {% elif group == 'Water Stress' %}
-                                                {% if ws_baseline_count %}
-                                                    <th colspan="{{ ws_baseline_count }}" class="text-center baseline-header">Current</th>
-                                                {% endif %}
-                                                {% if ws_moderatecase_count %}
-                                                    <th colspan="{{ ws_moderatecase_count }}" class="text-center moderate-header">Future (Moderate Case)</th>
-                                                {% endif %}
-                                                {% if ws_worstcase_count %}
-                                                    <th colspan="{{ ws_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
-                                                {% endif %}
-                                            {% elif group == 'Storm Surge' %}
-                                                {% if ss_baseline_count %}
-                                                    <th colspan="{{ ss_baseline_count }}" class="text-center baseline-header">Current</th>
-                                                {% endif %}
-                                                {% if ss_worstcase_count %}
-                                                    <th colspan="{{ ss_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
-                                                {% endif %}
-                                            {% elif group == 'Rainfall-Induced Landslide' %}
-                                                {% if ls_baseline_count %}
-                                                    <th colspan="{{ ls_baseline_count }}" class="text-center baseline-header">Current</th>
-                                                {% endif %}
-                                                {% if ls_moderatecase_count %}
-                                                    <th colspan="{{ ls_moderatecase_count }}" class="text-center moderate-header">Future (Moderate Case)</th>
-                                                {% endif %}
-                                                {% if ls_worstcase_count %}
-                                                    <th colspan="{{ ls_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
-                                                {% endif %}
-                                            {% else %}
-                                                <th colspan="{{ count }}"></th>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </tr>
+                                    
                                     <tr class="custom-table-header">
                                         {% for column in columns %}
                                             <th>{{ column }}</th>
@@ -635,7 +562,6 @@ View Sensitivity Results
 
     let sensitivityDataTable;
 
-    // Map column headers to their group and subgroup based on the initial
     // colspan structure so we can update the header rows when columns are
     // toggled on/off.
     function mapHeaderGroups() {
@@ -651,15 +577,6 @@ View Sensitivity Results
             }
         });
 
-        const subHeaders = $('#sensitivity-data-table thead tr.sub-group-header th');
-        idx = 0;
-        subHeaders.each(function(i) {
-            const span = parseInt($(this).attr('colspan')) || 1;
-            $(this).attr({'data-original-colspan': span, 'data-subgroup-index': i});
-            for (let j = 0; j < span && idx < columnHeaders.length; j++, idx++) {
-                columnHeaders.eq(idx).attr('data-subgroup-index', i);
-            }
-        });
     }
 
     function updateGroupHeaderColspans() {
@@ -677,18 +594,6 @@ View Sensitivity Results
             $(this).attr('colspan', count).css('display', count ? '' : 'none');
         });
 
-        const subCounts = {};
-        columnHeaders.each(function() {
-            const index = $(this).data('subgroup-index');
-            if ($(this).is(':visible')) {
-                subCounts[index] = (subCounts[index] || 0) + 1;
-            }
-        });
-        $('#sensitivity-data-table thead tr.sub-group-header th').each(function() {
-            const index = $(this).data('subgroup-index');
-            const count = subCounts[index] || 0;
-            $(this).attr('colspan', count).css('display', count ? '' : 'none');
-        });
     }
 
     function updateColumnVisibility() {
