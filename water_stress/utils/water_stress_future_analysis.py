@@ -34,6 +34,9 @@ def generate_future_water_stress_from_baseline(baseline_csv_path: str) -> dict:
         df_baseline = pd.read_csv(baseline_csv_path)
         df_future = pd.read_csv(future_csv_path)
 
+        # Normalize ``pfaf_id`` types to ensure successful merge
+        df_baseline["pfaf_id"] = pd.to_numeric(df_baseline["pfaf_id"], errors="coerce").astype("Int64")
+
         if "pfaf_id" not in df_baseline.columns:
             raise ValueError("Baseline CSV must contain 'pfaf_id' column.")
 
@@ -46,17 +49,25 @@ def generate_future_water_stress_from_baseline(baseline_csv_path: str) -> dict:
                 "pes50_ws_x_r",
             ]
         ].copy()
+        
+        df_future_selected["pfaf_id"] = pd.to_numeric(
+            df_future_selected["pfaf_id"], errors="coerce"
+        ).astype("Int64")
+        # Convert future water stress ratios to percentages keeping one decimal
+        # place. ``mul(100)`` scales values while ``round(1)`` preserves the
+        # decimal precision used in the baseline dataset.
+
         df_future_selected["bau30_ws_x_r"] = (
-            df_future_selected["bau30_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
+            df_future_selected["bau30_ws_x_r"].fillna(0).mul(100).round(1)
         )
         df_future_selected["bau50_ws_x_r"] = (
-            df_future_selected["bau50_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
+            df_future_selected["bau50_ws_x_r"].fillna(0).mul(100).round(1)
         )
         df_future_selected["pes30_ws_x_r"] = (
-            df_future_selected["pes30_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
+            df_future_selected["pes30_ws_x_r"].fillna(0).mul(100).round(1)
         )
         df_future_selected["pes50_ws_x_r"] = (
-            df_future_selected["pes50_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
+            df_future_selected["pes50_ws_x_r"].fillna(0).mul(100).round(1)
         )
 
         df_merged = pd.merge(df_baseline, df_future_selected, on="pfaf_id", how="left")

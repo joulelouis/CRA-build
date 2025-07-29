@@ -161,7 +161,12 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0009):
         
         # Clip water risk to relevant extent & normalize values
         gdf = gdf.cx[114:130, 0:20].reset_index(drop=True)
-        gdf['bws_raw'] = gdf['bws_raw'].astype(float).apply(lambda v: math.ceil(v * 100))
+        # Convert baseline water stress values to percent with one decimal place
+        # Instead of using ``math.ceil`` which rounds values up to the nearest
+        # integer, keep the decimal precision so that numbers such as ``4.2`` are
+        # preserved.  ``mul(100)`` scales the 0-1 range to 0-100 percent and
+        # ``round(1)`` keeps one decimal place.
+        gdf['bws_raw'] = gdf['bws_raw'].astype(float).mul(100).round(1)
         
         # Define fields to use for water stress analysis
         dynamic_fields = ['bws_raw']
@@ -176,6 +181,10 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0009):
         # Add water stress values and pfaf_id to facility data
         for f in dynamic_fields + ['PFAF_ID']:
             df_fac[f] = facility_join[f]
+
+        # Ensure pfaf_id is stored as integer to avoid mismatches in future
+        # analysis when merging with the Aqueduct future dataset
+        df_fac['PFAF_ID'] = pd.to_numeric(df_fac['PFAF_ID'], errors='coerce').astype('Int64')
         
         # Rename columns for final output
         df_fac.rename(
