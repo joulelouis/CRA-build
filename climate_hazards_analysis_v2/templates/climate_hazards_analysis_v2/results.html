@@ -489,7 +489,7 @@ Climate Hazard Analysis Results
                 {% with value=row|get_item:key %}
                 <td>
                     {# Water Stress Exposure styling #}
-                    {% if key == "Water Stress Exposure (%)" and value != "N/A" %}
+                    {% if "Water Stress Exposure" in key and value != "N/A" %}
                         {% with val=value|to_float %}
                             {% if val < 10 %}
                                 <span style="color: green; font-weight: bold;">{{ value }}</span>
@@ -922,7 +922,9 @@ function editCell($cell) {
 }
 
 function getInputType(columnName, currentValue) {
-    const percentageColumns = ['Water Stress Exposure (%)'];
+    if (columnName.startsWith('Water Stress Exposure')) {
+        return 'number';
+    }
     const numberColumns = [
         'Flood Depth (meters)', 'Days over 30° Celsius', 'Days over 33° Celsius',
         'Days over 35° Celsius', 'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
@@ -941,7 +943,7 @@ function getInputType(columnName, currentValue) {
     ];
 
     
-    if (percentageColumns.includes(columnName) || numberColumns.includes(columnName)) {
+    if (numberColumns.includes(columnName)) {
         return 'number';
     }
 
@@ -1114,7 +1116,7 @@ function saveCell($cell, $input, rowIndex, columnName) {
         newValue = ss.text;
     }
 
-    if (columnName === 'Water Stress Exposure (%)' && newValue !== 'N/A') {
+    if (columnName.startsWith('Water Stress Exposure') && newValue !== 'N/A') {
         const ws = categorizeWaterStress(newValue);
         displayHTML = `<span style="color: ${ws.color}; font-weight: bold;">${ws.text}</span>`;
     }
@@ -1172,9 +1174,14 @@ function validateCellValue(value, columnName) {
     if (value === '' || value === null || value === undefined) {
         return false;
     }
+
+    if (columnName.startsWith('Water Stress Exposure')) {
+        const numValue = parseFloat(value);
+        return !isNaN(numValue) && isFinite(numValue);
+    }
     
     const numberColumns = [
-        'Flood Depth (meters)', 'Water Stress Exposure (%)',
+        'Flood Depth (meters)',
         'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
         'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
         'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
