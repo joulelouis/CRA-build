@@ -225,22 +225,27 @@ View Sensitivity Results
     {% endif %}
 
     <!-- Sensitivity Analysis Info -->
-    {% comment %} <div class="row mt-4">
+    {% if revised_thresholds %}
+    <div class="row mt-4">
         <div class="col-12">
             <div class="sensitivity-info">
                 <h5><i class="fas fa-cog me-2"></i>Sensitivity Analysis Results</h5>
-                <p class="mb-2">The <strong>Water Stress Exposure (%)</strong> values below use custom color coding based on archetype-specific sensitivity parameters.</p>
+                <p class="mb-2">The values below use custom color coding based on archetype-specific sensitivity parameters.</p>
                 <div class="archetype-params">
-                    <strong>Applied Custom Thresholds:</strong>
-                    {% for archetype, params in archetype_params.items %}
-                        <span class="badge bg-secondary me-2">
-                            {{ archetype }}: Low&lt;{{ params.water_stress_low }}%, High&gt;{{ params.water_stress_high }}%
-                        </span>
+                    <strong>Revised Thresholds:</strong><br>
+                    {% for archetype, hazards in revised_thresholds.items %}
+                        <span class="badge bg-secondary me-2">{{ archetype }}</span>
+                        {% for h in hazards %}
+                            <span class="badge bg-info me-2">
+                                {{ h.name }}: Low&lt;{{ h.low }}{% if h.name == 'Water Stress' %}%{% endif %}, High&gt;{{ h.high }}{% if h.name == 'Water Stress' %}%{% endif %}
+                            </span>
+                        {% endfor %}<br>
                     {% endfor %}
                 </div>
             </div>
         </div>
-    </div> {% endcomment %}
+    </div>
+    {% endif %}
 
     <!-- Results Content -->
     <div class="container-fluid mt-4">

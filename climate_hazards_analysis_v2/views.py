@@ -1058,6 +1058,7 @@ def sensitivity_parameters(request):
             
             # Get existing archetype parameters from session
             archetype_params = request.session.get('climate_hazards_v2_archetype_params', {})
+            old_archetype_params = copy.deepcopy(archetype_params)
             
             # Check if archetype parameters were submitted through the form
             collected_archetype_params = {}
@@ -1095,6 +1096,27 @@ def sensitivity_parameters(request):
             
             # Update session with archetype parameters
             request.session['climate_hazards_v2_archetype_params'] = archetype_params
+
+            # Determine which archetypes had revised parameters compared to previous values
+            hazard_keys = ['water_stress', 'heat', 'flood',
+                           'tropical_cyclone', 'storm_surge', 'landslide']
+            revised_params = {}
+            for arch, params in archetype_params.items():
+                changed_hazards = {}
+                old_params = old_archetype_params.get(arch, {})
+                for key in hazard_keys:
+                    low_key = f"{key}_low"
+                    high_key = f"{key}_high"
+                    if params.get(low_key) != old_params.get(low_key) or params.get(high_key) != old_params.get(high_key):
+                        changed_hazards[key] = {
+                            'low': params.get(low_key),
+                            'high': params.get(high_key),
+                        }
+                if changed_hazards:
+                    revised_params[arch] = changed_hazards
+
+            request.session['climate_hazards_v2_revised_params'] = revised_params
+
             request.session.modified = True
             
             # Check if Apply Parameters button was clicked
@@ -1539,6 +1561,31 @@ def sensitivity_results(request):
             'columns': columns,
             'archetype_params': archetype_params
         }
+
+        revised_params = request.session.get('climate_hazards_v2_revised_params', {})
+
+        # Convert revised_params into a display friendly structure that lists
+        # thresholds per hazard for each archetype
+        hazard_labels = {
+            'water_stress': 'Water Stress',
+            'heat': 'Heat',
+            'flood': 'Flood',
+            'tropical_cyclone': 'Tropical Cyclone',
+            'storm_surge': 'Storm Surge',
+            'landslide': 'Rainfall-Induced Landslide',
+        }
+        revised_thresholds = {}
+        for arch, hazards in revised_params.items():
+            hazard_list = []
+            for key, values in hazards.items():
+                label = hazard_labels.get(key, key)
+                hazard_list.append({
+                    'name': label,
+                    'low': values.get('low'),
+                    'high': values.get('high'),
+                })
+            if hazard_list:
+                revised_thresholds[arch] = hazard_list
         
         # Prepare context for the template
         context = {
@@ -1547,6 +1594,7 @@ def sensitivity_results(request):
             'groups': groups,
             'selected_hazards': selected_hazards,
             'archetype_params': archetype_params,
+            'revised_thresholds': revised_thresholds,
             'heat_basecase_count': heat_basecase_count,
             'heat_worstcase_count': heat_worstcase_count,
             'heat_baseline_count': heat_baseline_count,
@@ -1561,7 +1609,7 @@ def sensitivity_results(request):
             'slr_moderatecase_count': slr_moderatecase_count,
             'slr_worstcase_count': slr_worstcase_count,
             'is_sensitivity_results': True,  # Flag to indicate this is sensitivity results
-            'success_message': f"Successfully applied Water Stress sensitivity parameters to {len(sensitivity_data)} facilities. Water Stress Exposure (%) values now use archetype-specific color coding."
+            'success_message': f"Successfully applied sensitivity parameters to {len(sensitivity_data)} facilities. Results now use archetype-specific color coding."
         }
         
         logger.info("Rendering sensitivity results template...")
