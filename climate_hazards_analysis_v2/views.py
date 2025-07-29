@@ -555,7 +555,13 @@ def show_results(request):
         # Create a mapping for each hazard type and its columns
         hazard_columns = {
             'Flood': ['Flood Depth (meters)'],
-            'Water Stress': ['Water Stress Exposure (%)'],
+            'Water Stress': [
+                'Water Stress Exposure (%)',
+                'Water Stress Exposure 2030 (%) - Moderate Case',
+                'Water Stress Exposure 2050 (%) - Moderate Case',
+                'Water Stress Exposure 2030 (%) - Worst Case',
+                'Water Stress Exposure 2050 (%) - Worst Case'
+            ],
             'Sea Level Rise': ['Elevation (meter above sea level)',
                             '2030 Sea Level Rise (in meters)',
                             '2040 Sea Level Rise (in meters)',
@@ -619,6 +625,20 @@ def show_results(request):
 
         if 'Heat' in groups:
             groups['Heat'] = heat_baseline_count + heat_basecase_count + heat_worstcase_count
+
+        ws_moderatecase_count = sum(
+            1 for c in columns
+            if c.startswith('Water Stress Exposure') and c.endswith(' - Moderate Case')
+        )
+        ws_worstcase_count = sum(
+            1 for c in columns
+            if c.startswith('Water Stress Exposure') and c.endswith(' - Worst Case')
+        )
+        ws_baseline_cols = ['Water Stress Exposure (%)']
+        ws_baseline_count = sum(1 for c in ws_baseline_cols if c in columns)
+
+        if 'Water Stress' in groups:
+            groups['Water Stress'] = ws_baseline_count + ws_moderatecase_count + ws_worstcase_count
 
         # Tropical Cyclone column counts
         tc_basecase_count = sum(
@@ -741,6 +761,9 @@ def show_results(request):
             'tc_baseline_count': tc_baseline_count,
             'ss_baseline_count': ss_baseline_count,
             'ss_worstcase_count': ss_worstcase_count,
+            'ws_baseline_count': ws_baseline_count,
+            'ws_moderatecase_count': ws_moderatecase_count,
+            'ws_worstcase_count': ws_worstcase_count,
             'ls_baseline_count': ls_baseline_count,
             'ls_moderatecase_count': ls_moderatecase_count,
             'ls_worstcase_count': ls_worstcase_count,
@@ -1364,7 +1387,13 @@ def sensitivity_results(request):
         # Create a mapping for each hazard type and its columns (excluding separate risk level column)
         hazard_columns = {
             'Flood': ['Flood Depth (meters)'],
-            'Water Stress': ['Water Stress Exposure (%)'],  # Only the original exposure column
+            'Water Stress': [
+                'Water Stress Exposure (%)',
+                'Water Stress Exposure 2030 (%) - Moderate Case',
+                'Water Stress Exposure 2050 (%) - Moderate Case',
+                'Water Stress Exposure 2030 (%) - Worst Case',
+                'Water Stress Exposure 2050 (%) - Worst Case'
+            ],
             'Sea Level Rise': [
                 'Elevation (meter above sea level)',
                 '2030 Sea Level Rise (in meters)',
@@ -1433,6 +1462,20 @@ def sensitivity_results(request):
 
         if 'Heat' in groups:
             groups['Heat'] = heat_baseline_count + heat_basecase_count + heat_worstcase_count
+
+        ws_moderatecase_count = sum(
+            1 for c in columns
+            if c.startswith('Water Stress Exposure') and c.endswith(' - Moderate Case')
+        )
+        ws_worstcase_count = sum(
+            1 for c in columns
+            if c.startswith('Water Stress Exposure') and c.endswith(' - Worst Case')
+        )
+        ws_baseline_cols = ['Water Stress Exposure (%)']
+        ws_baseline_count = sum(1 for c in ws_baseline_cols if c in columns)
+
+        if 'Water Stress' in groups:
+            groups['Water Stress'] = ws_baseline_count + ws_moderatecase_count + ws_worstcase_count
 
         tc_basecase_count = sum(
             1 for c in columns if c.endswith(' - Moderate Case') and 'Windspeed' in c

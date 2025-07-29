@@ -310,6 +310,16 @@ View Sensitivity Results
                                                 {% if tc_worstcase_count %}
                                                     <th colspan="{{ tc_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
                                                 {% endif %}
+                                            {% elif group == 'Water Stress' %}
+                                                {% if ws_baseline_count %}
+                                                    <th colspan="{{ ws_baseline_count }}" class="text-center baseline-header">Baseline</th>
+                                                {% endif %}
+                                                {% if ws_moderatecase_count %}
+                                                    <th colspan="{{ ws_moderatecase_count }}" class="text-center moderate-header">Future (Moderate Case)</th>
+                                                {% endif %}
+                                                {% if ws_worstcase_count %}
+                                                    <th colspan="{{ ws_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
+                                                {% endif %}
                                             {% elif group == 'Storm Surge' %}
                                                 {% if ss_baseline_count %}
                                                     <th colspan="{{ ss_baseline_count }}" class="text-center baseline-header">Baseline</th>

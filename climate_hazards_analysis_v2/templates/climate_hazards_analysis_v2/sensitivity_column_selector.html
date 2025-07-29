@@ -36,19 +36,58 @@
             </div>
             {% endif %}
             
-            <!-- Water Stress - Only Original Exposure Column with Custom Coloring -->
+            <!-- Water Stress -->
             {% if 'Water Stress' in selected_hazards %}
             <div class="mb-3">
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input hazard-group" id="col-water-stress" checked data-hazard="water-stress">
+                    <input type="checkbox" class="form-check-input hazard-group" id="col-water-stress" data-hazard="water-stress">
                     <label class="form-check-label fw-bold" for="col-water-stress">Water Stress</label>
                 </div>
                 <div class="ms-4">
+                    <!-- Baseline Group -->
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column water-stress" id="col-water-stress-exposure" checked data-column="Water Stress Exposure (%)">
-                        <label class="form-check-label" for="col-water-stress-exposure">
-                            <strong>Water Stress Exposure (%)</strong> <span class="badge bg-warning text-dark">Custom Thresholds</span>
-                        </label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="ws-baseline-group" data-hazard="ws-baseline">
+                        <label class="form-check-label" for="ws-baseline-group">Baseline</label>
+                    </div>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column ws-baseline water-stress" id="col-water-stress-exposure" checked data-column="Water Stress Exposure (%)">
+                            <label class="form-check-label" for="col-water-stress-exposure">
+                                <strong>Water Stress Exposure (%)</strong> <span class="badge bg-warning text-dark">Custom Thresholds</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Future (Moderate Case) -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-group" id="ws-moderate-group" data-hazard="ws-moderate">
+                        <label class="form-check-label fw-bold" for="ws-moderate-group">Future (Moderate Case)</label>
+                    </div>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column ws-moderate water-stress" id="col-ws-2030-mod" data-column="Water Stress Exposure 2030 (%) - Moderate Case">
+                            <label class="form-check-label" for="col-ws-2030-mod">Water Stress Exposure 2030 (%) - Moderate Case</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column ws-moderate water-stress" id="col-ws-2050-mod" data-column="Water Stress Exposure 2050 (%) - Moderate Case">
+                            <label class="form-check-label" for="col-ws-2050-mod">Water Stress Exposure 2050 (%) - Moderate Case</label>
+                        </div>
+                    </div>
+
+                    <!-- Future (Worst Case) -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input hazard-group" id="ws-worst-group" data-hazard="ws-worst">
+                        <label class="form-check-label fw-bold" for="ws-worst-group">Future (Worst Case)</label>
+                    </div>
+                    <div class="ms-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column ws-worst water-stress" id="col-ws-2030-worst" data-column="Water Stress Exposure 2030 (%) - Worst Case">
+                            <label class="form-check-label" for="col-ws-2030-worst">Water Stress Exposure 2030 (%) - Worst Case</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column ws-worst water-stress" id="col-ws-2050-worst" data-column="Water Stress Exposure 2050 (%) - Worst Case">
+                            <label class="form-check-label" for="col-ws-2050-worst">Water Stress Exposure 2050 (%) - Worst Case</label>
+                        </div>
                     </div>
                 </div>
             </div>
