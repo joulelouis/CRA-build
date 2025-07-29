@@ -12,7 +12,7 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0009):
     Performs water stress analysis for facility locations.
     Args:
     facility_csv_path (str): Path to the facility CSV file with locations
-    buffer_size (float): Buffer size for analysis (~250m = 0.0045, ~500m = 0.0090, ~750m = 0.0135)
+    buffer_size (float): Buffer size for analysis (~100m = 0.0009, ~250m = 0.00225, ~500m = 0.0045)
     
     Returns:
         dict: Dictionary containing file paths to generated outputs

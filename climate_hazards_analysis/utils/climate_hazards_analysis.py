@@ -219,7 +219,7 @@ def process_flood_exposure_analysis(facility_csv_path, selected_fields):
             return None, []
 
 
-def process_water_stress_analysis(facility_csv_path, selected_fields, buffer_size=0.0045):
+def process_water_stress_analysis(facility_csv_path, selected_fields, buffer_size=0.0009):
     """
     Process water stress analysis if selected.
     Args:
@@ -689,7 +689,7 @@ def process_nan_values(df):
     return df
 
 
-def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=None, buffer_size=0.0045, sensitivity_params=None):
+def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=None, buffer_size=0.0009, sensitivity_params=None):
     """
     Integrates multiple climate hazard analyses into a single output.
     Simplified version without flood threshold parameters.
@@ -697,7 +697,7 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
     Args:
     facility_csv_path: Path to facility locations CSV (required)
     selected_fields: List of selected hazard types to include
-    buffer_size: Buffer size for spatial analysis (default 0.0045)
+    buffer_size: Buffer size for spatial analysis (default 0.0009)
     sensitivity_params: Dictionary of sensitivity parameters (flood thresholds removed)
     
     Returns:
@@ -994,9 +994,9 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
         combined_df = combined_df[existing_cols + remaining_cols]
 
         # Write combined output CSV with parameters in filename if sensitivity analysis
-        if sensitivity_params and buffer_size != 0.0045:
+        if sensitivity_params and buffer_size != 0.0009:
             out_csv = os.path.join(input_dir, f'combined_output_sensitivity_buffer_{buffer_size:.4f}.csv')
-        elif buffer_size != 0.0045:
+        elif buffer_size != 0.0009:
             out_csv = os.path.join(input_dir, f'combined_output_buffer_{buffer_size:.4f}.csv')
         else:
             out_csv = os.path.join(input_dir, 'combined_output.csv')
