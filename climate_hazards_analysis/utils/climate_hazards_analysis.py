@@ -330,16 +330,31 @@ def process_sea_level_rise_analysis(facility_csv_path, selected_fields):
             df_slr = pd.read_csv(slr_res['combined_csv_paths'][0], encoding='latin-1')
         
         # Standardize column names
-        rename_map = {'Site': 'Facility', 'Lon': 'Long'}
+        rename_map = {
+            'Site': 'Facility',
+            'LAT': 'Lat',
+            'latitude': 'Lat',
+            'Lon': 'Long',
+            'LON': 'Long',
+            'LONG': 'Long',
+            'longitude': 'Long'
+        }
         for old, new in rename_map.items():
             if old in df_slr.columns and new not in df_slr.columns:
                 df_slr.rename(columns={old: new}, inplace=True)
         
         # Standardize sea level rise column names
-        years = [2030, 2040, 2050, 2060]
         rename_fields = {
-            f"{yr} Sea Level Rise CI 0.5": f"{yr} Sea Level Rise (in meters)"
-            for yr in years
+            # Old median CI columns -> new Moderate case naming
+            '2030 Sea Level Rise CI 0.5': '2030 Sea Level Rise (meters) - Moderate Case',
+            '2040 Sea Level Rise CI 0.5': '2040 Sea Level Rise (meters) - Moderate Case',
+            '2050 Sea Level Rise CI 0.5': '2050 Sea Level Rise (meters) - Moderate Case',
+            '2060 Sea Level Rise CI 0.5': '2060 Sea Level Rise (meters) - Moderate Case',
+            # Older generic naming -> new Moderate case
+            '2030 Sea Level Rise (in meters)': '2030 Sea Level Rise (meters) - Moderate Case',
+            '2040 Sea Level Rise (in meters)': '2040 Sea Level Rise (meters) - Moderate Case',
+            '2050 Sea Level Rise (in meters)': '2050 Sea Level Rise (meters) - Moderate Case',
+            '2060 Sea Level Rise (in meters)': '2060 Sea Level Rise (meters) - Moderate Case',
         }
         df_slr.rename(columns=rename_fields, inplace=True)
         
@@ -347,9 +362,11 @@ def process_sea_level_rise_analysis(facility_csv_path, selected_fields):
         if 'SRTM elevation' in df_slr.columns:
             df_slr.rename(columns={'SRTM elevation': 'Elevation (meter above sea level)'}, inplace=True)
         
-        # Get available SLR columns
-        slr_cols = ['Elevation (meter above sea level)'] + list(rename_fields.values())
-        available_slr_cols = [c for c in slr_cols if c in df_slr.columns]
+        # Get available SLR columns (both Moderate and Worst Case)
+        slr_cols = [c for c in df_slr.columns if 'Sea Level Rise (meters)' in c]
+        if 'Elevation (meter above sea level)' in df_slr.columns:
+            slr_cols.insert(0, 'Elevation (meter above sea level)')
+        available_slr_cols = slr_cols
         
         if not available_slr_cols:
             logger.warning("No SLR columns found in analysis output")
@@ -958,10 +975,12 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'Water Stress Exposure 2030 (%) - Worst Case',
             'Water Stress Exposure 2050 (%) - Worst Case',
             'Elevation (meter above sea level)',
-            '2030 Sea Level Rise (in meters)',
-            '2040 Sea Level Rise (in meters)',
-            '2050 Sea Level Rise (in meters)',
-            '2060 Sea Level Rise (in meters)',
+            '2030 Sea Level Rise (meters) - Moderate Case',
+            '2040 Sea Level Rise (meters) - Moderate Case',
+            '2050 Sea Level Rise (meters) - Moderate Case',
+            '2030 Sea Level Rise (meters) - Worst Case',
+            '2040 Sea Level Rise (meters) - Worst Case',
+            '2050 Sea Level Rise (meters) - Worst Case',
             'Extreme Windspeed 10 year Return Period (km/h)',
             'Extreme Windspeed 20 year Return Period (km/h)',
             'Extreme Windspeed 50 year Return Period (km/h)',

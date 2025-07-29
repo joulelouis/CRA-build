@@ -874,7 +874,7 @@ def identify_high_risk_assets(data, selected_hazards):
             'criteria': lambda row, cols: any(cols[col](row.get(col)) for col in cols if col in row)
         },
         'Sea Level Rise': {
-            'column': '2050 Sea Level Rise (in meters)',
+            'column': '2050 Sea Level Rise (meters) - Worst Case',
             'criteria': lambda v: v != 'Little to none' and isinstance(v, (int, float)) and v > 0.5
         },
         'Tropical Cyclones': {
@@ -1680,16 +1680,18 @@ def convert_table_value(value, column_name):
         'Days over 30° Celsius',
         'Days over 33° Celsius',
         'Days over 35° Celsius',
-        '2030 Sea Level Rise (in meters)',
-        '2040 Sea Level Rise (in meters)',
-        '2050 Sea Level Rise (in meters)',
-        '2060 Sea Level Rise (in meters)',
+        '2030 Sea Level Rise (meters) - Moderate Case',
+        '2040 Sea Level Rise (meters) - Moderate Case',
+        '2050 Sea Level Rise (meters) - Moderate Case',
+        '2030 Sea Level Rise (meters) - Worst Case',
+        '2040 Sea Level Rise (meters) - Worst Case',
+        '2050 Sea Level Rise (meters) - Worst Case',
         'Extreme Windspeed 10 year Return Period (km/h)',
         'Extreme Windspeed 20 year Return Period (km/h)',
         'Extreme Windspeed 50 year Return Period (km/h)',
         'Extreme Windspeed 100 year Return Period (km/h)',
         'Storm Surge Flood Depth (meters)',
-        'Storm Surge Flood Depth (meters) - Worst Case'
+        'Storm Surge Flood Depth (meters) - Worst Case',
         'Rainfall-Induced Landslide (factor of safety)',
         'Elevation (meter above sea level)'
     ]
