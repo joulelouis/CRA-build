@@ -459,6 +459,14 @@ Climate Hazard Analysis Results
                                                         <th colspan="{{ ss_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
                                                     {% endif %}
 
+                                                 {% elif group == 'Sea Level Rise' %}
+                                                      {% if slr_moderatecase_count %}
+                                                          <th colspan="{{ slr_moderatecase_count }}" class="text-center moderate-header">Future (Moderate Case)</th>
+                                                      {% endif %}
+                                                      {% if slr_worstcase_count %}
+                                                          <th colspan="{{ slr_worstcase_count }}" class="text-center worstcase-header">Future (Worst Case)</th>
+                                                      {% endif %}
+
                                                 {% elif group == 'Rainfall-Induced Landslide' %}
                                                     {% if ls_baseline_count %}
                                                         <th colspan="{{ ls_baseline_count }}" class="text-center baseline-header">Current</th>
@@ -786,10 +794,12 @@ if (typeof window.jQuery === 'undefined') {
                                 'Facility',
                                 'Lat',
                                 'Long',
-                                '2030 Sea Level Rise (in meters)',
-                                '2040 Sea Level Rise (in meters)',
-                                '2050 Sea Level Rise (in meters)',
-                                '2060 Sea Level Rise (in meters)'
+                                '2030 Sea Level Rise (meters) - Moderate Case',
+                                '2040 Sea Level Rise (meters) - Moderate Case',
+                                '2050 Sea Level Rise (meters) - Moderate Case',
+                                '2030 Sea Level Rise (meters) - Worst Case',
+                                '2040 Sea Level Rise (meters) - Worst Case',
+                                '2050 Sea Level Rise (meters) - Worst Case'
                             ];
                             if (!nonEditableColumns.includes(columnName)) {
                                 $(td).addClass('editable-cell');
@@ -928,9 +938,7 @@ function getInputType(columnName, currentValue) {
     const numberColumns = [
         'Flood Depth (meters)', 'Days over 30° Celsius', 'Days over 33° Celsius',
         'Days over 35° Celsius', 'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
-        'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)', '2030 Sea Level Rise (in meters)',
-        '2040 Sea Level Rise (in meters)', '2050 Sea Level Rise (in meters)',
-        '2060 Sea Level Rise (in meters)', 'Elevation (meter above sea level)',
+        '2030 Sea Level Rise (meters) - Moderate Case', '2040 Sea Level Rise (meters) - Moderate Case', '2050 Sea Level Rise (meters) - Moderate Case', '2030 Sea Level Rise (meters) - Worst Case', '2040 Sea Level Rise (meters) - Worst Case', '2050 Sea Level Rise (meters) - Worst Case',
         'Extreme Windspeed 10 year Return Period (km/h)',
         'Extreme Windspeed 20 year Return Period (km/h)',
         'Extreme Windspeed 50 year Return Period (km/h)',
@@ -1185,9 +1193,7 @@ function validateCellValue(value, columnName) {
         'Days over 30° Celsius', 'Days over 33° Celsius', 'Days over 35° Celsius',
         'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
         'Days over 35° Celsius (2026 - 2030)', 'Days over 35° Celsius (2031 - 2040)', 'Days over 35° Celsius (2041 - 2050)',
-        '2030 Sea Level Rise (in meters)', '2040 Sea Level Rise (in meters)',
-        '2050 Sea Level Rise (in meters)', '2060 Sea Level Rise (in meters)',
-        'Elevation (meter above sea level)',
+        '2030 Sea Level Rise (meters) - Moderate Case', '2040 Sea Level Rise (meters) - Moderate Case', '2050 Sea Level Rise (meters) - Moderate Case', '2030 Sea Level Rise (meters) - Worst Case', '2040 Sea Level Rise (meters) - Worst Case', '2050 Sea Level Rise (meters) - Worst Case',
         'Extreme Windspeed 10 year Return Period (km/h)',
         'Extreme Windspeed 20 year Return Period (km/h)',
         'Extreme Windspeed 50 year Return Period (km/h)',

@@ -562,11 +562,14 @@ def show_results(request):
                 'Water Stress Exposure 2030 (%) - Worst Case',
                 'Water Stress Exposure 2050 (%) - Worst Case'
             ],
-            'Sea Level Rise': ['Elevation (meter above sea level)',
-                            '2030 Sea Level Rise (in meters)',
-                            '2040 Sea Level Rise (in meters)',
-                            '2050 Sea Level Rise (in meters)', 
-                            '2060 Sea Level Rise (in meters)'],
+            'Sea Level Rise': [
+                '2030 Sea Level Rise (meters) - Moderate Case',
+                '2040 Sea Level Rise (meters) - Moderate Case',
+                '2050 Sea Level Rise (meters) - Moderate Case',
+                '2030 Sea Level Rise (meters) - Worst Case',
+                '2040 Sea Level Rise (meters) - Worst Case',
+                '2050 Sea Level Rise (meters) - Worst Case'
+            ],
             'Tropical Cyclones': ['Extreme Windspeed 10 year Return Period (km/h)', 
                                 'Extreme Windspeed 20 year Return Period (km/h)', 
                                 'Extreme Windspeed 50 year Return Period (km/h)', 
@@ -672,7 +675,10 @@ def show_results(request):
 
         if 'Storm Surge' in groups:
             groups['Storm Surge'] = ss_baseline_count + ss_worstcase_count
-
+        slr_moderatecase_count = sum(1 for c in columns if c.endswith(" - Moderate Case") and "Sea Level Rise" in c)
+        slr_worstcase_count = sum(1 for c in columns if c.endswith(" - Worst Case") and "Sea Level Rise" in c)
+        if "Sea Level Rise" in groups:
+            groups["Sea Level Rise"] = slr_moderatecase_count + slr_worstcase_count
         # Rainfall-Induced Landslide column counts
         ls_moderatecase_count = sum(
             1 for c in columns
@@ -767,6 +773,8 @@ def show_results(request):
             'ls_baseline_count': ls_baseline_count,
             'ls_moderatecase_count': ls_moderatecase_count,
             'ls_worstcase_count': ls_worstcase_count,
+            'slr_moderatecase_count': slr_moderatecase_count,
+            'slr_worstcase_count': slr_worstcase_count,
             'success_message': f"Successfully analyzed {len(data)} facilities for {len(selected_hazards)} hazard types."
         }
         
@@ -1399,11 +1407,12 @@ def sensitivity_results(request):
                 'Water Stress Exposure 2050 (%) - Worst Case'
             ],
             'Sea Level Rise': [
-                'Elevation (meter above sea level)',
-                '2030 Sea Level Rise (in meters)',
-                '2040 Sea Level Rise (in meters)',
-                '2050 Sea Level Rise (in meters)',
-                '2060 Sea Level Rise (in meters)'
+                '2030 Sea Level Rise (meters) - Moderate Case',
+                '2040 Sea Level Rise (meters) - Moderate Case',
+                '2050 Sea Level Rise (meters) - Moderate Case',
+                '2030 Sea Level Rise (meters) - Worst Case',
+                '2040 Sea Level Rise (meters) - Worst Case',
+                '2050 Sea Level Rise (meters) - Worst Case'
             ],
             'Tropical Cyclones': [
                 'Extreme Windspeed 10 year Return Period (km/h)',
@@ -1508,6 +1517,10 @@ def sensitivity_results(request):
 
         if 'Storm Surge' in groups:
             groups['Storm Surge'] = ss_baseline_count + ss_worstcase_count
+        slr_moderatecase_count = sum(1 for c in columns if c.endswith(" - Moderate Case") and "Sea Level Rise" in c)
+        slr_worstcase_count = sum(1 for c in columns if c.endswith(" - Worst Case") and "Sea Level Rise" in c)
+        if "Sea Level Rise" in groups:
+            groups["Sea Level Rise"] = slr_moderatecase_count + slr_worstcase_count
 
         ls_moderatecase_count = sum(
             1 for c in columns if c.endswith(' - Moderate Case') and 'Landslide' in c
@@ -1548,6 +1561,8 @@ def sensitivity_results(request):
             'ls_baseline_count': ls_baseline_count,
             'ls_moderatecase_count': ls_moderatecase_count,
             'ls_worstcase_count': ls_worstcase_count,
+            'slr_moderatecase_count': slr_moderatecase_count,
+            'slr_worstcase_count': slr_worstcase_count,
             'is_sensitivity_results': True,  # Flag to indicate this is sensitivity results
             'success_message': f"Successfully applied Water Stress sensitivity parameters to {len(sensitivity_data)} facilities. Water Stress Exposure (%) values now use archetype-specific color coding."
         }

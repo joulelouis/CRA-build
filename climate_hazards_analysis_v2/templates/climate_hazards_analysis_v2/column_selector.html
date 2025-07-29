@@ -101,24 +101,40 @@
                 </div>
                 <div class="ms-4">
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-elevation" data-column="Elevation (meter above sea level)">
-                        <label class="form-check-label" for="col-elevation">Elevation (meter above sea level)</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="slr-moderate-group" data-hazard="slr-moderate">
+                        <label class="form-check-label fw-bold" for="slr-moderate-group">Future (Moderate Case)</label>
+                    </div>
+                    <div class="ms-4 mb-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column slr-moderate sea-level-rise" id="col-slr-2030-mod" data-column="2030 Sea Level Rise (meters) - Moderate Case">
+                            <label class="form-check-label" for="col-slr-2030-mod">2030 Sea Level Rise (meters) - Moderate Case</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column slr-moderate sea-level-rise" id="col-slr-2040-mod" data-column="2040 Sea Level Rise (meters) - Moderate Case">
+                            <label class="form-check-label" for="col-slr-2040-mod">2040 Sea Level Rise (meters) - Moderate Case</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column slr-moderate sea-level-rise" id="col-slr-2050-mod" data-column="2050 Sea Level Rise (meters) - Moderate Case">
+                            <label class="form-check-label" for="col-slr-2050-mod">2050 Sea Level Rise (meters) - Moderate Case</label>
+                        </div>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2030" data-column="2030 Sea Level Rise (in meters)">
-                        <label class="form-check-label" for="col-slr-2030">2030 Sea Level Rise (in meters)</label>
+                        <input type="checkbox" class="form-check-input hazard-group" id="slr-worst-group" data-hazard="slr-worst">
+                        <label class="form-check-label fw-bold" for="slr-worst-group">Future (Worst Case)</label>
                     </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2040" checked data-column="2040 Sea Level Rise (in meters)">
-                        <label class="form-check-label" for="col-slr-2040">2040 Sea Level Rise (in meters)</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2050" data-column="2050 Sea Level Rise (in meters)">
-                        <label class="form-check-label" for="col-slr-2050">2050 Sea Level Rise (in meters)</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input hazard-column sea-level-rise" id="col-slr-2060" data-column="2060 Sea Level Rise (in meters)">
-                        <label class="form-check-label" for="col-slr-2060">2060 Sea Level Rise (in meters)</label>
+                    <div class="ms-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column slr-worst sea-level-rise" id="col-slr-2030-worst" data-column="2030 Sea Level Rise (meters) - Worst Case">
+                            <label class="form-check-label" for="col-slr-2030-worst">2030 Sea Level Rise (meters) - Worst Case</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column slr-worst sea-level-rise" id="col-slr-2040-worst" data-column="2040 Sea Level Rise (meters) - Worst Case">
+                            <label class="form-check-label" for="col-slr-2040-worst">2040 Sea Level Rise (meters) - Worst Case</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input hazard-column slr-worst sea-level-rise" id="col-slr-2050-worst" data-column="2050 Sea Level Rise (meters) - Worst Case">
+                            <label class="form-check-label" for="col-slr-2050-worst">2050 Sea Level Rise (meters) - Worst Case</label>
+                        </div>
                     </div>
                 </div>
             </div>
