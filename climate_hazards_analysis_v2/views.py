@@ -1333,8 +1333,7 @@ def sensitivity_results(request):
                 )
         
         # Add new columns to the columns list and reorder to put Asset Archetype as 2nd column
-        new_columns = ['Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold',
-                       'SS_Low_Threshold', 'SS_High_Threshold']
+        new_columns = ['Asset Archetype']
         
         # Reorder columns to put Asset Archetype as 2nd column
         if 'Asset Archetype' not in columns:
@@ -1350,18 +1349,8 @@ def sensitivity_results(request):
             
             # Add remaining columns (excluding the ones we're repositioning)
             for col in columns:
-                if col not in ['Facility', 'Asset Archetype', 'WS_Low_Threshold', 'WS_High_Threshold', 'SS_Low_Threshold', 'SS_High_Threshold']:
+                if col not in ['Facility', 'Asset Archetype']:
                     ordered_columns.append(col)
-            
-            # Add threshold columns at the end
-            if 'WS_Low_Threshold' not in columns:
-                ordered_columns.append('WS_Low_Threshold')
-            if 'WS_High_Threshold' not in columns:
-                ordered_columns.append('WS_High_Threshold')
-            if 'SS_Low_Threshold' not in columns:
-                ordered_columns.append('SS_Low_Threshold')
-            if 'SS_High_Threshold' not in columns:
-                ordered_columns.append('SS_High_Threshold')
             
             # Update the columns list
             columns = ordered_columns
@@ -1379,6 +1368,11 @@ def sensitivity_results(request):
                     ordered_row[column] = row[column]
                 else:
                     ordered_row[column] = 'N/A'  # Default for missing columns
+
+            # Preserve threshold values for template logic without displaying them
+            for thresh in ['WS_Low_Threshold', 'WS_High_Threshold', 'SS_Low_Threshold', 'SS_High_Threshold']:
+                if thresh in row:
+                    ordered_row[thresh] = row[thresh]
             reordered_data.append(ordered_row)
         
         sensitivity_data = reordered_data
@@ -1389,9 +1383,12 @@ def sensitivity_results(request):
         # Create detailed column groups for the table header (same as original but with new columns)
         groups = {}
         # Base group - Facility Information
-        facility_cols = ['Facility', 'Lat', 'Long', 'Asset Archetype',
-                        'WS Low Threshold', 'WS High Threshold',
-                        'SS Low Threshold', 'SS High Threshold']
+        facility_cols = [
+            'Facility',
+            'Lat',
+            'Long',
+            'Asset Archetype'
+        ]
         facility_count = sum(1 for col in facility_cols if col in columns)
         if facility_count > 0:
             groups['Facility Information'] = facility_count

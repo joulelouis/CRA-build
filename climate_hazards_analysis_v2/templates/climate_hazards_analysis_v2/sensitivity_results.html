@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load float_filters %}
+{% load my_filters %}
 {% block title %}
 View Sensitivity Results
 {% endblock %}
@@ -351,7 +352,8 @@ View Sensitivity Results
                                 <tbody>
                                     {% for row in data %}
                                         <tr class="custom-table-row">
-                                            {% for key, value in row.items %}
+                                            {% for key in columns %}
+                                                {% with value=row|get_item:key %}
                                                 <td>
                                                     {# Display plain text when hazard marked as not material #}
                                                     {% if value == "Not material" %}
@@ -378,10 +380,6 @@ View Sensitivity Results
                                                     {# Asset Archetype - Show which archetype was used #}
                                                     {% elif key == "Asset Archetype" %}
                                                         <span class="badge bg-info">{{ value }}</span>
-                                                    
-                                                    {# Threshold values - Show the custom thresholds used #}
-                                                    {% elif key == "WS Low Threshold" or key == "WS High Threshold" %}
-                                                        <small class="text-muted">{{ value }}%</small>
                                                     
                                                     {# Flood Depth styling (unchanged from original) #}
                                                     {% elif key == "Flood Depth (meters)" %}
@@ -556,6 +554,7 @@ View Sensitivity Results
                                                     {% else %}
                                                         {{ value }}
                                                     {% endif %}
+                                                    {% endwith %}
                                                 </td>
                                             {% endfor %}
                                         </tr>
