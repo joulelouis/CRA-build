@@ -1211,7 +1211,11 @@ def sensitivity_results(request):
 
         # Mapping of not-material flags to their corresponding result columns
         hazard_to_columns = {
-            'water_stress_not_material': ['Water Stress Exposure (%)'],
+            'water_stress_not_material': ['Water Stress Exposure (%)',
+                'Water Stress Exposure 2030 (%) - Moderate Case',
+                'Water Stress Exposure 2050 (%) - Moderate Case',
+                'Water Stress Exposure 2030 (%) - Worst Case',
+                'Water Stress Exposure 2050 (%) - Worst Case'],
             'flood_not_material': ['Flood Depth (meters)'],
             'heat_not_material': [
                 'Days over 30° Celsius',
