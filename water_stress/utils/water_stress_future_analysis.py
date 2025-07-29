@@ -37,20 +37,36 @@ def generate_future_water_stress_from_baseline(baseline_csv_path: str) -> dict:
         if "pfaf_id" not in df_baseline.columns:
             raise ValueError("Baseline CSV must contain 'pfaf_id' column.")
 
-        df_future_selected = df_future[["pfaf_id", "bau30_ws_x_r", "bau50_ws_x_r"]].copy()
+        df_future_selected = df_future[
+            [
+                "pfaf_id",
+                "bau30_ws_x_r",
+                "bau50_ws_x_r",
+                "pes30_ws_x_r",
+                "pes50_ws_x_r",
+            ]
+        ].copy()
         df_future_selected["bau30_ws_x_r"] = (
             df_future_selected["bau30_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
         )
         df_future_selected["bau50_ws_x_r"] = (
             df_future_selected["bau50_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
         )
+        df_future_selected["pes30_ws_x_r"] = (
+            df_future_selected["pes30_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
+        )
+        df_future_selected["pes50_ws_x_r"] = (
+            df_future_selected["pes50_ws_x_r"].fillna(0).apply(lambda v: math.ceil(v * 100))
+        )
 
         df_merged = pd.merge(df_baseline, df_future_selected, on="pfaf_id", how="left")
 
         df_merged.rename(
             columns={
-                "bau30_ws_x_r": "Water Stress Exposure 2030 (%)",
-                "bau50_ws_x_r": "Water Stress Exposure 2050 (%)",
+                "bau30_ws_x_r": "Water Stress Exposure 2030 (%) - Moderate Case",
+                "bau50_ws_x_r": "Water Stress Exposure 2050 (%) - Moderate Case",
+                "pes30_ws_x_r": "Water Stress Exposure 2030 (%) - Worst Case",
+                "pes50_ws_x_r": "Water Stress Exposure 2050 (%) - Worst Case",
             },
             inplace=True,
         )

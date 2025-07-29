@@ -23,6 +23,7 @@ from django.conf import settings
 from sea_level_rise_analysis.utils.sea_level_rise_analysis import generate_sea_level_rise_analysis
 from tropical_cyclone_analysis.utils.tropical_cyclone_analysis import generate_tropical_cyclone_analysis
 from water_stress.utils.water_stress_analysis import generate_water_stress_analysis
+from water_stress.utils.water_stress_future_analysis import generate_future_water_stress_from_baseline
 from heat_exposure_analysis.utils.heat_exposure_analysis import generate_heat_exposure_analysis
 from heat_exposure_analysis.utils.heat_future_analysis import generate_heat_future_analysis
 from tropical_cyclone_analysis.utils.tropical_cyclone_future_analysis import generate_tropical_cyclone_future_analysis
@@ -250,6 +251,14 @@ def process_water_stress_analysis(facility_csv_path, selected_fields, buffer_siz
             df_ws = pd.read_csv(ws_res['combined_csv_paths'][0], encoding='utf-8')
         except UnicodeDecodeError:
             df_ws = pd.read_csv(ws_res['combined_csv_paths'][0], encoding='latin-1')
+
+        # Generate future water stress projections using pfaf_id
+        future_res = generate_future_water_stress_from_baseline(ws_res['combined_csv_paths'][0])
+        if future_res.get('output_csv'):
+            try:
+                df_ws = pd.read_csv(future_res['output_csv'])
+            except Exception as e:
+                logger.warning(f"Failed to load future water stress output: {e}")
         
         # Standardize column names
         rename_map = {'Site': 'Facility', 'latitude': 'Lat', 'longitude': 'Long'}
@@ -257,14 +266,24 @@ def process_water_stress_analysis(facility_csv_path, selected_fields, buffer_siz
             if old in df_ws.columns and new not in df_ws.columns:
                 df_ws.rename(columns={old: new}, inplace=True)
         
-        # Handle water stress column variations and ensure pfaf_id
-        if 'Water Stress Exposure (%)' in df_ws.columns:
-            df_ws_values = df_ws[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']]
-        elif 'bws_06_raw' in df_ws.columns:
-            df_ws.rename(columns={'bws_06_raw': 'Water Stress Exposure (%)'}, inplace=True)
-            df_ws_values = df_ws[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']]
-            logger.warning("Water stress column not found in analysis output")
+        if 'bws_raw' in df_ws.columns:
+            df_ws.rename(columns={'bws_raw': 'Water Stress Exposure (%)'}, inplace=True)
+
+        if 'pfaf_id' in df_ws.columns:
+            df_ws.drop(columns=['pfaf_id'], inplace=True)
+
+        water_cols = [
+            'Water Stress Exposure (%)',
+            'Water Stress Exposure 2030 (%) - Moderate Case',
+            'Water Stress Exposure 2050 (%) - Moderate Case',
+            'Water Stress Exposure 2030 (%) - Worst Case',
+            'Water Stress Exposure 2050 (%) - Worst Case',
+        ]
+        existing_water_cols = [c for c in water_cols if c in df_ws.columns]
+        if not existing_water_cols:
+            logger.warning("Water stress columns not found in analysis output")
             return None, plot_paths
+        df_ws_values = df_ws[['Facility', 'Lat', 'Long'] + existing_water_cols]
             
         # Collect plot paths
         if ws_res.get('png_paths'):
@@ -934,6 +953,10 @@ def generate_climate_hazards_analysis(facility_csv_path=None, selected_fields=No
             'Long',
             'Flood Depth (meters)',
             'Water Stress Exposure (%)',
+            'Water Stress Exposure 2030 (%) - Moderate Case',
+            'Water Stress Exposure 2050 (%) - Moderate Case',
+            'Water Stress Exposure 2030 (%) - Worst Case',
+            'Water Stress Exposure 2050 (%) - Worst Case',
             'Elevation (meter above sea level)',
             '2030 Sea Level Rise (in meters)',
             '2040 Sea Level Rise (in meters)',

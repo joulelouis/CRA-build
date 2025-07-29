@@ -7,7 +7,7 @@ from shapely.geometry import Point, box
 import math
 from django.conf import settings
 
-def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
+def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0009):
     """
     Performs water stress analysis for facility locations.
     Args:
@@ -33,7 +33,10 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
         shapefile_path = f"{shapefile_base}.shp"
         dbf_path = f"{shapefile_base}.dbf"
         shx_path = f"{shapefile_base}.shx"
-        water_risk_csv_path = os.path.join(water_dir, 'Aqueduct40_baseline_monthly_y2023m07d05.csv')
+        # Updated to use the Aqueduct 4.0 baseline *annual* dataset
+        water_risk_csv_path = os.path.join(
+            water_dir, 'Aqueduct40_baseline_annual_y2023m07d05.csv'
+        )
         
         # Validate input files
         required = [shapefile_path, dbf_path, shx_path, water_risk_csv_path]
@@ -60,7 +63,7 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
             buffer_meters = int(buffer_size * 111000)
             output_filename = f'water_stress_analysis_output_buffer_{buffer_size:.4f}.csv'
             output_csv = os.path.join(output_dir, output_filename)
-            df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False, encoding='utf-8')
+            df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].assign(pfaf_id=np.nan)[['Facility','Lat','Long','pfaf_id','Water Stress Exposure (%)']].to_csv(output_csv, index=False, encoding='utf-8')
             output_csv_files.append(output_csv)
             
             # Create a simple plot
@@ -158,35 +161,43 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0045):
         
         # Clip water risk to relevant extent & normalize values
         gdf = gdf.cx[114:130, 0:20].reset_index(drop=True)
-        gdf['bws_06_raw'] = gdf['bws_06_raw'].astype(float).apply(lambda v: math.ceil(v*100))
+        gdf['bws_raw'] = gdf['bws_raw'].astype(float).apply(lambda v: math.ceil(v * 100))
         
         # Define fields to use for water stress analysis
-        dynamic_fields = ['bws_06_raw']
+        dynamic_fields = ['bws_raw']
 
         
         # Spatial join to get water stress values for each facility
         facility_join = gpd.sjoin(
-            facility_gdf, gdf[['geometry'] + dynamic_fields],
+            facility_gdf, gdf[['geometry', 'PFAF_ID'] + dynamic_fields],
             how='left', predicate='intersects'
         ).reset_index(drop=True)
         
-        # Add water stress values to facility data and rename to final column name
-        for f in dynamic_fields:
+        # Add water stress values and pfaf_id to facility data
+        for f in dynamic_fields + ['PFAF_ID']:
             df_fac[f] = facility_join[f]
         
-        # Rename bws_06_raw to Water Stress Exposure (%)
-        df_fac.rename(columns={'bws_06_raw': 'Water Stress Exposure (%)'}, inplace=True)
+        # Rename columns for final output
+        df_fac.rename(
+            columns={
+                'bws_raw': 'Water Stress Exposure (%)',
+                'PFAF_ID': 'pfaf_id',
+            },
+            inplace=True,
+        )
             
         # Save the results to CSV with buffer size in filename for sensitivity analysis
         output_filename = f'water_stress_analysis_output_buffer_{buffer_size:.4f}.csv'
         output_csv = os.path.join(output_dir, output_filename)
-        df_fac[['Facility', 'Lat', 'Long', 'Water Stress Exposure (%)']].to_csv(output_csv, index=False)
+        df_fac[
+            ['Facility', 'Lat', 'Long', 'pfaf_id', 'Water Stress Exposure (%)']
+        ].to_csv(output_csv, index=False)
         output_csv_files.append(output_csv)
         
         # Generate a plot
         fig, ax = plt.subplots(figsize=(12, 8))
         gdf.boundary.plot(ax=ax, linewidth=1, color='black')
-        gdf.plot(column='bws_06_raw', ax=ax, legend=True, cmap='OrRd')
+        gdf.plot(column='bws_raw', ax=ax, legend=True, cmap='OrRd')
         facility_gdf.plot(ax=ax, color='blue', markersize=50, alpha=0.5)
         ax.set_title(f'Water Stress and Facilities (Buffer: ~{buffer_meters}m)')
         ax.set_axis_off()
