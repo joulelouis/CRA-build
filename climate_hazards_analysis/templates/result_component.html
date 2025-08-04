@@ -1,3 +1,37 @@
+<style>
+  /* Simple Override Modal */
+  .override-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+  }
+
+  .override-modal:target {
+    display: flex;
+  }
+
+  .override-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    text-align: left;
+  }
+
+  .override-modal-close {
+    margin-top: 10px;
+  }
+</style>
+
+
 <div class="container mt-4 table-container">
     <div class="row">
       <div class="col-md-12">
@@ -283,10 +317,18 @@
                 </ul>
                 <!-- Generate Report Button on the right -->
                 <div class="text-end">
-                  <button type="button" class="btn btn-warning" id="override-values-btn">
+                  <a href="#overrideModal" class="btn btn-warning" id="override-values-btn">
                     <strong>Override Values</strong>
-                  </button>
+                  </a>
                 </div>
+              </div>
+            </div>
+
+            <div id="overrideModal" class="override-modal">
+              <div class="override-modal-content">
+                <h2>Override Values</h2>
+                <p>Override options will be available here.</p>
+                <a href="#" class="btn btn-secondary override-modal-close">Close</a>
               </div>
             </div>
   
