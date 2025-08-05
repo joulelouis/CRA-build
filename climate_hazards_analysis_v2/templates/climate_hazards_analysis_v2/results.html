@@ -314,13 +314,24 @@ Climate Hazard Analysis Results
         background: #fff;
         padding: 20px;
         border-radius: 8px;
-        max-width: 500px;
         width: 90%;
+        max-width: 1000px;
+        max-height: 90vh;
+        overflow-y: auto;
         text-align: left;
     }
 
     .override-modal-close {
         margin-top: 10px;
+    }
+
+    .override-input-fields .form-label {
+        white-space: normal;
+    }
+
+    #facility-inputs {
+        max-height: 70vh;
+        overflow-y: auto;
     }
 </style>
 
@@ -672,48 +683,25 @@ Climate Hazard Analysis Results
                                 <form>
                                     <div class="mb-4">
                                         <h5>Input Values</h5>
-                                        <div class="mb-3">
-                                            <label for="override-file" class="form-label">Upload Excel/CSV File</label>
-                                            <input type="file" id="override-file" class="form-control" accept=".csv,.xlsx">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="facility-select" class="form-label">Select Facility to Override</label>
-                                            <select id="facility-select" class="form-select">
-                                                <option value="" selected disabled>Select facility</option>
-                                                <option>Coconut Processing Plant in Gen San</option>
-                                                <option>Commissary in Paranque</option>
-                                                <option>SM Manila Shakeys Branch</option>
-                                                <option>Tuna Processing Plant in Gen San</option>
-                                            </select>
-                                        </div>
-                                        <div id="facility-inputs" style="display:none;">
-                                            <div class="mb-2">
-                                                <label class="form-label">Flood depth (meters)</label>
-                                                <input type="number" step="any" class="form-control">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="override-file" class="form-label">Upload Excel/CSV File</label>
+                                                    <input type="file" id="override-file" class="form-control" accept=".csv,.xlsx">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="facility-select" class="form-label">Select Facility to Override</label>
+                                                    <select id="facility-select" class="form-select">
+                                                        <option value="" selected disabled>Select facility</option>
+                                                        <option>Coconut Processing Plant in Gen San</option>
+                                                        <option>Commissary in Paranque</option>
+                                                        <option>SM Manila Shakeys Branch</option>
+                                                        <option>Tuna Processing Plant in Gen San</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div class="mb-2">
-                                                <label class="form-label">Water Stress Exposure (%)</label>
-                                                <input type="number" step="any" class="form-control">
-                                            </div>
-                                            <div class="mb-2">
-                                                <label class="form-label">Days over 30° Celsius</label>
-                                                <input type="number" step="any" class="form-control">
-                                            </div>
-                                            <div class="mb-2">
-                                                <label class="form-label">Days over 33° Celsius</label>
-                                                <input type="number" step="any" class="form-control">
-                                            </div>
-                                            <div class="mb-2">
-                                                <label class="form-label">Days over 35° Celsius</label>
-                                                <input type="number" step="any" class="form-control">
-                                            </div>
-                                            <div class="mb-2">
-                                                <label class="form-label">1-min Maximum Sustain Windspeed 10 year Return Period (km/h)</label>
-                                                <input type="number" step="any" class="form-control">
-                                            </div>
-                                            <div class="mb-2">
-                                                <label class="form-label">1-min Maximum Sustain Windspeed 20 year Return Period (km/h)</label>
-                                                <input type="number" step="any" class="form-control">
+                                            <div class="col-md-6" id="facility-inputs">
+                                                {% include 'climate_hazards_analysis_v2/override_input_fields.html' %}
                                             </div>
                                         </div>
                                     </div>
@@ -1627,10 +1615,13 @@ function highlightSteps(currentStep) {
 
 function setupOverrideModal() {
     const select = document.getElementById('facility-select');
-    const inputs = document.getElementById('facility-inputs');
-    if (select && inputs) {
+    const inputsContainer = document.getElementById('facility-inputs');
+    if (select && inputsContainer) {
+        const inputs = inputsContainer.querySelectorAll('input');
+        inputs.forEach(input => input.disabled = true);
         select.addEventListener('change', function() {
-            inputs.style.display = this.value ? 'block' : 'none';
+            const disabled = !this.value;
+            inputs.forEach(input => input.disabled = disabled);
         });
     }
 }
