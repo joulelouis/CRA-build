@@ -69,6 +69,49 @@ def standardize_facility_dataframe(df):
         
     return df
 
+def validate_shapefile(gdf):
+    """Validate that an uploaded shapefile has the expected structure.
+
+    The shapefile must contain only point geometries and include a column that
+    can be used for facility names. Returns the list of attribute columns (i.e.
+    the columns excluding geometry).
+
+    Args:
+        gdf (geopandas.GeoDataFrame): The input geodataframe from the shapefile
+
+    Returns:
+        list[str]: Attribute column names
+
+    Raises:
+        ValueError: If the shapefile has no features, contains non-point
+            geometries, or lacks a suitable facility name column.
+    """
+    if gdf.empty:
+        raise ValueError("Shapefile contains no features")
+
+    # Ensure geometries are Points
+    if not all(gdf.geometry.geom_type == "Point"):
+        raise ValueError("Shapefile must contain point geometries")
+
+    attribute_columns = [c for c in gdf.columns if c.lower() != "geometry"]
+
+    facility_name_variations = [
+        "facility",
+        "site",
+        "site name",
+        "facility name",
+        "facilty name",
+        "name",
+        "asset name",
+    ]
+
+    if not any(col.strip().lower() in facility_name_variations for col in attribute_columns):
+        raise ValueError(
+            "Shapefile attribute table must include a facility name column (e.g., 'Facility', 'Site', 'Name')."
+        )
+
+    return attribute_columns
+
 def load_cached_hazard_data(hazard_type):
     """
     Load pre-computed hazard data from the static files.

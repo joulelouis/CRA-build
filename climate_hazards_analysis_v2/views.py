@@ -3,15 +3,18 @@ from django.http import JsonResponse, HttpResponse
 import os
 from io import BytesIO
 import pandas as pd
+import geopandas as gpd
 import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_GET
 from django.utils.decorators import method_decorator
-from .utils import standardize_facility_dataframe, load_cached_hazard_data, combine_facility_with_hazard_data
+from .utils import standardize_facility_dataframe, load_cached_hazard_data, combine_facility_with_hazard_data, validate_shapefile
 from .error_utils import handle_sensitivity_param_error
 import logging
 import copy
+import zipfile
+import tempfile
 
 # Import from climate_hazards_analysis module
 from climate_hazards_analysis.utils.climate_hazards_analysis import generate_climate_hazards_analysis
@@ -65,6 +68,33 @@ def view_map(request):
                 csv_path = os.path.splitext(file_path)[0] + '.csv'
                 df.to_csv(csv_path, index=False)
                 request.session['climate_hazards_v2_facility_csv_path'] = csv_path
+            elif ext in ['.shp', '.zip']:
+                if ext == '.zip':
+                    with tempfile.TemporaryDirectory() as tmpdir:
+                        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                            zip_ref.extractall(tmpdir)
+                        shp_files = [f for f in os.listdir(tmpdir) if f.lower().endswith('.shp')]
+                        if not shp_files:
+                            raise ValueError('No shapefile found in the uploaded zip archive')
+                        shp_path = os.path.join(tmpdir, shp_files[0])
+                        gdf = gpd.read_file(shp_path)
+                else:
+                    gdf = gpd.read_file(file_path)
+
+                # Validate shapefile structure before processing
+                attribute_columns = validate_shapefile(gdf)
+                logger.info(f"Shapefile attribute columns: {attribute_columns}")
+
+                gdf = gdf.to_crs('EPSG:4326')
+                gdf['Lat'] = gdf.geometry.y
+                gdf['Long'] = gdf.geometry.x
+                df = pd.DataFrame(gdf.drop(columns='geometry'))
+
+
+                # Convert to CSV for downstream processing
+                csv_path = os.path.splitext(file_path)[0] + '.csv'
+                df.to_csv(csv_path, index=False)
+                request.session['climate_hazards_v2_facility_csv_path'] = csv_path
             else:
                 df = pd.read_csv(file_path)
                 request.session['climate_hazards_v2_facility_csv_path'] = file_path
@@ -76,7 +106,7 @@ def view_map(request):
             facility_data = df.to_dict(orient='records')
             
             # Debug: Log the facility data
-            logger.info(f"Processed {len(facility_data)} facilities from CSV: {str(facility_data)[:200]}...")
+            logger.info(f"Processed {len(facility_data)} facilities from file: {str(facility_data)[:200]}...")
             
             # Explicitly store in session
             request.session['climate_hazards_v2_facility_data'] = facility_data
@@ -86,8 +116,8 @@ def view_map(request):
             context['success_message'] = f"Successfully loaded {len(facility_data)} facilities from {file.name}"
             
         except Exception as e:
-            logger.exception(f"Error processing CSV: {str(e)}")
-            context['error'] = f"Error processing CSV: {str(e)}"
+            logger.exception(f"Error processing file: {str(e)}")
+            context['error'] = f"Error processing file: {str(e)}"
     
     # Return the template with context
     return render(request, 'climate_hazards_analysis_v2/main.html', context)
