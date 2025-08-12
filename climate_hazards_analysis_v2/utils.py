@@ -72,9 +72,9 @@ def standardize_facility_dataframe(df):
 def validate_shapefile(gdf):
     """Validate that an uploaded shapefile has the expected structure.
 
-    The shapefile must contain only point geometries and include a column that
-    can be used for facility names. Returns the list of attribute columns (i.e.
-    the columns excluding geometry).
+    The shapefile must contain point or multipoint geometries and include a
+    column that can be used for facility names. Returns the list of attribute
+    columns (i.e. the columns excluding geometry).
 
     Args:
         gdf (geopandas.GeoDataFrame): The input geodataframe from the shapefile
@@ -83,15 +83,16 @@ def validate_shapefile(gdf):
         list[str]: Attribute column names
 
     Raises:
-        ValueError: If the shapefile has no features, contains non-point
-            geometries, or lacks a suitable facility name column.
+        ValueError: If the shapefile has no features, contains geometries other
+            than points or multipoints, or lacks a suitable facility name
+            column.
     """
     if gdf.empty:
         raise ValueError("Shapefile contains no features")
 
-    # Ensure geometries are Points
-    if not all(gdf.geometry.geom_type == "Point"):
-        raise ValueError("Shapefile must contain point geometries")
+    # Ensure geometries are Points or MultiPoints
+    if not gdf.geometry.geom_type.isin(["Point", "MultiPoint"]).all():
+        raise ValueError("Shapefile must contain point or multipoint geometries")
 
     attribute_columns = [c for c in gdf.columns if c.lower() != "geometry"]
 

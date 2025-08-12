@@ -86,8 +86,8 @@ def view_map(request):
                 logger.info(f"Shapefile attribute columns: {attribute_columns}")
 
                 gdf = gdf.to_crs('EPSG:4326')
-                gdf['Lat'] = gdf.geometry.y
-                gdf['Long'] = gdf.geometry.x
+                gdf['Lat'] = gdf.geometry.centroid.y
+                gdf['Long'] = gdf.geometry.centroid.x
                 df = pd.DataFrame(gdf.drop(columns='geometry'))
 
 
@@ -103,7 +103,16 @@ def view_map(request):
             df = standardize_facility_dataframe(df)
             
             # Store facility data in session for map display
-            facility_data = df.to_dict(orient='records')
+            if ext in ['.shp', '.zip']:
+                facility_data = []
+                for i, row in df.iterrows():
+                    record = row.to_dict()
+                    geom = gdf.geometry.iloc[i]
+                    if geom.geom_type == 'MultiPoint':
+                        record['geometry'] = geom.convex_hull.__geo_interface__
+                    facility_data.append(record)
+            else:
+                facility_data = df.to_dict(orient='records')
             
             # Debug: Log the facility data
             logger.info(f"Processed {len(facility_data)} facilities from file: {str(facility_data)[:200]}...")
