@@ -133,7 +133,12 @@
                             </div>
                         </div>
 
-                        <!-- Instructions Panel - MOVED HERE -->
+                        <div class="alert alert-info mt-3" role="alert" style="margin-right: 40px;">
+                            Ensure your asset file includes the columns <strong>Facility</strong>, <strong>Latitude</strong>, <strong>Longitude</strong>, and <strong>Archetype</strong>. You can
+                            <a href="{% static 'sample/asset_template.csv' %}" download>download a template</a> for reference.
+                        </div>
+
+        <!-- Instructions Panel - MOVED HERE -->
         <div class="mt-4">
             <div class="card-header no-border">
                 <strong>Instructions</strong>
@@ -142,7 +147,6 @@
                 <ol class="mb-0 ps-3">
                     <li>Upload a CSV, Excel (.xlsx), or zipped Shapefile (.zip) file with facility locations (shapefiles may contain point or multipoint geometries and must include a facility name field).</li>
                     <li>The map will be generated automatically after the file is uploaded.</li>
-                    <li>Click anywhere on the map to add a new marker.</li>
                     <li>Hover over markers to see facility names.</li>
                     <li>Click "Proceed to Select Hazards and Scenarios" button to select hazards and scenarios.</li>
                 </ol>

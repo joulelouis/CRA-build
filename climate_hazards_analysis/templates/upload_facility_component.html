@@ -10,6 +10,11 @@
                     Please upload the facility location CSV.
                 </label> {% endcomment %}
             </div>
+
+        <div class="download-template mt-2">
+            <a href="{% static 'sample/asset_template.csv' %}" download>Download Template</a>
+        </div>
+        
         <div class="file-input-wrapper">
             <!-- File Input Container -->
             <div class="file-upload-box" onclick="document.getElementById('facilityCsv').click()">
