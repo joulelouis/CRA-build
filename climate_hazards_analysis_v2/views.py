@@ -110,6 +110,8 @@ def view_map(request):
                     geom = gdf.geometry.iloc[i]
                     if geom.geom_type == 'MultiPoint':
                         record['geometry'] = geom.convex_hull.__geo_interface__
+                    elif geom.geom_type in ['Polygon', 'MultiPolygon']:
+                        record['geometry'] = geom.__geo_interface__
                     facility_data.append(record)
             else:
                 facility_data = df.to_dict(orient='records')
