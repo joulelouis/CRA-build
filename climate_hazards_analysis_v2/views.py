@@ -64,10 +64,7 @@ def view_map(request):
             # Process the uploaded file to get facility data
             if ext in ['.xls', '.xlsx']:
                 df = pd.read_excel(file_path)
-                # Convert to CSV for downstream processing
-                csv_path = os.path.splitext(file_path)[0] + '.csv'
-                df.to_csv(csv_path, index=False)
-                request.session['climate_hazards_v2_facility_csv_path'] = csv_path
+                
             elif ext in ['.shp', '.zip']:
                 if ext == '.zip':
                     with tempfile.TemporaryDirectory() as tmpdir:
@@ -90,17 +87,21 @@ def view_map(request):
                 gdf['Long'] = gdf.geometry.centroid.x
                 df = pd.DataFrame(gdf.drop(columns='geometry'))
 
-
-                # Convert to CSV for downstream processing
-                csv_path = os.path.splitext(file_path)[0] + '.csv'
-                df.to_csv(csv_path, index=False)
-                request.session['climate_hazards_v2_facility_csv_path'] = csv_path
             else:
                 df = pd.read_csv(file_path)
-                request.session['climate_hazards_v2_facility_csv_path'] = file_path
-            
-            # Standardize column names and validate data
+
+            # Standardize column names and validate data before saving
             df = standardize_facility_dataframe(df)
+
+
+            # Determine CSV path and save standardized data
+            if ext in ['.xls', '.xlsx', '.shp', '.zip']:
+                csv_path = os.path.splitext(file_path)[0] + '.csv'
+            else:
+                csv_path = file_path
+                
+            df.to_csv(csv_path, index=False)
+            request.session['climate_hazards_v2_facility_csv_path'] = csv_path
             
             # Store facility data in session for map display
             if ext in ['.shp', '.zip']:

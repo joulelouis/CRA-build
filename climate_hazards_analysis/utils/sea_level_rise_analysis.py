@@ -139,6 +139,25 @@ def generate_sea_level_rise_analysis(facility_csv_path):
 
             # Open facility CSV and create geodataframes.
             df_fac = pd.read_csv(facility_csv_path)
+
+            # Standardize expected column names
+            rename_map = {}
+            for col in df_fac.columns:
+                low = col.strip().lower()
+                if low in ['facility', 'site', 'site name', 'facility name', 'facilty name', 'name', 'asset name']:
+                    rename_map[col] = 'Facility'
+                elif low == 'latitude' and 'Lat' not in df_fac.columns:
+                    rename_map[col] = 'Lat'
+                elif low == 'longitude' and 'Long' not in df_fac.columns:
+                    rename_map[col] = 'Long'
+            if rename_map:
+                df_fac.rename(columns=rename_map, inplace=True)
+
+            required_cols = ['Facility', 'Lat', 'Long']
+            missing = [c for c in required_cols if c not in df_fac.columns]
+            if missing:
+                raise ValueError(f"Missing required columns in facility CSV: {', '.join(missing)}")
+
             crs = {'init': f'EPSG:{4326}'}
             geometry = [Point(xy).buffer(buffer, cap_style=3) for xy in zip(df_fac['Long'], df_fac['Lat'])]
             geometry_point = [Point(xy) for xy in zip(df_fac['Long'], df_fac['Lat'])]
@@ -188,12 +207,12 @@ def generate_sea_level_rise_analysis(facility_csv_path):
 
             # Spatial join between facility buffers and the LECZ shapefile.
             df_sjoin = sjoin(geo_df, lecz_shp, how='inner', predicate='intersects')
-            df_sjoin = df_sjoin[["Site", "Lat", "Long", "geometry"]]
+            df_sjoin = df_sjoin[["Facility", "Lat", "Long", "geometry"]]
             df_sjoin_point = geo_df_point[geo_df_point.index.isin(df_sjoin.index)]
             df_sjoin_point = df_sjoin_point.drop_duplicates(
                 subset=['Lat', 'Long'],
                 keep='first').reset_index(drop=True)
-            df_sjoin_point_latlon = df_sjoin_point[["Site", "Long", "Lat"]]
+            df_sjoin_point_latlon = df_sjoin_point[["Facility", "Long", "Lat"]]
 
             # Plot the LECZ map with facilities and save the PNG.
             fig, ax = plt.subplots(figsize=(10, 10))
@@ -231,7 +250,7 @@ def generate_sea_level_rise_analysis(facility_csv_path):
                     ds_slr = ds_slr.where(ds_slr['sealevel_mm'] > -32768)
 
                     quant_col = f"{year} Sea Level Rise CI {quant}"
-                    cols = ["Facility", "Lat", "Lon", "SRTM elevation", quant_col]
+                    cols = ["Facility", "Lat", "Long", "SRTM elevation", quant_col]
                     df_quant = pd.DataFrame(columns=cols)
 
                     for row in df_sjoin_point_latlon.itertuples():
@@ -245,7 +264,7 @@ def generate_sea_level_rise_analysis(facility_csv_path):
                                                 y=slice(lat_max, lat_min)).quantile(0.05).round().values
                         slr_proj = ds_slr.sel(lon=row.Long, lat=row.Lat, method="nearest").sealevel_mm.values / 1000
                         if srtm_elev <= 10:
-                            df_temp = pd.DataFrame([[row.Site, row.Lat, row.Long, srtm_elev, slr_proj]], columns=cols)
+                            df_temp = pd.DataFrame([[row.Facility, row.Lat, row.Long, srtm_elev, slr_proj]], columns=cols)
                             df_quant = pd.concat([df_quant, df_temp])
                     if i == 0 and j == 0:
                         df_master = df_quant

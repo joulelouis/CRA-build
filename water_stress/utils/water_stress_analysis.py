@@ -108,8 +108,12 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0009):
         rename_map = {}
         for col in df_fac.columns:
             low = col.strip().lower()
-            if low in ['facility', 'site', 'site name', 'facility name', 'facilty name']:
+            if low in ['facility', 'site', 'site name', 'facility name', 'facilty name', 'name', 'asset name']:
                 rename_map[col] = 'Facility'
+            elif low in ['latitude', 'lat'] and 'Lat' not in df_fac.columns:
+                rename_map[col] = 'Lat'
+            elif low in ['longitude', 'long', 'lon'] and 'Long' not in df_fac.columns:
+                rename_map[col] = 'Long'
         if rename_map:
             df_fac.rename(columns=rename_map, inplace=True)
             
@@ -123,8 +127,9 @@ def generate_water_stress_analysis(facility_csv_path, buffer_size=0.0009):
         df_fac['Lat'] = pd.to_numeric(df_fac['Lat'], errors='coerce')
         df_fac.dropna(subset=['Long', 'Lat'], inplace=True)
         
+        # Create a Facility column if still missing after renaming
         if 'Facility' not in df_fac.columns:
-            raise ValueError("Your facility CSV must include a 'Facility' column or equivalent header.")
+            df_fac['Facility'] = df_fac.index.map(lambda i: f"Facility {i+1}")
             
         # Load shapefile
         hydrobasins = gpd.read_file(shapefile_path)

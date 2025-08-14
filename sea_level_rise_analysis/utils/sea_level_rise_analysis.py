@@ -17,9 +17,30 @@ def generate_sea_level_rise_analysis(facility_csv_path):
         os.makedirs(output_dir, exist_ok=True)
 
         df_points = pd.read_csv(facility_csv_path)
+
+
+        # Standardize expected column names
+        rename_map = {}
+        for col in df_points.columns:
+            low = col.strip().lower()
+            if low in ['facility', 'site', 'site name', 'facility name', 'facilty name', 'name', 'asset name']:
+                rename_map[col] = 'Facility'
+            elif low in ['latitude', 'lat'] and 'Lat' not in df_points.columns:
+                rename_map[col] = 'Lat'
+            elif low in ['longitude', 'long', 'lon'] and 'Long' not in df_points.columns:
+                rename_map[col] = 'Long'
+        if rename_map:
+            df_points.rename(columns=rename_map, inplace=True)
+
+        required_cols = ['Facility', 'Lat', 'Long']
+        missing = [c for c in required_cols if c not in df_points.columns]
+        if missing:
+            raise ValueError(f"Missing required columns in facility CSV: {', '.join(missing)}")
+
+
         geometry = [Point(xy) for xy in zip(df_points['Long'], df_points['Lat'])]
         gpd.GeoDataFrame(df_points, geometry=geometry, crs='EPSG:4326')
-        df_master = df_points[['Site', 'Lat', 'Long']].rename(columns={'Site': 'Facility', 'Lat': 'LAT', 'Long': 'LON'})
+        df_master = df_points[['Facility', 'Lat', 'Long']].rename(columns={'Lat': 'LAT', 'Long': 'LON'})
 
         quant = 0.5
         year_list = np.arange(2030, 2051, 10)
