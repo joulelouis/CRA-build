@@ -2,6 +2,10 @@
 .venv/
 CRAproject/.env
 
+# Python cache files
+__pycache__/
+*.pyc
+
 # Django static files
 staticfiles/
 static/admin/
