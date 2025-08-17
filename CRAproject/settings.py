@@ -12,9 +12,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:
+    load_dotenv = lambda *args, **kwargs: None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from the project's .env file if present
+load_dotenv(BASE_DIR / 'CRAproject' / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -99,10 +106,22 @@ WSGI_APPLICATION = 'CRAproject.wsgi.application'
 # }
 
 #temporary to run the local server
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',  # This creates a database file in your project directory
+#     }
+# }
+
+# Use PostgreSQL as the default database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # This creates a database file in your project directory
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_USER_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
