@@ -19,6 +19,7 @@ from django.urls import path, include
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
+from accounts.views import login_page, signup_page
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +35,10 @@ urlpatterns = [
     path('sea-level-rise-analysis/', include('sea_level_rise_analysis.urls')),
     path('tropical-cyclone-analysis/', include('tropical_cyclone_analysis.urls')),
     path('climate-hazards-analysis-v2/', include('climate_hazards_analysis_v2.urls')),
+    path('login/', login_page, name='login_page'),
+    path('signup/', signup_page, name='signup_page'),
+    path('api/auth/', include('accounts.urls')),
+    path('api/', include('overrides.urls')),
 ]
 
 # Serve media files during development
