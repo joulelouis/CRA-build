@@ -3,6 +3,7 @@
 {% block content %}
 <h2>Sign Up</h2>
 <form id="signup-form">
+    {% csrf_token %}
   <label for="username">Username:</label>
   <input id="username" name="username" type="text" required>
   <label for="email">Email:</label>

@@ -1,3 +1,20 @@
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+
+
 function setupLogin() {
   const form = document.getElementById('login-form');
   if (!form) return;
@@ -7,11 +24,20 @@ function setupLogin() {
     const password = document.getElementById('password').value;
     const response = await fetch('/api/auth/login/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
       body: JSON.stringify({ username, password })
     });
-    const data = await response.json();
-    console.log(data);
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('access', data.access);
+      localStorage.setItem('refresh', data.refresh);
+      window.location.href = '/';
+    } else {
+      console.error('Login failed');
+    }
   });
 }
 
@@ -25,10 +51,17 @@ function setupSignup() {
     const password = document.getElementById('password').value;
     const response = await fetch('/api/auth/signup/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
       body: JSON.stringify({ username, email, password })
     });
-    const data = await response.json();
-    console.log(data);
+    if (response.ok) {
+      await response.json();
+      window.location.href = '/login/';
+    } else {
+      console.error('Signup failed');
+    }
   });
 }
