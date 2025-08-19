@@ -668,51 +668,45 @@ Climate Hazard Analysis Results
                                     High Exposure
                                 </li>
                             </ul>
-                            <!-- Generate Report Button on the right -->
-                            <div class="text-end">
-                                <a href="#overrideModal" class="btn btn-warning" id="override-values-btn">
-                                    <strong>Override Values</strong>
-                                </a>
-                            </div>
+                           
                         </div>
                         </div>
 
-                        <div id="overrideModal" class="override-modal">
-                            <div class="override-modal-content">
-                                <h2>Override Values</h2>
-                                <form>
-                                    <div class="mb-4">
-                                        <h5>Input Values</h5>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="mb-3">
-                                                    <label for="override-file" class="form-label">Upload Excel/CSV File</label>
-                                                    <input type="file" id="override-file" class="form-control" accept=".csv,.xlsx">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="facility-select" class="form-label">Select Facility to Override</label>
-                                                    <select id="facility-select" class="form-select">
-                                                        <option value="" selected disabled>Select facility</option>
-                                                        <option>Coconut Processing Plant in Gen San</option>
-                                                        <option>Commissary in Paranque</option>
-                                                        <option>SM Manila Shakeys Branch</option>
-                                                        <option>Tuna Processing Plant in Gen San</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6" id="facility-inputs">
-                                                {% include 'climate_hazards_analysis_v2/override_input_fields.html' %}
-                                            </div>
+                        <!-- Override Cell Modal -->
+                        <div class="modal fade" id="overrideModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="override-form" class="modal-content" enctype="multipart/form-data">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Override Value</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Specific Facility</label>
+                                            <input type="text" id="override-facility" class="form-control" readonly>
                                         </div>
-                                    </div>
-                                    <div class="mb-4">
-                                        <h5>Upload Supporting Documents</h5>
-                                        <input type="file" class="form-control" accept="image/*">
-                                    </div>
-                                    <div class="d-flex justify-content-end">
-                                        <button type="submit" class="btn btn-primary me-2">Submit Override</button>
-                                        <a href="#" class="btn btn-secondary override-modal-close">Close</a>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Climate Hazard Field</label>
+                                            <input type="text" id="override-field" class="form-control" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Override Value</label>
+                                            <input type="text" id="override-value" class="form-control">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Reason/Explanation</label>
+                                            <textarea id="override-reason" class="form-control"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Upload Supporting Documents</label>
+                                            <input type="file" id="override-file" class="form-control" accept="image/png, image/jpeg">
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </div>
                                 </form>
                             </div>
                         </div>
@@ -803,6 +797,7 @@ Climate Hazard Analysis Results
 
 let dataTable;
 let cellChanges = {};
+let currentEditCell = null;
 let columnIndexMap = {};
 
 function showError(message) {
@@ -943,12 +938,45 @@ function attachEditableHandlers() {
     
     // Add click handlers to editable cells
     $('.editable-cell').on('click.editable', function() {
-        editCell($(this));
+        openOverrideModal($(this));
     });
     
     const editableCount = $('.editable-cell').length;
     console.log(`Attached handlers to ${editableCount} editable cells`);
 }
+
+let overrideModalInstance;
+
+function openOverrideModal($cell) {
+    currentEditCell = $cell;
+    const facilityName = $cell.closest('tr').find('td').first().text().trim();
+    $('#override-facility').val(facilityName);
+    $('#override-field').val($cell.attr('data-column'));
+    const currentValue = $cell.attr('data-original-value') || $cell.text().trim();
+    $('#override-value').val(currentValue);
+    $('#override-reason').val($cell.attr('data-reason') || '');
+    $('#override-file').val('');
+    if (!overrideModalInstance) {
+        overrideModalInstance = new bootstrap.Modal(document.getElementById('overrideModal'));
+    }
+    overrideModalInstance.show();
+}
+
+$(document).on('submit', '#override-form', function(e) {
+    e.preventDefault();
+    if (!currentEditCell) return;
+    const newValue = $('#override-value').val().trim();
+    const reason = $('#override-reason').val().trim();
+    const columnName = currentEditCell.attr('data-column');
+    const rowIndex = parseInt(currentEditCell.attr('data-row'), 10);
+    const $tempInput = $('<input>').val(newValue);
+    saveCell(currentEditCell, $tempInput, rowIndex, columnName);
+    currentEditCell.attr('data-reason', reason)
+        .attr('title', reason)
+        .attr('data-bs-toggle', 'tooltip');
+    new bootstrap.Tooltip(currentEditCell[0]);
+    overrideModalInstance.hide();
+});
 
 function editCell($cell) {
     if ($cell.hasClass('editing')) {
