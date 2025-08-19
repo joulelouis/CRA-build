@@ -49,6 +49,9 @@ Adjust Sensitivity Thresholds
         padding: 2px 8px;
         border-radius: 4px;
         font-size: 12px;
+        border: none;
+        width: 60px;
+        text-align: center;
     }
 
     /* Styles for combined multi-handle slider */
@@ -386,9 +389,9 @@ Adjust Sensitivity Thresholds
                                                 <input type="range" id="floodHigh" name="flood_high" min="0" max="5" step="0.1" value="1.5" oninput="updateAllDisplayValues()">
                                             </div>
                                             <div class="d-flex justify-content-between mt-2">
-                                                <div>Low: 0.1 to <span class="range-value" id="floodLowValue">0.5</span></div>
-                                                <div>Medium: <span class="range-value" id="floodMediumLow">0.5</span> to <span class="range-value" id="floodMediumHigh">1.5</span></div>
-                                                <div>High: <span class="range-value" id="floodHighValue">1.5</span> to 5</div>
+                                                <div>Low: 0.1 to <input type="number" class="range-value" id="floodLowValue" min="0" max="5" step="0.1" value="0.5" oninput="updateSliderFromInput('flood','Low', this.value)"></div>
+                                                <div>Medium: <input type="number" class="range-value" id="floodMediumLow" min="0" max="5" step="0.1" value="0.5" oninput="updateSliderFromInput('flood','Low', this.value)"> to <input type="number" class="range-value" id="floodMediumHigh" min="0" max="5" step="0.1" value="1.5" oninput="updateSliderFromInput('flood','High', this.value)"></div>
+                                                <div>High: <input type="number" class="range-value" id="floodHighValue" min="0" max="5" step="0.1" value="1.5" oninput="updateSliderFromInput('flood','High', this.value)"> to 5</div>
                                             </div>
                                         </div>
                                     </div>
@@ -423,9 +426,9 @@ Adjust Sensitivity Thresholds
                                                 <input type="range" id="waterStressHigh" name="water_stress_high" min="0" max="100" step="1" value="31" oninput="updateAllDisplayValues()">
                                             </div>
                                             <div class="d-flex justify-content-between mt-2">
-                                                <div>Low: 0% to <span class="range-value" id="waterStressLowValue">10</span> %</div>
-                                                <div>Medium: <span class="range-value" id="waterStressMediumLow">10</span>% to <span class="range-value" id="waterStressMediumHigh">31</span>%</div>
-                                                <div>High: <span class="range-value" id="waterStressHighValue">31</span> to 100%</div>
+                                                <div>Low: 0% to <input type="number" class="range-value" id="waterStressLowValue" min="0" max="100" step="1" value="10" oninput="updateSliderFromInput('waterStress','Low', this.value)"> %</div>
+                                                <div>Medium: <input type="number" class="range-value" id="waterStressMediumLow" min="0" max="100" step="1" value="10" oninput="updateSliderFromInput('waterStress','Low', this.value)"> % to <input type="number" class="range-value" id="waterStressMediumHigh" min="0" max="100" step="1" value="31" oninput="updateSliderFromInput('waterStress','High', this.value)"> %</div>
+                                                <div>High: <input type="number" class="range-value" id="waterStressHighValue" min="0" max="100" step="1" value="31" oninput="updateSliderFromInput('waterStress','High', this.value)"> to 100%</div>
                                             </div>
                                         </div>
                                     </div>
@@ -458,9 +461,9 @@ Adjust Sensitivity Thresholds
                                                 <input type="range" id="tropicalCycloneHigh" name="tropical_cyclone_high" min="0" max="300" step="1" value="178" oninput="updateAllDisplayValues()">
                                             </div>
                                             <div class="d-flex justify-content-between mt-2">
-                                                <div>Low: 0 to <span class="range-value" id="tropicalCycloneLowValue">119</span></div>
-                                                <div>Medium: <span class="range-value" id="tropicalCycloneMediumLow">119</span> to <span class="range-value" id="tropicalCycloneMediumHigh">178</span></div>
-                                                <div>High: <span class="range-value" id="tropicalCycloneHighValue">178</span> to 300</div>
+                                                <div>Low: 0 to <input type="number" class="range-value" id="tropicalCycloneLowValue" min="0" max="300" step="1" value="119" oninput="updateSliderFromInput('tropicalCyclone','Low', this.value)"></div>
+                                                <div>Medium: <input type="number" class="range-value" id="tropicalCycloneMediumLow" min="0" max="300" step="1" value="119" oninput="updateSliderFromInput('tropicalCyclone','Low', this.value)"> to <input type="number" class="range-value" id="tropicalCycloneMediumHigh" min="0" max="300" step="1" value="178" oninput="updateSliderFromInput('tropicalCyclone','High', this.value)"></div>
+                                                <div>High: <input type="number" class="range-value" id="tropicalCycloneHighValue" min="0" max="300" step="1" value="178" oninput="updateSliderFromInput('tropicalCyclone','High', this.value)"> to 300</div>
                                             </div>
                                         </div>
                                     </div>
@@ -495,9 +498,9 @@ Adjust Sensitivity Thresholds
                                                 <input type="range" id="heatHigh" name="heat_high" min="0" max="366" step="1" value="45" oninput="updateAllDisplayValues()">
                                             </div>
                                             <div class="d-flex justify-content-between mt-2">
-                                                <div>Low: 0 to <span class="range-value" id="heatLowValue">10</span></div>
-                                                <div>Medium: <span class="range-value" id="heatMediumLow">10</span> to <span class="range-value" id="heatMediumHigh">45</span></div>
-                                                <div>High: <span class="range-value" id="heatHighValue">45</span> to 366</div>
+                                                <div>Low: 0 to <input type="number" class="range-value" id="heatLowValue" min="0" max="366" step="1" value="10" oninput="updateSliderFromInput('heat','Low', this.value)"></div>
+                                                <div>Medium: <input type="number" class="range-value" id="heatMediumLow" min="0" max="366" step="1" value="10" oninput="updateSliderFromInput('heat','Low', this.value)"> to <input type="number" class="range-value" id="heatMediumHigh" min="0" max="366" step="1" value="45" oninput="updateSliderFromInput('heat','High', this.value)"></div>
+                                                <div>High: <input type="number" class="range-value" id="heatHighValue" min="0" max="366" step="1" value="45" oninput="updateSliderFromInput('heat','High', this.value)"> to 366</div>
                                             </div>
                                         </div>
                                     </div>
@@ -529,9 +532,9 @@ Adjust Sensitivity Thresholds
                                                 <input type="range" id="stormSurgeHigh" name="storm_surge_high" min="0" max="5" step="0.1" value="1.5" oninput="updateAllDisplayValues()">
                                             </div>
                                             <div class="d-flex justify-content-between mt-2">
-                                                <div>Low: 0.1 to <span class="range-value" id="stormSurgeLowValue">0.5</span></div>
-                                                <div>Medium: <span class="range-value" id="stormSurgeMediumLow">0.5</span> to <span class="range-value" id="stormSurgeMediumHigh">1.5</span></div>
-                                                <div>High: <span class="range-value" id="stormSurgeHighValue">1.5</span> to 5</div>
+                                                <div>Low: 0.1 to <input type="number" class="range-value" id="stormSurgeLowValue" min="0" max="5" step="0.1" value="0.5" oninput="updateSliderFromInput('stormSurge','Low', this.value)"></div>
+                                                <div>Medium: <input type="number" class="range-value" id="stormSurgeMediumLow" min="0" max="5" step="0.1" value="0.5" oninput="updateSliderFromInput('stormSurge','Low', this.value)"> to <input type="number" class="range-value" id="stormSurgeMediumHigh" min="0" max="5" step="0.1" value="1.5" oninput="updateSliderFromInput('stormSurge','High', this.value)"></div>
+                                                <div>High: <input type="number" class="range-value" id="stormSurgeHighValue" min="0" max="5" step="0.1" value="1.5" oninput="updateSliderFromInput('stormSurge','High', this.value)"> to 5</div>
                                             </div>
                                         </div>
                                     </div>
@@ -563,9 +566,9 @@ Adjust Sensitivity Thresholds
                                                 <input type="range" id="landslideHigh" name="landslide_high" min="0" max="3" step="0.1" value="1.5" oninput="updateAllDisplayValues()">
                                             </div>
                                             <div class="d-flex justify-content-between mt-2">
-                                                <div>High: 0 to <span class="range-value" id="landslideLowValue">1</span></div>
-                                                <div>Medium: <span class="range-value" id="landslideMediumLow">1</span> to <span class="range-value" id="landslideMediumHigh">1.5</span></div>
-                                                <div>Low: &gt; <span class="range-value" id="landslideHighValue">1.5</span></div>
+                                                <div>High: 0 to <input type="number" class="range-value" id="landslideLowValue" min="0" max="3" step="0.1" value="1" oninput="updateSliderFromInput('landslide','Low', this.value)"></div>
+                                                <div>Medium: <input type="number" class="range-value" id="landslideMediumLow" min="0" max="3" step="0.1" value="1" oninput="updateSliderFromInput('landslide','Low', this.value)"> to <input type="number" class="range-value" id="landslideMediumHigh" min="0" max="3" step="0.1" value="1.5" oninput="updateSliderFromInput('landslide','High', this.value)"></div>
+                                                <div>Low: &gt; <input type="number" class="range-value" id="landslideHighValue" min="0" max="3" step="0.1" value="1.5" oninput="updateSliderFromInput('landslide','High', this.value)"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -728,16 +731,32 @@ Adjust Sensitivity Thresholds
                 : `linear-gradient(to right, green 0%, green ${lowPct}%, orange ${lowPct}%, orange ${highPct}%, red ${highPct}%, red 100%)`;
     }
 
+    // Update slider values when numeric inputs change
+    function updateSliderFromInput(prefix, bound, value) {
+        const slider = document.getElementById(prefix + bound);
+        if (slider) {
+            slider.value = value;
+            updateAllDisplayValues();
+        }
+    }
+
     // Function to update all range value displays
     function updateAllDisplayValues() {
         ['waterStress', 'flood', 'heat', 'tropicalCyclone', 'stormSurge', 'landslide'].forEach(prefix => {
             const lowEl = document.getElementById(prefix + 'Low');
-            if (!lowEl) return;
+            const highEl = document.getElementById(prefix + 'High');
+            if (!lowEl || !highEl) return;
             enforceSliderOrder(prefix);
-            updateRangeValue(prefix + 'Low', lowEl.value);
-            updateRangeValue(prefix + 'High', document.getElementById(prefix + 'High').value);
-            document.getElementById(prefix + 'MediumLow').textContent = lowEl.value;
-            document.getElementById(prefix + 'MediumHigh').textContent = document.getElementById(prefix + 'High').value;
+            const lowVal = lowEl.value;
+            const highVal = highEl.value;
+            ['LowValue', 'MediumLow'].forEach(suffix => {
+                const el = document.getElementById(prefix + suffix);
+                if (el) el.value = lowVal;
+            });
+            ['HighValue', 'MediumHigh'].forEach(suffix => {
+                const el = document.getElementById(prefix + suffix);
+                if (el) el.value = highVal;
+            });
             updateSliderTrack(prefix);
         });
     }
@@ -797,11 +816,6 @@ Adjust Sensitivity Thresholds
                 saveBtn.classList.add('btn-info');
             }, 2000);
         }
-    }
-
-    // Function to update range value displays
-    function updateRangeValue(prefix, value) {
-        document.getElementById(prefix + 'Value').textContent = value;
     }
 
     // Update accordion state based on whether the hazard is marked not material
