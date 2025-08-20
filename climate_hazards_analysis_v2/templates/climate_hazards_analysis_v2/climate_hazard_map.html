@@ -1,7 +1,7 @@
 {% load static %}
 
 <!-- Map Container -->
-<div id="multi-hazard-map" style="width: 100%; height: 600px;"></div>
+<div id="climate-hazard-map" style="width: 100%; height: 600px;"></div>
 
 <!-- Sidebar (initially hidden off-canvas) -->
 <style>
@@ -88,8 +88,6 @@
   let multiHazardMap;
   let userMarker = null;
   let clickedLngLat = null;
-  let facilityMarkers = [];
-  let facilityPolygons = [];
 
 
 
@@ -108,10 +106,10 @@
     }
 
   // Initialize Mapbox
-  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
+  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtZWpqcGRlZDA2aTkybXNmY3BhcnJjMzMifQ.l5raW7vd-PNzS1jYsbyC7g';
 
     multiHazardMap = new mapboxgl.Map({
-        container: 'multi-hazard-map',
+        container: 'climate-hazard-map',
         center: [121.7740, 12.8797],
         zoom: 4.5,
         style: 'mapbox://styles/mapbox/dark-v10'
@@ -431,7 +429,7 @@ function loadFacilityData() {
     </div>
   `;
   
-  document.getElementById('multi-hazard-map').appendChild(loadingDiv);
+  document.getElementById('climate-hazard-map').appendChild(loadingDiv);
   
   fetch('/climate-hazards-analysis-v2/api/facility-data/')
     .then(response => response.json())
@@ -513,7 +511,7 @@ function loadFacilityData() {
           <div>${error.message || 'Failed to load facility data'}</div>
         </div>
       `;
-      document.getElementById('multi-hazard-map').appendChild(errorDiv);
+      document.getElementById('climate-hazard-map').appendChild(errorDiv);
       
       // Auto-remove error after 5 seconds
       setTimeout(() => {
@@ -522,40 +520,14 @@ function loadFacilityData() {
     });
 }
 
-  // Clear all facility markers
-  function clearFacilityMarkers() {
-    facilityMarkers.forEach(marker => marker.remove());
-    facilityMarkers = [];
-    facilityPolygons.forEach(id => {
-      if (multiHazardMap.getLayer(`${id}-fill`)) {
-        multiHazardMap.removeLayer(`${id}-fill`);
-      }
-      if (multiHazardMap.getLayer(`${id}-outline`)) {
-        multiHazardMap.removeLayer(`${id}-outline`);
-      }
-      if (multiHazardMap.getSource(id)) {
-        multiHazardMap.removeSource(id);
-      }
-    });
-    facilityPolygons = [];
-  }
-
-  // Fit map to show all markers
   function fitMapToMarkers() {
-    if (facilityMarkers.length === 0) return;
-    
-    // Get bounds of all markers
-    const bounds = new mapboxgl.LngLatBounds();
-    facilityMarkers.forEach(marker => {
-      bounds.extend(marker.getLngLat());
-    });
-    
-    // Fit map to bounds with padding
-    multiHazardMap.fitBounds(bounds, {
-      padding: 50,
-      maxZoom: 15
-    });
-  }
+  const markers = window.facilityMarkers || [];
+  if (markers.length === 0) return;
+
+  const bounds = new mapboxgl.LngLatBounds();
+  markers.forEach(marker => bounds.extend(marker.getLngLat()));
+  multiHazardMap.fitBounds(bounds, { padding: 50, maxZoom: 15 });
+}
 
   // Helper function to get CSRF token
   function getCookie(name) {
@@ -573,26 +545,14 @@ function loadFacilityData() {
     return cookieValue;
   }
 
-  // Ensure the map initializes and resizes when used inside hidden Bootstrap tabs
-  function setupMultiHazardMapTab() {
-    const tab = document.getElementById('multi-hazard-map-tab');
-    if (tab) {
-      tab.addEventListener('shown.bs.tab', () => {
-        initializeMultiHazardMap();
-      });
-    }
-
-    // In case the map tab is already active on load
-    const pane = document.getElementById('multi-hazard-map-tab-pane');
-    if (pane && pane.classList.contains('active')) {
-      initializeMultiHazardMap();
-    }
-  }
-
+// Auto-init if the container exists on this page
   if (document.readyState !== 'loading') {
-    setupMultiHazardMapTab();
+    if (document.getElementById('climate-hazard-map')) initializeMultiHazardMap();
   } else {
-    document.addEventListener('DOMContentLoaded', setupMultiHazardMapTab);
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('climate-hazard-map')) initializeMultiHazardMap();
+    });
   }
+  
 
 </script>

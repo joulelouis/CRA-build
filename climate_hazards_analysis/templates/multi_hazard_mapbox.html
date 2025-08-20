@@ -1,7 +1,9 @@
+{% extends "base.html" %}
+
 {% block content %}
 
 <!-- Map Container -->
-<div id="multi-hazard-map" style="width: 100%; height: 500px;"></div>
+<div id="multi-hazard-mapbox" style="width: 100%; height: 500px;"></div>
 
 <!-- Sidebar (initially hidden off-canvas) -->
 <style>
@@ -41,10 +43,10 @@
 {{ selected_dynamic_fields|json_script:"selected-hazards" }}
 
 <script>
-  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
+  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtZWpqcGRlZDA2aTkybXNmY3BhcnJjMzMifQ.l5raW7vd-PNzS1jYsbyC7g';
 
   const multiHazardMap = new mapboxgl.Map({ 
-      container: 'multi-hazard-map',
+      container: 'multi-hazard-mapbox',
       center: [121.7740, 12.8797],
       zoom: 4.5,
       style: 'mapbox://styles/mapbox/dark-v10'

@@ -537,7 +537,7 @@ View Sensitivity Results
                         </div>
 
                         <div class="tab-pane fade" id="multi-hazard-map-tab-pane" role="tabpanel" aria-labelledby="multi-hazard-map-tab">
-                            {% include "climate_hazards_analysis_v2/climate_hazard_map.html" %}
+                            <div id="sensitivity-map" style="width:100%; height:500px;"></div>
                         </div>
                     </div>
                 </div>
@@ -791,5 +791,52 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+<script>
+  // Keep a separate map instance for this tab
+  let sensitivityMap;
+
+  function initSensitivityMap() {
+    if (sensitivityMap) return; // don’t double-init
+
+    mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtZWpqcGRlZDA2aTkybXNmY3BhcnJjMzMifQ.l5raW7vd-PNzS1jYsbyC7g';
+    sensitivityMap = new mapboxgl.Map({
+      container: 'sensitivity-map',         // <-- unique id
+      center: [121.7740, 12.8797],
+      zoom: 4.5,
+      style: 'mapbox://styles/mapbox/dark-v10'
+    })
+      .addControl(new mapboxgl.NavigationControl())
+      .addControl(new mapboxgl.GeolocateControl())
+      .addControl(new mapboxgl.ScaleControl())
+      .addControl(new mapboxgl.FullscreenControl());
+
+    sensitivityMap.on('load', () => {
+      sensitivityMap.addSource('hazards-source', {
+        type: 'geojson',
+        data: 'https://raw.githubusercontent.com/macoymejia/geojsonph/master/Country/Country.minimal.json'
+      });
+      sensitivityMap.addLayer({
+        id: 'hazards-layer',
+        type: 'fill',
+        source: 'hazards-source',
+        paint: { 'fill-color': '#888', 'fill-opacity': 0.5 }
+      });
+    });
+  }
+
+  // Initialize only when the tab becomes visible
+  document.addEventListener('DOMContentLoaded', () => {
+    const tab = document.getElementById('multi-hazard-map-tab');
+    if (tab) {
+      tab.addEventListener('shown.bs.tab', () => {
+        initSensitivityMap();
+        setTimeout(() => sensitivityMap && sensitivityMap.resize(), 0);
+      });
+    }
+  });
+</script>
+
+
 <script src="{% static 'js/sensitivity_column_selector.js' %}"></script>
 {% endblock %}
