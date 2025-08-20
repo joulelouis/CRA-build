@@ -16,7 +16,7 @@ from reportlab.lib import colors
 from PIL import Image as PILImage
 
 
-def generate_climate_hazards_report_pdf(buffer, selected_fields, high_risk_assets=None):
+def generate_climate_hazards_report_pdf(buffer, selected_fields, high_risk_assets=None, risk_counts=None):
     """
     Generate a PDF report of climate hazard exposure analysis with each hazard on a separate page.
     
@@ -24,7 +24,19 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields, high_risk_asset
         buffer (BytesIO): Buffer to write the PDF content into
         selected_fields (list): List of selected climate hazard fields
         high_risk_assets (dict, optional): Dictionary mapping hazard types to lists of high-risk assets
+        risk_counts (dict, optional): Mapping of hazard to high-risk asset counts by scenario
     """
+
+    if risk_counts is None and high_risk_assets:
+        risk_counts = {
+            hazard: {
+                'current': len(assets),
+                'future_moderate': 0,
+                'future_worst': 0,
+            }
+            for hazard, assets in high_risk_assets.items()
+        }
+
     # Create the document template
     doc = SimpleDocTemplate(buffer, pagesize=A4,
                             rightMargin=40, leftMargin=40,
@@ -119,93 +131,39 @@ def generate_climate_hazards_report_pdf(buffer, selected_fields, high_risk_asset
 
     overview_data = [
         [Paragraph("Climate Hazard", wrap_style),
-         Paragraph("Portfolio Exposure Rating", wrap_style),
+         Paragraph("Current Portfolio Exposure Rating", wrap_style),
+         Paragraph("Future (Moderate Case) Portfolio Exposure Rating", wrap_style),
+         Paragraph("Future (Worst Case) Portfolio Exposure Rating", wrap_style),
          Paragraph("Explanation and Recommendation", wrap_style)]
     ]
 
-    # For each hazard, check if it is in selected_fields before appending its row.
-    if "Heat" in selected_fields:
-        # Check if we have any high-risk assets for this hazard
-        heat_risk_count = len(high_risk_assets.get("Heat", [])) if high_risk_assets else 0
-        
-        overview_data.append([
-            Paragraph("Heat", wrap_style),
-            Paragraph(f"Days over 30°C: <strong><font color='red'>High</font></strong> ({heat_risk_count} assets at risk), <br/>"
-                     f"Days over 33°C: <strong><font color='red'>High</font></strong>, <br/>"
-                     f"Days over 35°C: <strong><font color='orange'>Medium</font></strong>", wrap_style),
-            Paragraph("Lorem Ipsum with a long explanation for Heat.", wrap_style)
-        ])
+    def format_risk(count):
+        if count and count > 0:
+            return Paragraph(f"<strong><font color='red'>High</font></strong> ({count} assets at risk)", wrap_style)
+        return Paragraph("-", wrap_style)
 
-    if "Flood" in selected_fields:
-        # Check if we have any high-risk assets for this hazard
-        flood_risk_count = len(high_risk_assets.get("Flood", [])) if high_risk_assets else 0
-        risk_level = "<strong><font color='red'>High</font></strong>" if flood_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
+    for hazard in selected_fields:
+        if not risk_counts or hazard not in risk_counts:
+            continue
+        counts = risk_counts.get(hazard, {})
         
         overview_data.append([
-            Paragraph("Flood", wrap_style),
-            Paragraph(f"{risk_level} ({flood_risk_count} assets at risk)", wrap_style),
-            Paragraph("Lorem Ipsum with a long explanation for Flood.", wrap_style)
-        ])
-
-    if "Water Stress" in selected_fields:
-        # Check if we have any high-risk assets for this hazard
-        ws_risk_count = len(high_risk_assets.get("Water Stress", [])) if high_risk_assets else 0
-        risk_level = "<strong><font color='red'>High</font></strong>" if ws_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
-        
-        overview_data.append([
-            Paragraph("Water Stress", wrap_style),
-            Paragraph(f"{risk_level} ({ws_risk_count} assets at risk)", wrap_style),
-            Paragraph("Lorem Ipsum with a long explanation for Water Stress.", wrap_style)
-        ])
-
-    if "Sea Level Rise" in selected_fields:
-        # Check if we have any high-risk assets for this hazard
-        slr_risk_count = len(high_risk_assets.get("Sea Level Rise", [])) if high_risk_assets else 0
-        risk_level = "<strong><font color='red'>High</font></strong>" if slr_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
-        
-        overview_data.append([
-            Paragraph("Sea Level Rise", wrap_style),
-            Paragraph(f"{risk_level} ({slr_risk_count} assets at risk)", wrap_style),
-            Paragraph("Lorem Ipsum with a long explanation for Sea Level Rise.", wrap_style)
-        ])
-
-    if "Tropical Cyclones" in selected_fields:
-        # Check if we have any high-risk assets for this hazard
-        tc_risk_count = len(high_risk_assets.get("Tropical Cyclones", [])) if high_risk_assets else 0
-        risk_level = "<strong><font color='red'>High</font></strong>" if tc_risk_count > 0 else "<strong><font color='orange'>Medium</font></strong>"
-        
-        overview_data.append([
-            Paragraph("Tropical Cyclone", wrap_style),
-            Paragraph(f"{risk_level} ({tc_risk_count} assets at high risk)", wrap_style),
-            Paragraph("Lorem Ipsum with a long explanation for Tropical Cyclone.", wrap_style)
-        ])
-
-    if "Storm Surge" in selected_fields:
-        # Check if we have any high-risk assets for this hazard
-        ss_risk_count = len(high_risk_assets.get("Storm Surge", [])) if high_risk_assets else 0
-        risk_level = "<strong><font color='red'>High</font></strong>" if ss_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
-        
-        overview_data.append([
-            Paragraph("Storm Surge", wrap_style),
-            Paragraph(f"{risk_level} ({ss_risk_count} assets at risk)", wrap_style),
-            Paragraph("Lorem Ipsum with a long explanation for Storm Surge.", wrap_style)
-        ])
-
-    if "Rainfall Induced Landslide" in selected_fields:
-        # Check if we have any high-risk assets for this hazard
-        ril_risk_count = len(high_risk_assets.get("Rainfall Induced Landslide", [])) if high_risk_assets else 0
-        risk_level = "<strong><font color='red'>High</font></strong>" if ril_risk_count > 0 else "<strong><font color='green'>Low</font></strong>"
-        
-        overview_data.append([
-            Paragraph("Rainfall Induced Landslide", wrap_style),
-            Paragraph(f"{risk_level} ({ril_risk_count} assets at risk)", wrap_style),
-            Paragraph("Lorem Ipsum with a long explanation for Rainfall-Induced Landslide.", wrap_style)
+            Paragraph(hazard, wrap_style),
+            format_risk(counts.get('current', 0)),
+            format_risk(counts.get('future_moderate', 0)),
+            format_risk(counts.get('future_worst', 0)),
+            Paragraph(f"Lorem Ipsum with a long explanation for {hazard}.", wrap_style)
         ])
 
     # Create overview table with proper styling
     available_width = doc.width
-    # Define relative column widths: column 3 will be wider (50% of available width)
-    col_widths = [available_width * 0.25, available_width * 0.25, available_width * 0.5]
+    col_widths = [
+        available_width * 0.2,
+        available_width * 0.2,
+        available_width * 0.2,
+        available_width * 0.2,
+        available_width * 0.2,
+    ]
     overview_table = Table(overview_data, colWidths=col_widths)
     overview_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),

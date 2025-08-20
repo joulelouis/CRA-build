@@ -83,56 +83,15 @@
 </div>
 
 <script>
-  // Initialize Mapbox
-  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
-
-  const multiHazardMap = new mapboxgl.Map({ 
-      container: 'multi-hazard-map',
-      center: [121.7740, 12.8797],
-      zoom: 4.5,
-      style: 'mapbox://styles/mapbox/dark-v10'
-  })
-  .addControl(new mapboxgl.NavigationControl())
-  .addControl(new mapboxgl.GeolocateControl())
-  .addControl(new mapboxgl.ScaleControl())
-  .addControl(new mapboxgl.FullscreenControl());
 
   // Variables to hold map state
+  let multiHazardMap;
   let userMarker = null;
   let clickedLngLat = null;
   let facilityMarkers = [];
   let facilityPolygons = [];
 
-  // When map loads, add base layers
-  multiHazardMap.on('load', () => {
-    // Add the Philippines GeoJSON source
-    multiHazardMap.addSource('hazards-source', {
-      type: 'geojson',
-      data: 'https://raw.githubusercontent.com/macoymejia/geojsonph/master/Country/Country.minimal.json'
-    });
-  
-    // Draw filled polygons
-    multiHazardMap.addLayer({
-      id: 'hazards-layer',
-      type: 'fill',
-      source: 'hazards-source',
-      paint: {
-        'fill-color': '#888',
-        'fill-opacity': 0.5
-      }
-    });
-  
-    // Change cursor on hover
-    multiHazardMap.on('mouseenter', 'hazards-layer', () => {
-      multiHazardMap.getCanvas().style.cursor = 'pointer';
-    });
-    multiHazardMap.on('mouseleave', 'hazards-layer', () => {
-      multiHazardMap.getCanvas().style.cursor = '';
-    });
 
-    // Try to load facility data if it exists in session
-    loadFacilityData();
-  });
 
   // Create a base blue circle element for markers
   const baseBlueCircle = document.createElement('div');
@@ -142,29 +101,81 @@
   baseBlueCircle.style.border = '2px solid white';
   baseBlueCircle.style.backgroundColor = 'blue';
 
-  // On map click: show add facility panel
-  multiHazardMap.on('click', (e) => {
-    clickedLngLat = [e.lngLat.lng, e.lngLat.lat];
-    
-    // Remove previous temporary marker if it exists
-    if (userMarker) {
-      userMarker.remove();
+  function initializeMultiHazardMap() {
+    if (multiHazardMap) {
+      multiHazardMap.resize();
+      return;
     }
 
-    // Create and add new temporary marker
-    const el = baseBlueCircle.cloneNode(true);
-    el.style.opacity = '0.6'; // Make it semi-transparent to indicate it's temporary
-    userMarker = new mapboxgl.Marker({ element: el })
-      .setLngLat(clickedLngLat)
-      .addTo(multiHazardMap);
+  // Initialize Mapbox
+  mapboxgl.accessToken = 'pk.eyJ1Ijoiam91bGUyMzMxIiwiYSI6ImNtNzMyczF5YTBmdHIybHB3bXVqMWdiaGgifQ.WW8zxem2Mfu8jPk-L_kSdA';
 
-    // Update coordinates in the add facility panel
-    document.getElementById('click-coordinates').textContent = 
-      `Lat: ${e.lngLat.lat.toFixed(6)}, Lng: ${e.lngLat.lng.toFixed(6)}`;
-    
-    // Show the add facility panel
-    document.getElementById('add-facility-panel').style.display = 'block';
-  });
+    multiHazardMap = new mapboxgl.Map({
+        container: 'multi-hazard-map',
+        center: [121.7740, 12.8797],
+        zoom: 4.5,
+        style: 'mapbox://styles/mapbox/dark-v10'
+    })
+    .addControl(new mapboxgl.NavigationControl())
+    .addControl(new mapboxgl.GeolocateControl())
+    .addControl(new mapboxgl.ScaleControl())
+    .addControl(new mapboxgl.FullscreenControl());
+
+    // When map loads, add base layers
+    multiHazardMap.on('load', () => {
+      // Add the Philippines GeoJSON source
+      multiHazardMap.addSource('hazards-source', {
+        type: 'geojson',
+        data: 'https://raw.githubusercontent.com/macoymejia/geojsonph/master/Country/Country.minimal.json'
+      });
+
+      // Draw filled polygons
+      multiHazardMap.addLayer({
+        id: 'hazards-layer',
+        type: 'fill',
+        source: 'hazards-source',
+        paint: {
+          'fill-color': '#888',
+          'fill-opacity': 0.5
+        }
+      });
+
+      // Change cursor on hover
+      multiHazardMap.on('mouseenter', 'hazards-layer', () => {
+        multiHazardMap.getCanvas().style.cursor = 'pointer';
+      });
+      multiHazardMap.on('mouseleave', 'hazards-layer', () => {
+        multiHazardMap.getCanvas().style.cursor = '';
+      });
+
+      // Try to load facility data if it exists in session
+      loadFacilityData();
+    });
+
+    // On map click: show add facility panel
+    multiHazardMap.on('click', (e) => {
+      clickedLngLat = [e.lngLat.lng, e.lngLat.lat];
+
+      // Remove previous temporary marker if it exists
+      if (userMarker) {
+        userMarker.remove();
+      }
+
+      // Create and add new temporary marker
+      const el = baseBlueCircle.cloneNode(true);
+      el.style.opacity = '0.6'; // Make it semi-transparent to indicate it's temporary
+      userMarker = new mapboxgl.Marker({ element: el })
+        .setLngLat(clickedLngLat)
+        .addTo(multiHazardMap);
+
+      // Update coordinates in the add facility panel
+      document.getElementById('click-coordinates').textContent =
+        `Lat: ${e.lngLat.lat.toFixed(6)}, Lng: ${e.lngLat.lng.toFixed(6)}`;
+
+      // Show the add facility panel
+      document.getElementById('add-facility-panel').style.display = 'block';
+    });
+  }
 
   // Functions for sidebar
   function openSidebar(content) {
@@ -561,4 +572,27 @@ function loadFacilityData() {
     }
     return cookieValue;
   }
+
+  // Ensure the map initializes and resizes when used inside hidden Bootstrap tabs
+  function setupMultiHazardMapTab() {
+    const tab = document.getElementById('multi-hazard-map-tab');
+    if (tab) {
+      tab.addEventListener('shown.bs.tab', () => {
+        initializeMultiHazardMap();
+      });
+    }
+
+    // In case the map tab is already active on load
+    const pane = document.getElementById('multi-hazard-map-tab-pane');
+    if (pane && pane.classList.contains('active')) {
+      initializeMultiHazardMap();
+    }
+  }
+
+  if (document.readyState !== 'loading') {
+    setupMultiHazardMapTab();
+  } else {
+    document.addEventListener('DOMContentLoaded', setupMultiHazardMapTab);
+  }
+
 </script>

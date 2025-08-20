@@ -867,12 +867,21 @@ def generate_report(request):
     
     # Identify high-risk assets for each hazard type
     high_risk_assets = identify_high_risk_assets(analysis_data, selected_fields)
+
+    # Get high-risk counts from sensitivity results
+    sensitivity_results = request.session.get('climate_hazards_v2_sensitivity_results')
+    risk_counts = compute_sensitivity_high_risk_counts(sensitivity_results, selected_fields) if sensitivity_results else {}
     
     # Initialize a BytesIO buffer for the PDF
     buffer = BytesIO()
     
     # Generate the PDF report with dynamic high-risk assets
-    generate_climate_hazards_report_pdf(buffer, selected_fields, high_risk_assets)
+    generate_climate_hazards_report_pdf(
+        buffer,
+        selected_fields,
+        high_risk_assets=high_risk_assets,
+        risk_counts=risk_counts,
+    )
     
     # Get the PDF content
     pdf = buffer.getvalue()
@@ -977,6 +986,93 @@ def identify_high_risk_assets(data, selected_hazards):
                     continue
     
     return high_risk_assets
+
+def compute_sensitivity_high_risk_counts(sensitivity_results, selected_hazards):
+    """Compute high-risk asset counts for current and future scenarios."""
+    if not sensitivity_results:
+        return {}
+
+    data = sensitivity_results.get('data', [])
+    counts = {h: {'current': 0, 'future_moderate': 0, 'future_worst': 0} for h in selected_hazards}
+
+    hazard_thresholds = {
+        'Water Stress': {
+            'current': [('Water Stress Exposure (%)', lambda v: isinstance(v, (int, float)) and v > 30)],
+            'future_moderate': [
+                ('Water Stress Exposure 2030 (%) - Moderate Case', lambda v: isinstance(v, (int, float)) and v > 30),
+                ('Water Stress Exposure 2050 (%) - Moderate Case', lambda v: isinstance(v, (int, float)) and v > 30),
+            ],
+            'future_worst': [
+                ('Water Stress Exposure 2030 (%) - Worst Case', lambda v: isinstance(v, (int, float)) and v > 30),
+                ('Water Stress Exposure 2050 (%) - Worst Case', lambda v: isinstance(v, (int, float)) and v > 30),
+            ],
+        },
+        'Heat': {
+            'current': [
+                ('Days over 30° Celsius', lambda v: isinstance(v, (int, float)) and v >= 300),
+                ('Days over 33° Celsius', lambda v: isinstance(v, (int, float)) and v >= 100),
+                ('Days over 35° Celsius', lambda v: isinstance(v, (int, float)) and v >= 30),
+            ],
+            'future_moderate': [
+                ('Days over 35° Celsius (2026 - 2030) - Moderate Case', lambda v: isinstance(v, (int, float)) and v >= 30),
+                ('Days over 35° Celsius (2031 - 2040) - Moderate Case', lambda v: isinstance(v, (int, float)) and v >= 30),
+                ('Days over 35° Celsius (2041 - 2050) - Moderate Case', lambda v: isinstance(v, (int, float)) and v >= 30),
+            ],
+            'future_worst': [
+                ('Days over 35° Celsius (2026 - 2030) - Worst Case', lambda v: isinstance(v, (int, float)) and v >= 30),
+                ('Days over 35° Celsius (2031 - 2040) - Worst Case', lambda v: isinstance(v, (int, float)) and v >= 30),
+                ('Days over 35° Celsius (2041 - 2050) - Worst Case', lambda v: isinstance(v, (int, float)) and v >= 30),
+            ],
+        },
+        'Flood': {
+            'current': [('Flood Depth (meters)', lambda v: v in ['Greater than 1.5', 'High Risk'])],
+            'future_moderate': [],
+            'future_worst': [],
+        },
+        'Sea Level Rise': {
+            'current': [],
+            'future_moderate': [('2050 Sea Level Rise (meters) - Moderate Case', lambda v: isinstance(v, (int, float)) and v > 0.5)],
+            'future_worst': [('2050 Sea Level Rise (meters) - Worst Case', lambda v: isinstance(v, (int, float)) and v > 0.5)],
+        },
+        'Tropical Cyclones': {
+            'current': [('Extreme Windspeed 100 year Return Period (km/h)', lambda v: isinstance(v, (int, float)) and v >= 178)],
+            'future_moderate': [],
+            'future_worst': [],
+        },
+        'Storm Surge': {
+            'current': [('Storm Surge Flood Depth (meters)', lambda v: isinstance(v, (int, float)) and v >= 1.5)],
+            'future_moderate': [],
+            'future_worst': [('Storm Surge Flood Depth (meters) - Worst Case', lambda v: isinstance(v, (int, float)) and v >= 1.5)],
+        },
+        'Rainfall Induced Landslide': {
+            'current': [('Rainfall-Induced Landslide (factor of safety)', lambda v: isinstance(v, (int, float)) and v < 1)],
+            'future_moderate': [('Rainfall-Induced Landslide (factor of safety) - Moderate Case', lambda v: isinstance(v, (int, float)) and v < 1)],
+            'future_worst': [('Rainfall-Induced Landslide (factor of safety) - Worst Case', lambda v: isinstance(v, (int, float)) and v < 1)],
+        },
+    }
+
+    for row in data:
+        for hazard in selected_hazards:
+            thresholds = hazard_thresholds.get(hazard, {})
+            for scenario in ['current', 'future_moderate', 'future_worst']:
+                for col_name, criterion in thresholds.get(scenario, []):
+                    if col_name in row:
+                        value = row[col_name]
+                        try:
+                            if isinstance(value, str) and value not in ['N/A', 'Little to none', 'Data not available',
+                                                                       'Not material', '0.1 to 0.5', '0.5 to 1.5',
+                                                                       'Greater than 1.5', 'Unknown']:
+                                value = float(value)
+                        except ValueError:
+                            pass
+                        try:
+                            if criterion(value):
+                                counts[hazard][scenario] += 1
+                                break
+                        except Exception:
+                            continue
+
+    return counts
 
 def sensitivity_parameters(request):
     """
