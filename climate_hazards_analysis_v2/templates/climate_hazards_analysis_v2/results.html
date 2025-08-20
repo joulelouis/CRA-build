@@ -402,12 +402,6 @@ Climate Hazard Analysis Results
                             </a>
                         </li>
 
-                        <li class="nav-item {% if selected_hazards|length <= 1 %}d-none{% endif %}">
-                            <a class="nav-link custom-tab-link" id="multi-hazard-map-tab" data-bs-toggle="tab" href="#multi-hazard-map" role="tab" aria-controls="map-content" aria-selected="false">
-                                Multi-Hazard Map 
-                            </a>
-                        </li>
-
                         {% for hazard in selected_hazards %}
                             {% if hazard == "Heat" %}
                             <li class="nav-item">
@@ -709,12 +703,6 @@ Climate Hazard Analysis Results
                                         </div>
                                 </form>
                             </div>
-                        </div>
-
-                        <!-- Multi-Hazard Map Tab -->
-                        <div class="tab-pane fade text-center" id="multi-hazard-map" role="tabpanel" aria-labelledby="multi-hazard-map-tab">
-                            <h2>Multi-Hazard Map</h2>
-                            <div id="multi-hazard-map-content"></div>
                         </div>
 
                         <!-- Individual Hazard Map Tabs -->
